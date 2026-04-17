@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Biome extends Model
 {
-    protected $fillable = ['name', 'dimension_id', 'description', 'image'];
+    protected $fillable = ['name', 'dimension_id', 'parent_id', 'description', 'image'];
 
     public function dimension()
     {
@@ -16,5 +16,15 @@ class Biome extends Model
     public function mobs()
     {
         return $this->hasMany(Mob::class);
+    }
+
+    public function parent()
+    {
+        return $this->belongsTo(Biome::class, 'parent_id');
+    }
+
+    public function subBiomes()
+    {
+        return $this->hasMany(Biome::class, 'parent_id');
     }
 }

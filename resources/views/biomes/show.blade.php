@@ -1,27 +1,42 @@
 <x-app-layout>
     <div class="py-12 px-4 sm:px-6 lg:px-8">
         <div class="max-w-7xl mx-auto">
-            <!-- Breadcrumbs -->
+            <!-- Breadcrumbs + Admin Controls -->
             <nav class="flex justify-between items-center mb-8" aria-label="Breadcrumb">
-                <ol class="inline-flex items-center space-x-1 md:space-x-3">
+                <ol class="inline-flex items-center space-x-1 md:space-x-3 flex-wrap gap-y-2">
                     <li class="inline-flex items-center">
                         <a href="{{ route('biomes.index') }}" class="text-gray-400 hover:text-white text-sm font-medium transition-colors">Explorer</a>
                     </li>
+                    @if($biome->parent)
+                        <li>
+                            <div class="flex items-center">
+                                <svg class="w-6 h-6 text-gray-700" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path></svg>
+                                <a href="{{ route('biomes.show', $biome->parent) }}" class="ml-1 text-sm font-bold text-indigo-400 hover:text-indigo-300 transition-colors uppercase tracking-widest">{{ $biome->parent->name }}</a>
+                            </div>
+                        </li>
+                    @endif
                     <li>
                         <div class="flex items-center">
                             <svg class="w-6 h-6 text-gray-700" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path></svg>
-                            <span class="ml-1 text-sm font-black text-indigo-500 uppercase tracking-widest">{{ $biome->dimension->name }}</span>
+                            <span class="ml-1 text-sm font-black text-white uppercase tracking-widest">{{ $biome->name }}</span>
                         </div>
                     </li>
                 </ol>
 
                 @if(Auth::check() && Auth::user()->is_admin)
                     <div class="flex items-center space-x-3">
+                        {{-- Add sub-biome (only for top-level biomes) --}}
+                        @if(!$biome->parent_id)
+                            <a href="{{ route('admin.biomes.create', ['parent_id' => $biome->id]) }}" class="inline-flex items-center space-x-2 bg-indigo-900/30 hover:bg-indigo-600 border border-indigo-500/30 hover:border-indigo-500 px-4 py-2 rounded-xl transition-all group">
+                                <svg class="w-4 h-4 text-indigo-400 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                                <span class="text-indigo-400 group-hover:text-white font-bold text-xs uppercase tracking-widest">Add Sub-biome</span>
+                            </a>
+                        @endif
                         <a href="{{ route('admin.biomes.edit', $biome) }}" class="inline-flex items-center space-x-2 bg-white/5 hover:bg-white/10 border border-white/10 px-4 py-2 rounded-xl transition-all">
                             <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                             <span class="text-gray-300 font-bold text-xs uppercase tracking-widest">Reconfigure</span>
                         </a>
-                        <form action="{{ route('admin.biomes.destroy', $biome) }}" method="POST" onsubmit="return confirm('WARNING: Are you sure you want to completely erase this ecosystem from the registry? This action cannot be undone.');">
+                        <form action="{{ route('admin.biomes.destroy', $biome) }}" method="POST" onsubmit="return confirm('WARNING: Are you sure you want to erase this from the registry? This cannot be undone.');">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="inline-flex items-center space-x-2 bg-red-900/20 hover:bg-red-600 border border-red-500/30 hover:border-red-500 px-4 py-2 rounded-xl transition-all group">
@@ -32,6 +47,14 @@
                     </div>
                 @endif
             </nav>
+
+            <!-- Sub-biome indicator badge -->
+            @if($biome->parent)
+                <div class="inline-flex items-center space-x-2 bg-indigo-500/10 border border-indigo-500/20 px-4 py-2 rounded-full mb-6">
+                    <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"></path></svg>
+                    <span class="text-indigo-300 text-xs font-black uppercase tracking-widest">Sub-biome of {{ $biome->parent->name }}</span>
+                </div>
+            @endif
 
             <!-- Hero Section -->
             <div class="glass-card rounded-[3rem] overflow-hidden mb-12">
@@ -65,10 +88,68 @@
                                 <span class="text-[10px] font-black uppercase tracking-widest text-gray-600 block mb-1">Native Species</span>
                                 <span class="text-white font-bold">{{ $biome->mobs->count() }} Creatures Cataloged</span>
                             </div>
+                            @if($biome->subBiomes->count() > 0)
+                                <div class="col-span-2">
+                                    <span class="text-[10px] font-black uppercase tracking-widest text-gray-600 block mb-1">Known Variants</span>
+                                    <span class="text-white font-bold">{{ $biome->subBiomes->count() }} Sub-biome{{ $biome->subBiomes->count() > 1 ? 's' : '' }}</span>
+                                </div>
+                            @endif
                         </div>
                     </div>
                 </div>
             </div>
+
+            <!-- Sub-biomes Section (only for top-level biomes with sub-biomes) -->
+            @if($biome->subBiomes->count() > 0)
+                <div class="mb-16">
+                    <div class="flex items-center justify-between mb-8">
+                        <div class="flex items-center space-x-4">
+                            <h2 class="text-2xl font-bold text-white">Known <span class="text-indigo-500">Variants</span></h2>
+                            <div class="flex-1 h-[1px] bg-white/10 w-24"></div>
+                        </div>
+                        @if(Auth::check() && Auth::user()->is_admin)
+                            <a href="{{ route('admin.biomes.create', ['parent_id' => $biome->id]) }}" class="inline-flex items-center space-x-2 bg-indigo-900/20 border border-indigo-500/20 hover:border-indigo-500/60 px-4 py-2 rounded-xl transition-all text-indigo-400 hover:text-indigo-300">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                                <span class="text-xs font-black uppercase tracking-widest">New Variant</span>
+                            </a>
+                        @endif
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        @foreach($biome->subBiomes as $sub)
+                            <a href="{{ route('biomes.show', $sub) }}" class="group glass-card rounded-2xl overflow-hidden hover:-translate-y-1 transition-all duration-300 border border-white/5 hover:border-indigo-500/30">
+                                <div class="h-36 relative overflow-hidden bg-gray-900">
+                                    @if($sub->image)
+                                        <img src="{{ asset('storage/' . $sub->image) }}" alt="{{ $sub->name }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+                                    @else
+                                        <div class="w-full h-full bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center">
+                                            <svg class="w-8 h-8 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945" stroke-width="1.5"></path></svg>
+                                        </div>
+                                    @endif
+                                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+                                    <div class="absolute bottom-0 left-0 p-3">
+                                        <h3 class="text-sm font-black text-white leading-tight group-hover:text-indigo-300 transition-colors">{{ $sub->name }}</h3>
+                                    </div>
+                                    @if(Auth::check() && Auth::user()->is_admin)
+                                        <div class="absolute top-2 right-2 flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <a href="{{ route('admin.biomes.edit', $sub) }}" onclick="event.stopPropagation(); event.preventDefault(); window.location='{{ route('admin.biomes.edit', $sub) }}';" class="p-1.5 bg-black/60 backdrop-blur-sm rounded-lg border border-white/10 text-indigo-400 hover:text-indigo-300">
+                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                            </a>
+                                        </div>
+                                    @endif
+                                </div>
+                                <div class="p-4">
+                                    <p class="text-gray-600 text-[10px] italic line-clamp-2">"{{ Str::limit($sub->description, 80) }}"</p>
+                                    <div class="flex items-center justify-between mt-3 pt-3 border-t border-white/5">
+                                        <span class="text-[9px] font-bold uppercase tracking-widest text-gray-600">{{ $sub->mobs->count() }} Creatures</span>
+                                        <span class="text-[9px] font-bold uppercase tracking-widest text-indigo-500">Sub-biome</span>
+                                    </div>
+                                </div>
+                            </a>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
 
             <!-- Inhabitant Mobs -->
             <div>

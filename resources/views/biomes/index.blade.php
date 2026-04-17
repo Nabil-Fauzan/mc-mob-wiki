@@ -5,7 +5,7 @@
             <div class="text-center mb-16 relative">
                 <h1 class="text-4xl font-black text-white tracking-tight mb-4">Biomes <span class="text-indigo-500">& Dimensions</span></h1>
                 <p class="text-gray-400 max-w-2xl mx-auto mb-6">Explore the vast ecosystems of the Minecraft world, from the peaceful plains of the Overworld to the scorched valleys of the Nether.</p>
-                
+
                 @if(Auth::check() && Auth::user()->is_admin)
                     <a href="{{ route('admin.biomes.create') }}" class="inline-flex items-center space-x-2 bg-gradient-to-r from-red-600 to-red-900 border border-red-400/50 px-6 py-3 rounded-full shadow-[0_0_15px_rgba(239,68,68,0.5)] hover:shadow-[0_0_30px_rgba(239,68,68,0.8)] hover:-translate-y-1 transition-all duration-300">
                         <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
@@ -18,7 +18,7 @@
             @foreach($dimensions as $dimension)
                 <div class="mb-24 last:mb-0">
                     <div class="flex items-center space-x-4 mb-8">
-                        <div class="w-12 h-1 bg-gradient-to-r from-transparent 
+                        <div class="w-12 h-1 bg-gradient-to-r from-transparent
                             {{ $dimension->color_theme == 'green' ? 'to-green-500' : '' }}
                             {{ $dimension->color_theme == 'red' ? 'to-red-500' : '' }}
                             {{ $dimension->color_theme == 'purple' ? 'to-purple-500' : '' }}
@@ -29,7 +29,8 @@
 
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         @forelse($dimension->biomes as $biome)
-                            <a href="{{ route('biomes.show', $biome) }}" class="glass-card rounded-[2.5rem] overflow-hidden group hover:-translate-y-2 transition-all duration-500">
+                            <!-- Top-level Biome Card -->
+                            <a href="{{ route('biomes.show', $biome) }}" class="glass-card rounded-[2.5rem] overflow-hidden group hover:-translate-y-2 transition-all duration-500 relative">
                                 <div class="aspect-video relative overflow-hidden bg-gray-900">
                                     @if($biome->image)
                                         <img src="{{ asset('storage/' . $biome->image) }}" alt="{{ $biome->name }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
@@ -39,6 +40,15 @@
                                         </div>
                                     @endif
                                     <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+
+                                    {{-- Sub-biome badge --}}
+                                    @if($biome->subBiomes->count() > 0)
+                                        <div class="absolute top-4 left-4 flex items-center space-x-1.5 bg-black/60 backdrop-blur-sm border border-white/10 px-3 py-1 rounded-full">
+                                            <svg class="w-3 h-3 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg>
+                                            <span class="text-[9px] font-black uppercase tracking-widest text-indigo-300">{{ $biome->subBiomes->count() }} Sub-biomes</span>
+                                        </div>
+                                    @endif
+
                                     <div class="absolute bottom-6 left-6">
                                         <h3 class="text-xl font-bold text-white mb-1">{{ $biome->name }}</h3>
                                         <div class="flex items-center space-x-3">
@@ -51,6 +61,20 @@
                                 </div>
                                 <div class="p-6">
                                     <p class="text-gray-500 text-xs italic line-clamp-2">"{{ $biome->description }}"</p>
+
+                                    @if($biome->subBiomes->count() > 0)
+                                        <div class="mt-4 pt-4 border-t border-white/5">
+                                            <p class="text-[9px] font-black uppercase tracking-widest text-gray-600 mb-3">Known Variants</p>
+                                            <div class="flex flex-wrap gap-2">
+                                                @foreach($biome->subBiomes->take(4) as $sub)
+                                                    <span class="px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 rounded-full">{{ $sub->name }}</span>
+                                                @endforeach
+                                                @if($biome->subBiomes->count() > 4)
+                                                    <span class="px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider bg-white/5 text-gray-500 rounded-full">+{{ $biome->subBiomes->count() - 4 }} more</span>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    @endif
                                 </div>
                             </a>
                         @empty

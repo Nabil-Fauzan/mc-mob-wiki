@@ -73,7 +73,7 @@ class MobController extends Controller
     public function create()
     {
         $categories = \App\Models\Category::all();
-        $biomes = \App\Models\Biome::all();
+        $biomes = \App\Models\Biome::with('dimension')->orderBy('name')->get();
         return view('mobs.create', compact('categories', 'biomes'));
     }
 
@@ -83,14 +83,14 @@ class MobController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required',
+            'name'        => 'required',
             'category_id' => 'required|exists:categories,id',
-            'biome_id' => 'required|exists:biomes,id',
-            'health' => 'required',
-            'damage' => 'required',
-            'drops' => 'required',
+            'biome_id'    => 'nullable|exists:biomes,id',
+            'health'      => 'required',
+            'damage'      => 'required',
+            'drops'       => 'required',
             'description' => 'required',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'image'       => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
         $data = $request->all();
@@ -120,7 +120,7 @@ class MobController extends Controller
     public function edit(Mob $mob)
     {
         $categories = \App\Models\Category::all();
-        $biomes = \App\Models\Biome::all();
+        $biomes = \App\Models\Biome::with('dimension')->orderBy('name')->get();
         return view('mobs.edit', compact('mob', 'categories', 'biomes'));
     }
 
@@ -130,14 +130,14 @@ class MobController extends Controller
     public function update(Request $request, Mob $mob)
     {
         $request->validate([
-            'name' => 'required',
+            'name'        => 'required',
             'category_id' => 'required|exists:categories,id',
-            'biome_id' => 'required|exists:biomes,id',
-            'health' => 'required',
-            'damage' => 'required',
-            'drops' => 'required',
+            'biome_id'    => 'nullable|exists:biomes,id',
+            'health'      => 'required',
+            'damage'      => 'required',
+            'drops'       => 'required',
             'description' => 'required',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'image'       => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
         $data = $request->all();

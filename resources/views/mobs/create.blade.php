@@ -60,17 +60,23 @@
                             <!-- Biome -->
                             <div>
                                 <x-input-label for="biome_id" :value="__('Natural Habitat')" />
-                                <select id="biome_id" name="biome_id" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" required>
-                                    <option value="" disabled selected>Select Region</option>
+                                <select id="biome_id" name="biome_id" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
+                                    <option value="">— No specific habitat —</option>
                                     @php
+                                        // Group by dimension, show parent biomes first, then sub-biomes indented
                                         $groupedBiomes = $biomes->groupBy('dimension.name');
                                     @endphp
                                     @foreach($groupedBiomes as $dimensionName => $biomesInDim)
                                         <optgroup label="{{ $dimensionName }}">
-                                            @foreach($biomesInDim as $biome)
-                                                <option value="{{ $biome->id }}" {{ old('biome_id') == $biome->id ? 'selected' : '' }}>
-                                                    {{ $biome->name }}
+                                            @foreach($biomesInDim->whereNull('parent_id') as $parentBiome)
+                                                <option value="{{ $parentBiome->id }}" {{ old('biome_id') == $parentBiome->id ? 'selected' : '' }}>
+                                                    {{ $parentBiome->name }}
                                                 </option>
+                                                @foreach($biomesInDim->where('parent_id', $parentBiome->id) as $subBiome)
+                                                    <option value="{{ $subBiome->id }}" {{ old('biome_id') == $subBiome->id ? 'selected' : '' }}>
+                                                        &nbsp;&nbsp;&nbsp;↳ {{ $subBiome->name }}
+                                                    </option>
+                                                @endforeach
                                             @endforeach
                                         </optgroup>
                                     @endforeach

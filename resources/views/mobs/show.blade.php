@@ -121,9 +121,13 @@
                                         <span class="text-xs font-bold text-gray-500 uppercase tracking-widest">Natural Habitat</span>
                                     </div>
                                     <p class="text-white font-bold">
-                                        <a href="{{ route('biomes.show', $mob->biome_id) }}" class="hover:text-indigo-400 transition-colors">
-                                            {{ $mob->biome->name }}
-                                        </a>
+                                        @if($mob->biome)
+                                            <a href="{{ route('biomes.show', $mob->biome) }}" class="hover:text-indigo-400 transition-colors">
+                                                {{ $mob->biome->name }}
+                                            </a>
+                                        @else
+                                            <span class="text-gray-500 italic">Unknown</span>
+                                        @endif
                                     </p>
                                 </div>
                                 <div class="glass-card p-6 rounded-2xl">
