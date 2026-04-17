@@ -1,0 +1,90 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    :root {
+        --mc-green: #38e038;
+        --mc-purple: #a44dee;
+        --mc-dark: #0f172a;
+        --mc-glass: rgba(255, 255, 255, 0.05);
+    }
+
+    body {
+        @apply bg-[#020617] text-gray-100;
+        scroll-behavior: smooth;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+        width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+        background: #020617;
+    }
+    ::-webkit-scrollbar-thumb {
+        background: #1e293b;
+        border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+        background: var(--mc-green);
+    }
+}
+
+@layer components {
+    .glass-card {
+        @apply bg-white/5 backdrop-blur-xl border border-white/10 shadow-2xl;
+    }
+    
+    .btn-primary-mc {
+        @apply bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 hover:shadow-[0_0_20px_rgba(79,70,229,0.4)] flex items-center justify-center whitespace-nowrap;
+    }
+
+    .minecraft-glow {
+        text-shadow: 0 0 10px rgba(56, 224, 56, 0.5);
+    }
+}
+
+/* Animations */
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0px); }
+}
+
+.animate-float {
+    animation: float 6s ease-in-out infinite;
+}
+
+@keyframes glow-pulse {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+}
+
+.animate-glow {
+    animation: glow-pulse 3s ease-in-out infinite;
+}
+
+.fade-in-up {
+    animation: fadeInUp 0.8s ease-out forwards;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Swiper custom styling */
+.swiper-pagination-bullet {
+    @apply bg-white/50 !important;
+}
+.swiper-pagination-bullet-active {
+    @apply bg-indigo-500 !important;
+}
+
