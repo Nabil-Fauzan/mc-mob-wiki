@@ -15,7 +15,21 @@ class Mob extends Model
         'drops',
         'description',
         'spawning_conditions',
+        'health_easy',
+        'health_normal',
+        'health_hard',
+        'damage_easy',
+        'damage_normal',
+        'damage_hard',
+        'melee_attack',
+        'ranged_attack',
+        'xp_reward',
     ];
+
+    public function loot()
+    {
+        return $this->hasMany(MobDrop::class);
+    }
 
     public function category()
     {

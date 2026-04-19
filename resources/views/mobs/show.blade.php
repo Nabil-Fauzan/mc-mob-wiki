@@ -1,12 +1,31 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div class="flex items-center space-x-4">
-                <a href="{{ route('mobs.index') }}" class="p-2 bg-white/5 hover:bg-white/10 rounded-full border border-white/10 transition-all">
-                    <svg class="w-6 h-6 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
-                </a>
-                <h2 class="text-3xl font-black text-white tracking-tight">
-                    {{ $mob->name }} <span class="text-indigo-500 font-mono text-xl">_</span>
+            <div class="flex flex-col">
+                <!-- Breadcrumbs -->
+                <nav class="flex mb-4" aria-label="Breadcrumb">
+                    <ol class="inline-flex items-center space-x-1 md:space-x-3 text-[10px] uppercase font-black tracking-widest text-gray-500">
+                        <li class="inline-flex items-center">
+                            <a href="{{ route('mobs.index') }}" class="hover:text-indigo-400">Wiki</a>
+                        </li>
+                        @if($mob->biomes->first()?->dimension)
+                        <li>
+                            <div class="flex items-center">
+                                <svg class="w-3 h-3 text-gray-600 mx-1" fill="currentColor" viewBox="0 0 20 20"><path d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"></path></svg>
+                                <a href="{{ route('dimensions.index') }}" class="hover:text-indigo-400">{{ $mob->biomes->first()->dimension->name }}</a>
+                            </div>
+                        </li>
+                        @endif
+                        <li aria-current="page">
+                            <div class="flex items-center">
+                                <svg class="w-3 h-3 text-gray-600 mx-1" fill="currentColor" viewBox="0 0 20 20"><path d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"></path></svg>
+                                <span class="text-indigo-500">{{ $mob->name }}</span>
+                            </div>
+                        </li>
+                    </ol>
+                </nav>
+                <h2 class="text-4xl font-black text-white tracking-tighter">
+                    {{ $mob->name }} <span class="text-indigo-500 animate-pulse">_</span>
                 </h2>
             </div>
             <div class="flex space-x-3" x-data="{ favorited: {{ $mob->favoritedBy()->where('user_id', auth()->id())->exists() ? 'true' : 'false' }}, count: {{ $mob->favoritedBy()->count() }} }">
@@ -70,35 +89,155 @@
                                     <span class="w-8 h-px bg-gray-800 mr-3"></span>
                                     Combat & Health
                                 </h4>
-                                <div class="grid grid-cols-2 gap-6">
-                                    <div class="glass-card p-4 rounded-2xl border-red-500/10">
-                                        <div class="flex items-center space-x-2 mb-2">
-                                            <svg class="w-4 h-4 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"></path></svg>
-                                            <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Health</span>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <!-- Health Breakdown -->
+                                    <div class="glass-card p-6 rounded-2xl border-red-500/10">
+                                        <div class="flex items-center space-x-3 mb-6">
+                                            <div class="p-2 bg-red-500/20 rounded-lg">
+                                                <svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"></path></svg>
+                                            </div>
+                                            <span class="text-xs font-black text-gray-400 uppercase tracking-widest">Vitality Intel (HP)</span>
                                         </div>
-                                        <p class="text-3xl font-black text-white">{{ $mob->health }} <span class="text-xs text-red-500 uppercase">HP</span></p>
+                                        
+                                        <div class="space-y-4">
+                                            <div class="flex justify-between items-center group">
+                                                <span class="text-[10px] font-black text-green-500/70 uppercase">Easy</span>
+                                                <span class="text-lg font-black text-white tracking-tight">{{ $mob->health_easy ?: '?' }}</span>
+                                            </div>
+                                            <div class="flex justify-between items-center group">
+                                                <span class="text-[10px] font-black text-yellow-500/70 uppercase">Normal</span>
+                                                <span class="text-lg font-black text-white tracking-tight">{{ $mob->health_normal ?: '?' }}</span>
+                                            </div>
+                                            <div class="flex justify-between items-center group">
+                                                <span class="text-[10px] font-black text-red-500/70 uppercase">Hard</span>
+                                                <span class="text-lg font-black text-white tracking-tight">{{ $mob->health_hard ?: '?' }}</span>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div class="glass-card p-4 rounded-2xl border-orange-500/10">
-                                        <div class="flex items-center space-x-2 mb-2">
-                                            <svg class="w-4 h-4 text-orange-500" fill="currentColor" viewBox="0 0 20 20"><path d="M13.172 2.172a4 4 0 00-5.656 0L3.828 5.858a4 4 0 105.656 5.656L10 10.343l.515.515a4 4 0 005.656-5.656l-3-3z"></path></svg>
-                                            <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Damage</span>
+
+                                    <!-- Damage Breakdown -->
+                                    <div class="glass-card p-6 rounded-2xl border-orange-500/10">
+                                        <div class="flex items-center space-x-3 mb-6">
+                                            <div class="p-2 bg-orange-500/20 rounded-lg">
+                                                <svg class="w-5 h-5 text-orange-500" fill="currentColor" viewBox="0 0 20 20"><path d="M13.172 2.172a4 4 0 00-5.656 0L3.828 5.858a4 4 0 105.656 5.656L10 10.343l.515.515a4 4 0 005.656-5.656l-3-3z"></path></svg>
+                                            </div>
+                                            <span class="text-xs font-black text-gray-400 uppercase tracking-widest">General Damage (ATK)</span>
                                         </div>
-                                        <p class="text-3xl font-black text-white">{{ $mob->damage }} <span class="text-xs text-orange-500 uppercase">DPS</span></p>
+                                        
+                                        <div class="space-y-4">
+                                            <div class="flex justify-between items-center group">
+                                                <span class="text-[10px] font-black text-green-500/70 uppercase">Easy</span>
+                                                <span class="text-lg font-black text-white tracking-tight">{{ $mob->damage_easy ?: '?' }}</span>
+                                            </div>
+                                            <div class="flex justify-between items-center group">
+                                                <span class="text-[10px] font-black text-yellow-500/70 uppercase">Normal</span>
+                                                <span class="text-lg font-black text-white tracking-tight">{{ $mob->damage_normal ?: '?' }}</span>
+                                            </div>
+                                            <div class="flex justify-between items-center group">
+                                                <span class="text-[10px] font-black text-red-500/70 uppercase">Hard</span>
+                                                <span class="text-lg font-black text-white tracking-tight">{{ $mob->damage_hard ?: '?' }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Specific Attack Profiles -->
+                                    @if($mob->melee_attack || $mob->ranged_attack)
+                                        <div class="col-span-full glass-card p-6 rounded-2xl border-indigo-500/10 mt-2">
+                                            <h5 class="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-6 flex items-center">
+                                                <span class="w-2 h-2 bg-indigo-500 rounded-full mr-2 animate-pulse"></span>
+                                                Specialized Attack Arsenal
+                                            </h5>
+                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                                @if($mob->melee_attack)
+                                                    <div class="space-y-2">
+                                                        <span class="text-[9px] font-black text-red-400 uppercase tracking-tighter block mb-1">Melee Profile</span>
+                                                        <p class="text-sm text-gray-300 leading-relaxed font-medium bg-black/20 p-3 rounded-xl border border-white/5 italic">
+                                                            "{{ $mob->melee_attack }}"
+                                                        </p>
+                                                    </div>
+                                                @endif
+                                                @if($mob->ranged_attack)
+                                                    <div class="space-y-2">
+                                                        <span class="text-[9px] font-black text-blue-400 uppercase tracking-tighter block mb-1">Ranged Profile</span>
+                                                        <p class="text-sm text-gray-300 leading-relaxed font-medium bg-black/20 p-3 rounded-xl border border-white/5 italic">
+                                                            "{{ $mob->ranged_attack }}"
+                                                        </p>
+                                                    </div>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    @endif
+
+                                    <!-- Interactive Radar Chart -->
+                                    <div class="col-span-full glass-card p-8 rounded-[2.5rem] border-indigo-500/10 mt-4 overflow-hidden relative">
+                                        <h5 class="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-6">Threat Intelligence Radar</h5>
+                                        <div class="aspect-square max-w-[300px] mx-auto opacity-80 hover:opacity-100 transition-opacity">
+                                            <canvas id="threatRadar"></canvas>
+                                        </div>
+                                        <div class="absolute top-8 right-8 text-[8px] font-black text-indigo-500 uppercase tracking-widest leading-none">
+                                            Analytical Node [0.4]<br>
+                                            <span class="text-gray-700 italic">Simulated Data</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
+                        <script>
+                            document.addEventListener('DOMContentLoaded', function() {
+                                @php
+                                    preg_match('/\d+/', $mob->health_normal ?: $mob->health, $hM);
+                                    preg_match('/\d+/', $mob->damage_normal ?: $mob->damage, $dM);
+                                    $h = intval($hM[0] ?? 20);
+                                    $d = intval($dM[0] ?? 5);
+                                    $x = intval($mob->xp_reward ?: 5);
+                                    $r = $mob->category->name == 'Hostile' ? 80 : ($mob->category->name == 'Neutral' ? 50 : 30);
+                                @endphp
+
+                                const ctx = document.getElementById('threatRadar').getContext('2d');
+                                new Chart(ctx, {
+                                    type: 'radar',
+                                    data: {
+                                        labels: ['Vitality', 'Lethality', 'EXP Value', 'Complexity', 'Spawn Weight'],
+                                        datasets: [{
+                                            label: '{{ $mob->name }} Profile',
+                                            data: [
+                                                {{ min(($h/100)*100, 100) }}, 
+                                                {{ min(($d/20)*100, 100) }}, 
+                                                {{ min(($x/50)*100, 100) }}, 
+                                                {{ $r }}, 
+                                                70
+                                            ],
+                                            fill: true,
+                                            backgroundColor: 'rgba(99, 102, 241, 0.2)',
+                                            borderColor: 'rgb(99, 102, 241)',
+                                            pointBackgroundColor: 'rgb(99, 102, 241)',
+                                            pointBorderColor: '#fff',
+                                            pointHoverBackgroundColor: '#fff',
+                                            pointHoverBorderColor: 'rgb(99, 102, 241)'
+                                        }]
+                                    },
+                                    options: {
+                                        elements: { line: { borderWidth: 3 } },
+                                        scales: {
+                                            r: {
+                                                angleLines: { color: 'rgba(255, 255, 255, 0.05)' },
+                                                grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                                                pointLabels: { color: '#94a3b8', font: { size: 10, weight: '900' } },
+                                                ticks: { display: false },
+                                                suggestedMin: 0,
+                                                suggestedMax: 100
+                                            }
+                                        },
+                                        plugins: { legend: { display: false } }
+                                    }
+                                });
+                            });
+                        </script>
+
                         <!-- Right Column: Description & Metadata -->
                         <div class="flex flex-col h-full">
                             <div class="mb-8">
-                                <span class="px-4 py-1 text-xs font-black uppercase tracking-widest rounded-full backdrop-blur-md border mb-6 inline-block
-                                    {{ $mob->category->name == 'Hostile' ? 'bg-red-500/20 text-red-400 border-red-500/30' : '' }}
-                                    {{ $mob->category->name == 'Passive' ? 'bg-green-500/20 text-green-400 border-green-500/30' : '' }}
-                                    {{ $mob->category->name == 'Neutral' ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' : '' }}
-                                ">
-                                    {{ $mob->category->name }} Class
-                                </span>
                                 <h1 class="text-6xl font-black text-white mb-8 tracking-tighter">{{ $mob->name }}</h1>
                                 
                                 <div class="space-y-6">
@@ -141,14 +280,76 @@
                                         </div>
                                     @endif
                                 </div>
-                                <div class="glass-card p-6 rounded-2xl">
-                                    <div class="flex items-center space-x-3 mb-3">
-                                        <div class="w-8 h-8 bg-yellow-500/10 rounded-lg flex items-center justify-center">
-                                            <svg class="w-4 h-4 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+                                <div class="glass-card p-6 rounded-2xl border-yellow-500/10">
+                                    <div class="flex items-center justify-between mb-4">
+                                        <div class="flex items-center space-x-3">
+                                            <div class="w-8 h-8 bg-yellow-500/20 rounded-lg flex items-center justify-center">
+                                                <svg class="w-4 h-4 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+                                            </div>
+                                            <span class="text-xs font-black text-gray-400 uppercase tracking-widest">Loot Intelligence</span>
                                         </div>
-                                        <span class="text-xs font-bold text-gray-500 uppercase tracking-widest">Valuable Drops</span>
+                                        @if($mob->xp_reward)
+                                            <div class="flex items-center bg-green-500/10 px-2 py-1 rounded-md border border-green-500/20">
+                                                <span class="text-[9px] font-black text-green-500 uppercase mr-1">XP</span>
+                                                <span class="text-xs font-mono font-bold text-white">{{ $mob->xp_reward }}</span>
+                                            </div>
+                                        @endif
                                     </div>
-                                    <p class="text-white font-bold">{{ $mob->drops }}</p>
+
+                                    <div class="space-y-2">
+                                        @forelse($mob->loot as $item)
+                                            <div class="flex items-center justify-between p-2 rounded-xl bg-white/5 border border-white/5 group hover:border-yellow-500/30 transition-all">
+                                                <div class="flex items-center space-x-3">
+                                                    <span class="text-lg">{{ $item->icon ?: '📦' }}</span>
+                                                    <div>
+                                                        <p class="text-xs font-bold text-white leading-none mb-1">{{ $item->item_name }}</p>
+                                                        <div class="flex items-center space-x-2">
+                                                            <span class="text-[8px] font-black uppercase tracking-tighter
+                                                                {{ $item->rarity == 'Common' ? 'text-gray-400' : '' }}
+                                                                {{ $item->rarity == 'Uncommon' ? 'text-green-400' : '' }}
+                                                                {{ $item->rarity == 'Rare' ? 'text-blue-400' : '' }}
+                                                                {{ $item->rarity == 'Legendary' ? 'text-purple-400' : '' }}
+                                                            ">{{ $item->rarity }}</span>
+                                                            <span class="w-1 h-1 bg-white/10 rounded-full"></span>
+                                                            <span class="text-[8px] font-bold text-gray-500">{{ $item->chance }} chance</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <span class="text-[10px] font-mono font-black text-yellow-500 bg-yellow-500/10 px-1.5 py-0.5 rounded">x{{ $item->quantity }}</span>
+                                            </div>
+                                        @empty
+                                            @if($mob->drops)
+                                                <p class="text-xs text-gray-300 font-medium italic opacity-60">"{{ $mob->drops }}"</p>
+                                            @else
+                                                <div class="py-4 text-center">
+                                                    <span class="text-[10px] text-gray-600 italic">No loot intelligence recovered</span>
+                                                </div>
+                                            @endif
+                                        @endforelse
+                                    </div>
+
+                                    <!-- Loot Probability Calculator -->
+                                    <div class="mt-6 pt-6 border-t border-white/5" x-data="{ kills: 10 }">
+                                        <div class="flex justify-between items-center mb-4">
+                                            <span class="text-[9px] font-black text-yellow-600 uppercase tracking-widest">Farming Intelligence</span>
+                                            <div class="flex items-center space-x-2">
+                                                <span class="text-[10px] text-gray-600 font-bold">Kills:</span>
+                                                <input type="number" x-model="kills" class="w-12 bg-white/5 border-none focus:ring-0 text-white text-[10px] font-bold p-0 text-center">
+                                            </div>
+                                        </div>
+                                        <div class="space-y-2">
+                                            @foreach($mob->loot->take(3) as $item)
+                                                <div class="flex justify-between text-[10px]">
+                                                    <span class="text-gray-500">{{ $item->item_name }}</span>
+                                                    @php
+                                                        preg_match('/\d+/', $item->chance, $cM);
+                                                        $c = intval($cM[0] ?? 100);
+                                                    @endphp
+                                                    <span class="text-yellow-500 font-black" x-text="(Math.min(100, Math.round((1 - Math.pow(1 - ({{ $c/100 }}), kills)) * 100))) + '% chance'"></span>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
@@ -255,6 +456,34 @@
                     @endforelse
                 </div>
             </div>
+            </div>
+
+            <!-- Related Entities -->
+            @if($relatedMobs->count() > 0)
+                <div class="mt-24">
+                    <div class="flex items-center justify-between mb-12">
+                        <div>
+                            <h3 class="text-3xl font-black text-white tracking-tighter uppercase">Related Biological Intelligence</h3>
+                            <p class="text-gray-500 text-sm mt-2 italic">Entities often encountered in the same dimensional parameters.</p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
+                        @foreach($relatedMobs as $rel)
+                            <a href="{{ route('mobs.show', $rel) }}" class="glass-card p-6 rounded-[2.5rem] border-white/5 group hover:border-indigo-500/40 transition-all hover:-translate-y-2 duration-500">
+                                <div class="aspect-square bg-gray-950 rounded-3xl overflow-hidden mb-6">
+                                    @if($rel->image)
+                                        <img src="{{ asset('storage/' . $rel->image) }}" alt="{{ $rel->name }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+                                    @else
+                                        <div class="w-full h-full flex items-center justify-center text-gray-800">?</div>
+                                    @endif
+                                </div>
+                                <h4 class="text-lg font-black text-white group-hover:text-indigo-400 transition-colors uppercase tracking-tight">{{ $rel->name }}</h4>
+                                <span class="text-[9px] font-black text-gray-600 uppercase tracking-widest">{{ $rel->category->name }}</span>
+                            </a>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
         </div>
     </div>
 </x-app-layout>

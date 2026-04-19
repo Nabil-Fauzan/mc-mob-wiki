@@ -57,8 +57,11 @@ Route::get('/comparison', [MobController::class, 'comparison'])->name('mobs.comp
 Route::get('/stats', [AnalyticsController::class, 'index'])->name('stats.index');
 
 // Biomes Discovery
-Route::get('/biomes', [BiomeController::class, 'index'])->name('biomes.index');
-Route::get('/biomes/{biome}', [BiomeController::class, 'show'])->name('biomes.show');
+Route::get('/biomes', [\App\Http\Controllers\BiomeController::class, 'index'])->name('biomes.index');
+Route::get('/biomes/{biome}', [\App\Http\Controllers\BiomeController::class, 'show'])->name('biomes.show');
+
+// Dimension Hub
+Route::get('/dimensions', [\App\Http\Controllers\DimensionController::class, 'index'])->name('dimensions.index');
 
 // Show route is public but must be last to avoid catching 'create'
 Route::get('/mobs/{mob}', [MobController::class, 'show'])->name('mobs.show');

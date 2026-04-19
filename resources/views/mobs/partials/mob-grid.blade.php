@@ -70,6 +70,26 @@
                 <p class="text-sm text-gray-400 mb-6 italic leading-relaxed">
                     "{{ Str::limit($mob->description, 100) }}"
                 </p>
+
+                <!-- Direct Loot Preview -->
+                <div class="mb-6 pt-4 border-t border-white/5">
+                    <span class="text-[9px] font-black text-gray-500 uppercase tracking-widest block mb-2">Loot Intelligence Preview</span>
+                    <div class="flex flex-wrap gap-1.5">
+                        @forelse($mob->loot->take(4) as $drop)
+                            <div class="flex items-center space-x-1 px-1.5 py-1 bg-white/5 rounded-md border border-white/5 hover:border-yellow-500/30 transition-all cursor-help" title="{{ $drop->item_name }}">
+                                <span class="text-xs">{{ $drop->icon ?: '📦' }}</span>
+                                <span class="text-[8px] text-gray-400 font-bold uppercase truncate max-w-[40px]">{{ $drop->item_name }}</span>
+                            </div>
+                        @empty
+                            <span class="text-[8px] text-gray-600 italic">No loot metadata</span>
+                        @endforelse
+                        @if($mob->loot->count() > 4)
+                            <div class="flex items-center px-1.5 py-1 bg-white/5 rounded-md border border-white/5">
+                                <span class="text-[8px] text-gray-400 font-bold">+{{ $mob->loot->count() - 4 }}</span>
+                            </div>
+                        @endif
+                    </div>
+                </div>
                 
                 <div class="flex justify-between items-center pt-4 border-t border-white/5">
                     <div class="flex -space-x-2">
