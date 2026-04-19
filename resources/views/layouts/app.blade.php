@@ -115,6 +115,36 @@
             <main>
                 {{ $slot }}
             </main>
+
+            <!-- Floating Mobile Navigation -->
+            <div class="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-[90%] max-w-md md:hidden nav-appear" 
+                 x-data="{ active: '{{ Route::currentRouteName() }}' }">
+                <div class="glass-card rounded-full p-2 px-6 flex items-center justify-between border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+                    <a href="{{ route('mobs.index') }}" class="p-3 transition-all rounded-full" 
+                       :class="active === 'mobs.index' ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/40' : 'text-gray-500 hover:text-white'">
+                        <span class="text-xl">🧭</span>
+                    </a>
+                    <a href="{{ route('dimensions.index') }}" class="p-3 transition-all rounded-full"
+                       :class="active === 'dimensions.index' ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/40' : 'text-gray-500 hover:text-white'">
+                        <span class="text-xl">🌌</span>
+                    </a>
+                    <a href="{{ route('mobs.create') }}" class="p-3 transition-all rounded-full"
+                       :class="active === 'mobs.create' ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/40' : 'text-gray-500 hover:text-white'">
+                        <span class="text-xl">➕</span>
+                    </a>
+                    <a href="{{ route('mobs.comparison') }}" class="p-3 transition-all rounded-full"
+                       :class="active === 'mobs.comparison' ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/40' : 'text-gray-500 hover:text-white'">
+                        <span class="text-xl">🧪</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Mobile Quick Trigger -->
+            <button @click="paletteOpen = true" 
+                    class="fixed bottom-24 right-6 z-40 w-12 h-12 bg-indigo-600 text-white rounded-full shadow-2xl flex items-center justify-center border border-white/20 md:hidden nav-appear animate-float"
+                    style="animation-delay: 200ms">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            </button>
         </div>
     </body>
 </html>

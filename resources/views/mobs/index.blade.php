@@ -72,10 +72,16 @@
             const url = `{{ route('mobs.index') }}?${params.toString()}`;
             
             try {
+                const startTime = Date.now();
                 const response = await fetch(url, {
                     headers: { 'X-Requested-With': 'XMLHttpRequest' }
                 });
                 const html = await response.text();
+                
+                // Ensure a minimum aesthetic duration of 300ms for the skeleton shimmer
+                const elapsed = Date.now() - startTime;
+                if(elapsed < 300) await new Promise(r => setTimeout(r, 300 - elapsed));
+
                 document.getElementById('mob-grid-container').innerHTML = html;
                 window.history.pushState({}, '', url);
                 this.initPaginationLinks();
@@ -263,12 +269,8 @@
                                 class="text-[10px] font-black uppercase tracking-widest text-gray-500 hover:text-red-500 transition-colors">
                                 Reset Parameter Intelligence
                             </button>
-                            <div x-show="isLoading" class="flex items-center text-indigo-500 text-[10px] font-bold uppercase tracking-[0.2em] animate-pulse">
-                                <svg class="animate-spin h-3 w-3 mr-2" viewBox="0 0 24 24">
-                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
-                                Syncing...
+                            <div x-show="isLoading" class="flex items-center text-indigo-500 text-[10px] font-black uppercase tracking-[0.2em] animate-pulse">
+                                Data Syncing...
                             </div>
                         </div>
                     </div>
@@ -345,8 +347,13 @@
             </div>
 
             <!-- Mobs Grid Container -->
-            <div id="mob-grid-container" :class="{ 'opacity-50 pointer-events-none transition-opacity duration-300': isLoading }">
-                @include('mobs.partials.mob-grid')
+            <div id="mob-grid-container" class="relative">
+                <div x-show="isLoading" class="absolute inset-x-0 top-0 z-20">
+                    @include('mobs.partials.skeleton')
+                </div>
+                <div :class="isLoading ? 'opacity-0' : 'opacity-100'" class="transition-opacity duration-500">
+                    @include('mobs.partials.mob-grid')
+                </div>
             </div>
         </div>
     </div>

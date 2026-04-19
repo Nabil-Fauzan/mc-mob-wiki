@@ -26,7 +26,7 @@
                             $themeColor = 'emerald';
                             if(Str::contains($data['dimension']->name, 'Nether')) $themeColor = 'red';
                             if(Str::contains($data['dimension']->name, 'End')) $themeColor = 'purple';
-                        @php
+                        @endphp
                         
                         <div class="space-y-4">
                             <div class="flex justify-between items-end">
@@ -61,8 +61,8 @@
                         }
                     @endphp
 
-                    <div class="glass-card rounded-[4rem] overflow-hidden border-white/5 group hover:border-{{ $themeColor }}-500/30 transition-all duration-700 shadow-2xl" 
-                         style="box-shadow: 0 0 80px {{ $glowColor }}">
+                    <div class="glass-card rounded-[4rem] overflow-hidden border-white/5 group hover:border-{{ $themeColor }}-500/30 transition-all duration-700 shadow-2xl stagger-item" 
+                         style="box-shadow: 0 0 80px {{ $glowColor }}; animation-delay: {{ $loop->index * 150 }}ms">
                         <div class="grid grid-cols-1 lg:grid-cols-12">
                             <!-- Visual Sidebar -->
                             <div class="lg:col-span-4 relative overflow-hidden bg-gradient-to-br {{ $accentGradient }} p-12 flex flex-col justify-between min-h-[400px]">

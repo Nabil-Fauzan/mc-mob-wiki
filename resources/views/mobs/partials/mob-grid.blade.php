@@ -1,8 +1,13 @@
 <!-- Mobs Grid -->
 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 mb-12">
     @forelse($mobs as $mob)
-        <div class="glass-card rounded-[2rem] overflow-hidden group hover:-translate-y-2 transition-all duration-500">
-            <div class="aspect-[4/5] bg-gray-900 relative overflow-hidden">
+        @php
+            preg_match('/\d+/', $mob->damage_normal ?: $mob->damage, $dM);
+            $isThreatening = intval($dM[0] ?? 0) >= 10;
+        @endphp
+        <div class="glass-card rounded-[2rem] overflow-hidden group hover:-translate-y-2 transition-all duration-500 stagger-item" 
+             style="animation-delay: {{ ($loop->index % 8) * 75 }}ms">
+            <div class="aspect-[4/5] bg-gray-900 relative overflow-hidden {{ $isThreatening ? 'threat-pulse' : '' }}">
                 @if($mob->image)
                     <img src="{{ asset('storage/' . $mob->image) }}" alt="{{ $mob->name }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
                 @else

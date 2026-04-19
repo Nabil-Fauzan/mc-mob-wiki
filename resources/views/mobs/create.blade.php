@@ -164,7 +164,7 @@
 
                                 <div class="space-y-3">
                                     <template x-for="(item, index) in items" :key="index">
-                                        <div class="glass-card p-4 rounded-2xl border-white/5 grid grid-cols-1 md:grid-cols-12 gap-4 items-end relative group">
+                                        <div class="glass-card p-4 rounded-2xl border-white/5 grid grid-cols-1 md:grid-cols-12 gap-4 items-end relative group loot-pop">
                                             <div class="md:col-span-1">
                                                 <x-input-label :value="__('Icon')" class="text-[9px] text-center" />
                                                 <input type="text" :name="'loot['+index+'][icon]'" x-model="item.icon" class="mt-1 block w-full bg-black/40 border-white/10 rounded-lg text-sm text-center px-0 text-white focus:ring-yellow-500/50" placeholder="📦">
