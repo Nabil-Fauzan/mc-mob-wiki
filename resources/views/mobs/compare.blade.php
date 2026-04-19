@@ -74,14 +74,16 @@
 
                             <!-- Detailed Comparison List -->
                             <div class="space-y-4 pt-8 border-t border-white/5">
-                                <div class="flex justify-between text-sm">
-                                    <span class="text-gray-500 font-bold uppercase tracking-widest text-[10px]">Primary Biome</span>
-                                    <span class="text-white font-bold">{{ $mob->biome->name ?? 'Global' }}</span>
+                                <div class="flex justify-between items-start text-sm">
+                                    <span class="text-gray-500 font-bold uppercase tracking-widest text-[10px] mt-1">Natural Habitats</span>
+                                    <span class="text-white font-bold text-right max-w-[150px] leading-tight">{{ $mob->biomes->pluck('name')->implode(', ') ?: ($mob->spawning_conditions ? 'Classified Location' : 'Global Presence') }}</span>
                                 </div>
-                                <div class="flex justify-between text-sm">
-                                    <span class="text-gray-500 font-bold uppercase tracking-widest text-[10px]">Dimension Classification</span>
-                                    <span class="text-indigo-400 font-bold">{{ $mob->biome->dimension->name ?? 'Unknown' }}</span>
-                                </div>
+                                @if($mob->spawning_conditions)
+                                    <div class="flex justify-between items-start text-sm pt-4 border-t border-white/5">
+                                        <span class="text-gray-500 font-bold uppercase tracking-widest text-[10px] mt-1">Encounter Info</span>
+                                        <span class="text-indigo-300 font-bold text-right max-w-[150px] leading-tight italic text-[11px]">"{{ $mob->spawning_conditions }}"</span>
+                                    </div>
+                                @endif
                                 <div class="pt-4">
                                     <span class="text-gray-500 font-bold uppercase tracking-widest text-[10px] block mb-2">Item Drops</span>
                                     <div class="flex flex-wrap gap-2">

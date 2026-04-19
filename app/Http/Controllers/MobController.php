@@ -14,7 +14,7 @@ class MobController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Mob::with(['category', 'biome.dimension'])->withCount('favoritedBy');
+        $query = Mob::with(['category', 'biomes.dimension'])->withCount('favoritedBy');
 
         if (\Illuminate\Support\Facades\Auth::check()) {
             $query->withExists(['favoritedBy as is_favorited' => function($q) {
@@ -85,22 +85,28 @@ class MobController extends Controller
         $request->validate([
             'name'        => 'required',
             'category_id' => 'required|exists:categories,id',
-            'biome_id'    => 'nullable|exists:biomes,id',
+            'biome_ids'   => 'nullable|array',
+            'biome_ids.*' => 'exists:biomes,id',
             'health'      => 'required',
             'damage'      => 'required',
             'drops'       => 'required',
             'description' => 'required',
+            'spawning_conditions' => 'nullable|string',
             'image'       => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
-        $data = $request->all();
+        $data = $request->except('biome_ids');
 
         if ($request->hasFile('image')) {
             $path = $request->file('image')->store('mobs', 'public');
             $data['image'] = $path;
         }
 
-        Mob::create($data);
+        $mob = Mob::create($data);
+        
+        if ($request->has('biome_ids')) {
+            $mob->biomes()->sync($request->biome_ids);
+        }
 
         return redirect()->route('mobs.index')->with('success', 'Mob created successfully.');
     }
@@ -110,7 +116,7 @@ class MobController extends Controller
      */
     public function show(Mob $mob)
     {
-        $mob->load(['category', 'biome.dimension']);
+        $mob->load(['category', 'biomes.dimension']);
         return view('mobs.show', compact('mob'));
     }
 
@@ -132,15 +138,17 @@ class MobController extends Controller
         $request->validate([
             'name'        => 'required',
             'category_id' => 'required|exists:categories,id',
-            'biome_id'    => 'nullable|exists:biomes,id',
+            'biome_ids'   => 'nullable|array',
+            'biome_ids.*' => 'exists:biomes,id',
             'health'      => 'required',
             'damage'      => 'required',
             'drops'       => 'required',
             'description' => 'required',
+            'spawning_conditions' => 'nullable|string',
             'image'       => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
-        $data = $request->all();
+        $data = $request->except('biome_ids');
 
         if ($request->hasFile('image')) {
             if ($mob->image) {
@@ -151,6 +159,9 @@ class MobController extends Controller
         }
 
         $mob->update($data);
+        
+        // Sync biomes
+        $mob->biomes()->sync($request->biome_ids ?? []);
 
         return redirect()->route('mobs.index')->with('success', 'Mob updated successfully.');
     }
@@ -174,7 +185,7 @@ class MobController extends Controller
     public function comparison(Request $request)
     {
         $ids = explode(',', $request->query('ids', ''));
-        $mobs = Mob::with(['category', 'biome.dimension'])->whereIn('id', $ids)->get();
+        $mobs = Mob::with(['category', 'biomes.dimension'])->whereIn('id', $ids)->get();
 
         if ($mobs->isEmpty()) {
             return redirect()->route('mobs.index')->with('error', 'Please select mobs to compare.');

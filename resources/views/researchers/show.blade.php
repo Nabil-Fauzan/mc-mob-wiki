@@ -91,7 +91,7 @@
                                     @endif
                                     <div class="p-6 relative z-20 -mt-12">
                                         <h3 class="text-xl font-black text-white tracking-wide mb-1 group-hover:text-indigo-400 transition-colors">{{ $mob->name }}</h3>
-                                        <span class="text-xs font-bold uppercase text-gray-500">{{ $mob->biome->name ?? 'Unknown Biome' }} • {{ $mob->category->name }}</span>
+                                        <span class="text-xs font-bold uppercase text-gray-500">{{ $mob->biomes->first()->name ?? 'Global' }} • {{ $mob->category->name }}</span>
                                     </div>
                                 </a>
                             @endforeach

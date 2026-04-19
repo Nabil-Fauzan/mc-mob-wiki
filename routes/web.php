@@ -23,7 +23,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', function () {
         /** @var \App\Models\User $user */
         $user = \Illuminate\Support\Facades\Auth::user();
-        $favorites = $user->favorite_mobs()->with(['category', 'biome'])->latest()->get();
+        $favorites = $user->favorite_mobs()->with(['category', 'biomes'])->latest()->get();
         $stats = [
             'favorites_count' => $favorites->count(),
             'comments_count' => $user->comments()->count(),

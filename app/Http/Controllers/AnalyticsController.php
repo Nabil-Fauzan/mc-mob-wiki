@@ -36,7 +36,7 @@ class AnalyticsController extends Controller
         $avgDamage = Mob::avg(DB::raw('CAST(damage AS UNSIGNED)'));
 
         // 4. Lethality Ranking (Top 5)
-        $topDeadly = Mob::with(['category', 'biome'])
+        $topDeadly = Mob::with(['category', 'biomes'])
             ->select('*')
             ->selectRaw('(CAST(health AS UNSIGNED) + CAST(damage AS UNSIGNED) * 2) as threat_score')
             ->orderBy('threat_score', 'desc')

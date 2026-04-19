@@ -23,7 +23,7 @@
             <div class="glass-card rounded-[2.5rem] border border-white/10 p-8 shadow-[0_0_50px_rgba(0,0,0,0.5)] bg-gray-900/40 backdrop-blur-xl">
                 <form action="{{ route('admin.biomes.update', $biome) }}" method="POST" enctype="multipart/form-data"
                     class="space-y-8"
-                    x-data="biomeEditForm('{{ $biome->parent_id ? 'sub' : 'top' }}', {{ $biome->parent_id ?? 'null' }}, '{{ $biome->image ? asset('storage/' . $biome->image) : '' }}')">
+                    x-data="biomeEditForm('{{ $biome->parent_id ? 'sub' : 'top' }}', {{ $biome->parent_id ?? 'null' }}, '{{ $biome->image ? asset('storage/' . $biome->image) : '' }}', {{ $presetImages->toJson() }}, {{ $uploadedImages->toJson() }})">
                     @csrf
                     @method('PUT')
 
@@ -101,28 +101,94 @@
                         </div>
 
                         <!-- Image -->
-                        <div>
-                            <label class="block text-xs font-black uppercase tracking-widest text-indigo-400 mb-2">Visual Feed (Image)</label>
-                            <label for="image" class="block relative group h-[200px] rounded-2xl overflow-hidden border-2 border-dashed border-white/20 bg-black/40 hover:bg-black/60 hover:border-indigo-500/50 transition-all cursor-pointer">
-                                <template x-if="imageUrl">
-                                    <img x-bind:src="imageUrl" class="absolute inset-0 w-full h-full object-cover z-10" alt="Preview">
-                                </template>
-                                <div class="absolute inset-0 flex flex-col items-center justify-center z-20" x-bind:class="imageUrl ? 'opacity-0 group-hover:opacity-100 transition-opacity' : ''">
-                                    <div class="w-12 h-12 rounded-full bg-indigo-500/20 flex items-center justify-center mx-auto mb-3 text-indigo-400 group-hover:bg-indigo-500 group-hover:text-white transition-colors">
-                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                        <div class="relative">
+                            <div class="flex justify-between items-center mb-2">
+                                <label class="block text-xs font-black uppercase tracking-widest text-indigo-400">Visual Feed (Image)</label>
+                                <button type="button" @click="showSelector = !showSelector" class="text-[10px] font-black uppercase tracking-widest text-indigo-500 hover:text-indigo-400 transition-colors flex items-center">
+                                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg>
+                                    Quick Select
+                                </button>
+                            </div>
+
+                            <!-- Hidden input for existing image -->
+                            <input type="hidden" name="existing_image" x-model="selectedPath">
+
+                            <div class="relative group">
+                                <label for="image" class="block relative h-[200px] rounded-2xl overflow-hidden border-2 border-dashed border-white/20 bg-black/40 hover:bg-black/60 hover:border-indigo-500/50 transition-all cursor-pointer">
+                                    <template x-if="imageUrl">
+                                        <img x-bind:src="imageUrl" class="absolute inset-0 w-full h-full object-cover z-10" alt="Preview">
+                                    </template>
+                                    <div class="absolute inset-0 flex flex-col items-center justify-center z-20" x-bind:class="imageUrl ? 'opacity-0 group-hover:opacity-100 transition-opacity' : ''">
+                                        <div class="w-12 h-12 rounded-full bg-indigo-500/20 flex items-center justify-center mx-auto mb-3 text-indigo-400 group-hover:bg-indigo-500 group-hover:text-white transition-colors">
+                                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                                        </div>
+                                        <span class="text-sm font-bold text-gray-300 text-center block px-4"
+                                            x-text="imageUrl ? 'Click to Change Image' : 'Click to Select Image'"></span>
                                     </div>
-                                    <span class="text-sm font-bold text-gray-300 text-center block px-4"
-                                        x-text="imageUrl ? 'Click to Change Image' : 'Click to Select Image'"></span>
+                                    <input type="file" name="image" id="image" accept="image/*" class="sr-only" x-ref="fileInput"
+                                        x-on:change="
+                                            if ($event.target.files.length) {
+                                                selectedPath = '';
+                                                let reader = new FileReader();
+                                                reader.onload = e => imageUrl = e.target.result;
+                                                reader.readAsDataURL($event.target.files[0]);
+                                            }
+                                        ">
+                                </label>
+
+                                <!-- Dropdown Selector -->
+                                <div x-show="showSelector" 
+                                    @click.away="showSelector = false"
+                                    x-transition:enter="transition ease-out duration-200"
+                                    x-transition:enter-start="opacity-0 scale-95"
+                                    x-transition:enter-end="opacity-100 scale-100"
+                                    class="absolute top-full left-0 right-0 mt-2 z-50 bg-gray-900 border border-white/10 rounded-2xl shadow-2xl overflow-hidden backdrop-blur-xl">
+                                    
+                                    <div class="p-3 border-b border-white/10">
+                                        <input type="text" x-model="searchQuery" placeholder="Search images..." class="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-xs text-white focus:ring-1 focus:ring-indigo-500 outline-none">
+                                    </div>
+
+                                    <div class="max-h-[300px] overflow-y-auto custom-scrollbar">
+                                        <!-- Presets -->
+                                        <template x-if="filteredPresets.length > 0">
+                                            <div class="p-2">
+                                                <p class="text-[9px] font-black uppercase tracking-widest text-gray-500 mb-2 px-2">Preset Ecosystems</p>
+                                                <div class="grid grid-cols-2 gap-2">
+                                                    <template x-for="path in filteredPresets" :key="path">
+                                                        <button type="button" @click="selectImage(path, 'preset')" class="group relative aspect-video rounded-lg overflow-hidden border border-white/5 hover:border-indigo-500/50 transition-all">
+                                                            <img :src="'{{ asset('') }}' + path" class="w-full h-full object-cover">
+                                                            <div class="absolute inset-0 bg-black/40 group-hover:bg-black/10 transition-colors"></div>
+                                                            <p class="absolute bottom-1 left-2 right-2 text-[8px] text-white truncate font-bold" x-text="path.split('/').pop()"></p>
+                                                        </button>
+                                                    </template>
+                                                </div>
+                                            </div>
+                                        </template>
+
+                                        <!-- Previous Uploads -->
+                                        <template x-if="filteredUploads.length > 0">
+                                            <div class="p-2 border-t border-white/5">
+                                                <p class="text-[9px] font-black uppercase tracking-widest text-gray-500 mb-2 px-2">Previous Discoveries</p>
+                                                <div class="grid grid-cols-2 gap-2">
+                                                    <template x-for="path in filteredUploads" :key="path">
+                                                        <button type="button" @click="selectImage(path, 'upload')" class="group relative aspect-video rounded-lg overflow-hidden border border-white/5 hover:border-indigo-500/50 transition-all">
+                                                            <img :src="'{{ asset('storage') }}' + '/' + path" class="w-full h-full object-cover">
+                                                            <div class="absolute inset-0 bg-black/40 group-hover:bg-black/10 transition-colors"></div>
+                                                            <p class="absolute bottom-1 left-2 right-2 text-[8px] text-white truncate font-bold" x-text="path.split('/').pop()"></p>
+                                                        </button>
+                                                    </template>
+                                                </div>
+                                            </div>
+                                        </template>
+
+                                        <template x-if="filteredPresets.length === 0 && filteredUploads.length === 0">
+                                            <div class="p-8 text-center">
+                                                <p class="text-xs text-gray-500 uppercase tracking-widest font-black">No matches found</p>
+                                            </div>
+                                        </template>
+                                    </div>
                                 </div>
-                                <input type="file" name="image" id="image" accept="image/*" class="sr-only"
-                                    x-on:change="
-                                        if ($event.target.files.length) {
-                                            let reader = new FileReader();
-                                            reader.onload = e => imageUrl = e.target.result;
-                                            reader.readAsDataURL($event.target.files[0]);
-                                        }
-                                    ">
-                            </label>
+                            </div>
                             @error('image') <p class="text-red-400 text-xs mt-2">{{ $message }}</p> @enderror
                             <p class="text-[10px] text-gray-500 mt-2 uppercase tracking-widest text-center">Leave blank to keep current image</p>
                         </div>
@@ -138,15 +204,12 @@
 
                     <!-- Actions -->
                     <div class="pt-6 border-t border-white/10 flex justify-between items-center">
-                        {{-- Danger zone: delete --}}
-                        <form action="{{ route('admin.biomes.destroy', $biome) }}" method="POST" onsubmit="return confirm('WARNING: Erase this ecosystem permanently?');">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="inline-flex items-center space-x-2 text-red-600 hover:text-red-400 font-bold text-xs uppercase tracking-widest transition-colors">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                <span>Eradicate</span>
-                            </button>
-                        </form>
+                        {{-- Trigger delete form outside --}}
+                        <button type="button" onclick="if(confirm('WARNING: Erase this ecosystem permanently?')) document.getElementById('delete-biome-form').submit();" 
+                            class="inline-flex items-center space-x-2 text-red-600 hover:text-red-400 font-bold text-xs uppercase tracking-widest transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                            <span>Eradicate</span>
+                        </button>
 
                         <div class="flex items-center gap-4">
                             <a href="{{ route('biomes.show', $biome) }}" class="text-gray-400 hover:text-white font-bold text-sm transition-colors">Cancel</a>
@@ -164,12 +227,39 @@
         </div>
     </div>
 
+    <!-- Delete Form Outside Main Form -->
+    <form id="delete-biome-form" action="{{ route('admin.biomes.destroy', $biome) }}" method="POST" style="display:none">
+        @csrf
+        @method('DELETE')
+    </form>
+
     <script>
-        function biomeEditForm(initialType, initialParentId, initialImageUrl) {
+        function biomeEditForm(initialType, initialParentId, initialImageUrl, presets, uploads) {
             return {
                 biomeType: initialType,
                 parentId: initialParentId,
                 imageUrl: initialImageUrl || '',
+                showSelector: false,
+                selectedPath: '',
+                searchQuery: '',
+                presets: presets,
+                uploads: uploads,
+                get filteredPresets() {
+                    return this.presets.filter(p => p.toLowerCase().includes(this.searchQuery.toLowerCase())).slice(0, 10);
+                },
+                get filteredUploads() {
+                    return this.uploads.filter(u => u.toLowerCase().includes(this.searchQuery.toLowerCase())).slice(0, 10);
+                },
+                selectImage(path, type) {
+                    this.selectedPath = path;
+                    if (type === 'preset') {
+                        this.imageUrl = '{{ asset('') }}' + path;
+                    } else {
+                        this.imageUrl = '{{ asset('storage') }}' + '/' + path;
+                    }
+                    this.showSelector = false;
+                    this.$refs.fileInput.value = '';
+                }
             }
         }
     </script>

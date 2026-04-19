@@ -10,11 +10,11 @@ class Mob extends Model
         'name',
         'image',
         'category_id',
-        'biome_id',
         'health',
         'damage',
         'drops',
         'description',
+        'spawning_conditions',
     ];
 
     public function category()
@@ -22,9 +22,9 @@ class Mob extends Model
         return $this->belongsTo(Category::class);
     }
 
-    public function biome()
+    public function biomes()
     {
-        return $this->belongsTo(Biome::class);
+        return $this->belongsToMany(Biome::class)->withTimestamps();
     }
 
     public function favoritedBy()

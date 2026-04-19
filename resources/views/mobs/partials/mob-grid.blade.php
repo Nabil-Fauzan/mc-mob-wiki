@@ -53,10 +53,18 @@
 
             <div class="p-6">
                 <h3 class="text-xl font-bold text-white mb-2 underline decoration-indigo-500/30 group-hover:decoration-indigo-500 transition-colors">{{ $mob->name }}</h3>
-                <div class="flex items-center space-x-2 mb-4">
-                    <span class="text-xs text-gray-400 bg-white/5 px-2 py-1 rounded-md">{{ $mob->biome->name ?? 'Global' }}</span>
-                    <span class="text-xs text-gray-500">•</span>
-                    <span class="text-xs text-indigo-400/80">{{ $mob->biome->dimension->name ?? 'Unknown' }}</span>
+                <div class="flex flex-wrap items-center gap-1.5 mb-4 max-h-[24px] overflow-hidden">
+                    @forelse($mob->biomes as $biome)
+                        <span class="text-[10px] text-indigo-400/80 bg-indigo-500/5 border border-indigo-500/10 px-2 py-0.5 rounded-full whitespace-nowrap">
+                            {{ $biome->name }}
+                        </span>
+                        @if($loop->iteration >= 2 && $mob->biomes->count() > 2)
+                            <span class="text-[10px] text-gray-600 font-bold">+{{ $mob->biomes->count() - 2 }}</span>
+                            @break
+                        @endif
+                    @empty
+                        <span class="text-[10px] text-gray-500 bg-white/5 px-2 py-0.5 rounded-full">Global Presence</span>
+                    @endforelse
                 </div>
 
                 <p class="text-sm text-gray-400 mb-6 italic leading-relaxed">

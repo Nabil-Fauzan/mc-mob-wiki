@@ -10,7 +10,7 @@ class ResearcherController extends Controller
     public function show(User $user)
     {
         // Fetch the user's bookmarked mobs
-        $favorites = $user->favorite_mobs()->with(['category', 'biome.dimension'])->latest()->get();
+        $favorites = $user->favorite_mobs()->with(['category', 'biomes.dimension'])->latest()->get();
         
         // Fetch their recent comments
         $comments = $user->comments()->with('mob')->latest()->get();

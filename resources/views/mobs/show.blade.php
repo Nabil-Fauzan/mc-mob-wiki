@@ -120,15 +120,26 @@
                                         </div>
                                         <span class="text-xs font-bold text-gray-500 uppercase tracking-widest">Natural Habitat</span>
                                     </div>
-                                    <p class="text-white font-bold">
-                                        @if($mob->biome)
-                                            <a href="{{ route('biomes.show', $mob->biome) }}" class="hover:text-indigo-400 transition-colors">
-                                                {{ $mob->biome->name }}
+                                    <div class="flex flex-wrap gap-2">
+                                        @forelse($mob->biomes as $biome)
+                                            <a href="{{ route('biomes.show', $biome) }}" class="bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/20 px-3 py-1 rounded-full text-[10px] font-bold text-indigo-300 transition-all">
+                                                {{ $biome->name }}
                                             </a>
-                                        @else
-                                            <span class="text-gray-500 italic">Unknown</span>
-                                        @endif
-                                    </p>
+                                        @empty
+                                            @if(!$mob->spawning_conditions)
+                                                <span class="text-gray-500 text-sm italic">Area Classified</span>
+                                            @endif
+                                        @endforelse
+                                    </div>
+                                    
+                                    @if($mob->spawning_conditions)
+                                        <div class="mt-4 pt-4 border-t border-white/5">
+                                            <span class="text-[9px] font-black uppercase tracking-widest text-indigo-400 block mb-2">Special Conditions</span>
+                                            <p class="text-xs text-gray-300 font-medium leading-relaxed italic">
+                                                "{{ $mob->spawning_conditions }}"
+                                            </p>
+                                        </div>
+                                    @endif
                                 </div>
                                 <div class="glass-card p-6 rounded-2xl">
                                     <div class="flex items-center space-x-3 mb-3">

@@ -57,7 +57,7 @@
                                     </div>
                                     <div class="flex-1 min-w-0">
                                         <h4 class="text-sm font-black text-white truncate">{{ $mob->name }}</h4>
-                                        <p class="text-[10px] text-gray-500 uppercase tracking-widest">{{ $mob->category->name }} · {{ $mob->biome->name }}</p>
+                                        <p class="text-[10px] text-gray-500 uppercase tracking-widest">{{ $mob->category->name }} · {{ $mob->biomes->first()->name ?? 'Global' }}</p>
                                     </div>
                                     <a href="{{ route('mobs.show', $mob) }}" class="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center text-gray-500 hover:text-white hover:bg-white/10 transition-all">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>

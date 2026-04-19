@@ -6,6 +6,7 @@ use App\Models\Biome;
 use App\Models\Dimension;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\File;
 
 class BiomeController extends Controller
 {
@@ -37,10 +38,6 @@ class BiomeController extends Controller
     // Admin: Biome CRUD
     // -------------------------
 
-    /**
-     * Show form to create a top-level biome OR a sub-biome.
-     * Pass ?parent_id=X to pre-select a parent biome.
-     */
     public function create(Request $request)
     {
         $dimensions = Dimension::all();
@@ -48,7 +45,14 @@ class BiomeController extends Controller
         $parentBiomes = Biome::whereNull('parent_id')->orderBy('name')->get();
         $selectedParent = $request->parent_id ? Biome::find($request->parent_id) : null;
 
-        return view('biomes.create', compact('dimensions', 'parentBiomes', 'selectedParent'));
+        // Fetch available images
+        $presetImages = collect(File::glob(public_path('images/biomes/*.*')))
+            ->map(fn($path) => 'images/biomes/' . basename($path));
+        
+        $uploadedImages = collect(Storage::disk('public')->files('biomes'))
+            ->map(fn($path) => 'biomes/' . basename($path));
+
+        return view('biomes.create', compact('dimensions', 'parentBiomes', 'selectedParent', 'presetImages', 'uploadedImages'));
     }
 
     /**
@@ -64,6 +68,7 @@ class BiomeController extends Controller
             'dimension_id'=> $isSubBiome ? 'nullable' : 'required|exists:dimensions,id',
             'description' => 'required|string',
             'image'       => 'nullable|image|max:2048',
+            'existing_image' => 'nullable|string',
         ]);
 
         // Sub-biomes inherit their parent's dimension
@@ -74,6 +79,8 @@ class BiomeController extends Controller
 
         if ($request->hasFile('image')) {
             $validated['image'] = $request->file('image')->store('biomes', 'public');
+        } elseif ($request->filled('existing_image')) {
+            $validated['image'] = $request->existing_image;
         }
 
         $biome = Biome::create($validated);
@@ -85,16 +92,20 @@ class BiomeController extends Controller
         return $redirect->with('success', 'Biome entry deployed successfully.');
     }
 
-    /**
-     * Show the edit form for a biome or sub-biome.
-     */
     public function edit(Biome $biome)
     {
         $dimensions  = Dimension::all();
         // Exclude self from potential parents
         $parentBiomes = Biome::whereNull('parent_id')->where('id', '!=', $biome->id)->orderBy('name')->get();
 
-        return view('biomes.edit', compact('biome', 'dimensions', 'parentBiomes'));
+        // Fetch available images
+        $presetImages = collect(File::glob(public_path('images/biomes/*.*')))
+            ->map(fn($path) => 'images/biomes/' . basename($path));
+        
+        $uploadedImages = collect(Storage::disk('public')->files('biomes'))
+            ->map(fn($path) => 'biomes/' . basename($path));
+
+        return view('biomes.edit', compact('biome', 'dimensions', 'parentBiomes', 'presetImages', 'uploadedImages'));
     }
 
     /**
@@ -110,6 +121,7 @@ class BiomeController extends Controller
             'dimension_id'=> $isSubBiome ? 'nullable' : 'required|exists:dimensions,id',
             'description' => 'required|string',
             'image'       => 'nullable|image|max:2048',
+            'existing_image' => 'nullable|string',
         ]);
 
         if ($isSubBiome) {
@@ -120,10 +132,12 @@ class BiomeController extends Controller
         }
 
         if ($request->hasFile('image')) {
-            if ($biome->image) {
+            if ($biome->image && !str_starts_with($biome->image, 'images/')) {
                 Storage::disk('public')->delete($biome->image);
             }
             $validated['image'] = $request->file('image')->store('biomes', 'public');
+        } elseif ($request->filled('existing_image')) {
+            $validated['image'] = $request->existing_image;
         }
 
         $biome->update($validated);

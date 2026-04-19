@@ -115,34 +115,47 @@
                         @endif
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                         @foreach($biome->subBiomes as $sub)
-                            <a href="{{ route('biomes.show', $sub) }}" class="group glass-card rounded-2xl overflow-hidden hover:-translate-y-1 transition-all duration-300 border border-white/5 hover:border-indigo-500/30">
-                                <div class="h-36 relative overflow-hidden bg-gray-900">
+                            <a href="{{ route('biomes.show', $sub) }}" class="group glass-card rounded-[2rem] overflow-hidden hover:-translate-y-2 transition-all duration-500 border border-white/5 hover:border-indigo-500/30 flex flex-col">
+                                <div class="aspect-video relative overflow-hidden bg-gray-900 border-b border-white/5">
                                     @if($sub->image)
-                                        <img src="{{ asset('storage/' . $sub->image) }}" alt="{{ $sub->name }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+                                        <img src="{{ asset('storage/' . $sub->image) }}" alt="{{ $sub->name }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000">
                                     @else
-                                        <div class="w-full h-full bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center">
-                                            <svg class="w-8 h-8 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945" stroke-width="1.5"></path></svg>
+                                        <div class="w-full h-full bg-gradient-to-br from-indigo-900/20 via-gray-900 to-black flex items-center justify-center relative">
+                                            <div class="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-indigo-500 via-transparent to-transparent"></div>
+                                            <svg class="w-10 h-10 text-indigo-500/30 opacity-50 group-hover:scale-125 group-hover:text-indigo-400 group-hover:opacity-100 transition-all duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                            </svg>
                                         </div>
                                     @endif
-                                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
-                                    <div class="absolute bottom-0 left-0 p-3">
-                                        <h3 class="text-sm font-black text-white leading-tight group-hover:text-indigo-300 transition-colors">{{ $sub->name }}</h3>
-                                    </div>
+                                    
+                                    <div class="absolute inset-0 bg-gradient-to-t from-gray-950 via-gray-950/20 to-transparent group-hover:opacity-70 transition-opacity"></div>
+                                    
+                                    <!-- Edit control (Admin) -->
                                     @if(Auth::check() && Auth::user()->is_admin)
-                                        <div class="absolute top-2 right-2 flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <a href="{{ route('admin.biomes.edit', $sub) }}" onclick="event.stopPropagation(); event.preventDefault(); window.location='{{ route('admin.biomes.edit', $sub) }}';" class="p-1.5 bg-black/60 backdrop-blur-sm rounded-lg border border-white/10 text-indigo-400 hover:text-indigo-300">
-                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                                            </a>
+                                        <div class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
+                                            <object>
+                                                <a href="{{ route('admin.biomes.edit', $sub) }}" class="p-2 bg-black/60 backdrop-blur-md rounded-xl border border-white/10 text-indigo-400 hover:text-white hover:bg-indigo-600 transition-all">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                                </a>
+                                            </object>
                                         </div>
                                     @endif
                                 </div>
-                                <div class="p-4">
-                                    <p class="text-gray-600 text-[10px] italic line-clamp-2">"{{ Str::limit($sub->description, 80) }}"</p>
-                                    <div class="flex items-center justify-between mt-3 pt-3 border-t border-white/5">
-                                        <span class="text-[9px] font-bold uppercase tracking-widest text-gray-600">{{ $sub->mobs->count() }} Creatures</span>
-                                        <span class="text-[9px] font-bold uppercase tracking-widest text-indigo-500">Sub-biome</span>
+
+                                <div class="p-6 flex-1 flex flex-col justify-between">
+                                    <div>
+                                        <h3 class="text-lg font-black text-white mb-2 group-hover:text-indigo-400 transition-colors tracking-tight">{{ $sub->name }}</h3>
+                                        <p class="text-gray-400 text-[11px] leading-relaxed italic line-clamp-3 mb-6">"{{ $sub->description }}"</p>
+                                    </div>
+
+                                    <div class="flex items-center justify-between pt-4 border-t border-white/5">
+                                        <div class="flex items-center space-x-2">
+                                            <div class="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse"></div>
+                                            <span class="text-[9px] font-black uppercase tracking-[0.2em] text-gray-500">{{ $sub->mobs->count() }} Species</span>
+                                        </div>
+                                        <span class="text-[9px] font-black uppercase tracking-[0.2em] text-indigo-500/80 group-hover:text-indigo-400">Variant</span>
                                     </div>
                                 </div>
                             </a>

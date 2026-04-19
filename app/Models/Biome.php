@@ -15,7 +15,7 @@ class Biome extends Model
 
     public function mobs()
     {
-        return $this->hasMany(Mob::class);
+        return $this->belongsToMany(Mob::class)->withTimestamps();
     }
 
     public function parent()

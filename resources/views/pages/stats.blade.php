@@ -84,7 +84,7 @@
                                 </div>
                                 <div class="flex-1">
                                     <div class="text-sm font-black text-white tracking-tight">{{ $mob->name }}</div>
-                                    <div class="text-[10px] text-gray-500 uppercase tracking-widest">{{ $mob->biome->name }} · {{ $mob->category->name }}</div>
+                                    <div class="text-[10px] text-gray-500 uppercase tracking-widest">{{ $mob->biomes->first()->name ?? 'Global' }} · {{ $mob->category->name }}</div>
                                 </div>
                                 <div class="text-right">
                                     <div class="text-xs font-black text-indigo-400 uppercase tracking-tighter">Threat Score</div>

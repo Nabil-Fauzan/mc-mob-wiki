@@ -57,31 +57,43 @@
                                 <x-input-error class="mt-2" :messages="$errors->get('drops')" />
                             </div>
 
-                            <!-- Biome -->
-                            <div>
-                                <x-input-label for="biome_id" :value="__('Natural Habitat')" />
-                                <select id="biome_id" name="biome_id" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
-                                    <option value="">— No specific habitat —</option>
+                            <!-- Biomes -->
+                            <div class="col-span-full">
+                                <x-input-label :value="__('Natural Habitats (Select many)')" />
+                                <div class="mt-2 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4 bg-gray-900/50 rounded-xl border border-white/5 max-h-[400px] overflow-y-auto custom-scrollbar">
                                     @php
-                                        // Group by dimension, show parent biomes first, then sub-biomes indented
                                         $groupedBiomes = $biomes->groupBy('dimension.name');
                                     @endphp
                                     @foreach($groupedBiomes as $dimensionName => $biomesInDim)
-                                        <optgroup label="{{ $dimensionName }}">
+                                        <div class="space-y-3">
+                                            <h4 class="text-[10px] font-black uppercase tracking-widest text-indigo-400 border-b border-indigo-500/20 pb-1 mb-2">{{ $dimensionName }}</h4>
                                             @foreach($biomesInDim->whereNull('parent_id') as $parentBiome)
-                                                <option value="{{ $parentBiome->id }}" {{ old('biome_id') == $parentBiome->id ? 'selected' : '' }}>
-                                                    {{ $parentBiome->name }}
-                                                </option>
-                                                @foreach($biomesInDim->where('parent_id', $parentBiome->id) as $subBiome)
-                                                    <option value="{{ $subBiome->id }}" {{ old('biome_id') == $subBiome->id ? 'selected' : '' }}>
-                                                        &nbsp;&nbsp;&nbsp;↳ {{ $subBiome->name }}
-                                                    </option>
-                                                @endforeach
+                                                <div class="space-y-2">
+                                                    <label class="flex items-center group cursor-pointer">
+                                                        <div class="relative flex items-center">
+                                                            <input type="checkbox" name="biome_ids[]" value="{{ $parentBiome->id }}" 
+                                                                class="w-4 h-4 rounded border-white/10 bg-black/40 text-indigo-600 focus:ring-indigo-500 focus:ring-offset-gray-900 transition-all cursor-pointer"
+                                                                {{ is_array(old('biome_ids')) && in_array($parentBiome->id, old('biome_ids')) ? 'checked' : '' }}>
+                                                        </div>
+                                                        <span class="ml-2 text-xs font-bold text-gray-300 group-hover:text-white transition-colors">{{ $parentBiome->name }}</span>
+                                                    </label>
+                                                    
+                                                    @foreach($biomesInDim->where('parent_id', $parentBiome->id) as $subBiome)
+                                                        <label class="flex items-center group cursor-pointer ml-4">
+                                                            <div class="relative flex items-center">
+                                                                <input type="checkbox" name="biome_ids[]" value="{{ $subBiome->id }}" 
+                                                                    class="w-3.5 h-3.5 rounded border-white/10 bg-black/40 text-indigo-500 focus:ring-indigo-500 focus:ring-offset-gray-900 transition-all cursor-pointer"
+                                                                    {{ is_array(old('biome_ids')) && in_array($subBiome->id, old('biome_ids')) ? 'checked' : '' }}>
+                                                            </div>
+                                                            <span class="ml-2 text-[11px] font-medium text-gray-400 group-hover:text-indigo-300 transition-colors">↳ {{ $subBiome->name }}</span>
+                                                        </label>
+                                                    @endforeach
+                                                </div>
                                             @endforeach
-                                        </optgroup>
+                                        </div>
                                     @endforeach
-                                </select>
-                                <x-input-error class="mt-2" :messages="$errors->get('biome_id')" />
+                                </div>
+                                <x-input-error class="mt-2" :messages="$errors->get('biome_ids')" />
                             </div>
                         </div>
 
@@ -90,6 +102,14 @@
                             <x-input-label for="description" :value="__('Behavior / Description')" />
                             <textarea id="description" name="description" rows="4" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" required>{{ old('description') }}</textarea>
                             <x-input-error class="mt-2" :messages="$errors->get('description')" />
+                        </div>
+
+                        <!-- Spawning Conditions -->
+                        <div>
+                            <x-input-label for="spawning_conditions" :value="__('Special Spawning Conditions (Optional)')" />
+                            <textarea id="spawning_conditions" name="spawning_conditions" rows="2" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" placeholder="e.g. Spawned via Ender Pearl, Village Mechanics, etc.">{{ old('spawning_conditions') }}</textarea>
+                            <p class="mt-1 text-xs text-gray-500 italic">Use this for mobs that don't spawn naturally in biomes.</p>
+                            <x-input-error class="mt-2" :messages="$errors->get('spawning_conditions')" />
                         </div>
 
                         <!-- Image -->
