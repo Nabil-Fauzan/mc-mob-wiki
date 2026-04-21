@@ -5,8 +5,8 @@
         <style>
             .hero-swiper {
                 width: 100%;
-                height: 80vh;
-                border-radius: 2rem;
+                height: min(80vh, 720px);
+                border-radius: 1.5rem;
                 overflow: hidden;
             }
             .swiper-slide {
@@ -15,14 +15,25 @@
             .swiper-slide img {
                 width: 100%;
                 height: 100%;
-                object-cover: cover;
+                object-fit: cover;
             }
             .slide-content {
                 position: absolute;
-                bottom: 10%;
-                left: 5%;
+                bottom: 2rem;
+                left: 1rem;
+                right: 1rem;
                 z-index: 10;
                 max-width: 600px;
+            }
+            @media (min-width: 640px) {
+                .hero-swiper {
+                    border-radius: 2rem;
+                }
+                .slide-content {
+                    bottom: 10%;
+                    left: 5%;
+                    right: auto;
+                }
             }
         </style>
     </x-slot>
@@ -36,13 +47,13 @@
                     <div class="swiper-slide group">
                         <img src="{{ asset('images/hero1.png') }}" alt="Explore Minecraft" class="brightness-50 group-hover:scale-105 transition-transform duration-[10s] ease-linear">
                         <div class="slide-content fade-in-up">
-                            <span class="inline-block px-4 py-1.5 bg-green-500/20 text-green-400 rounded-full text-xs font-bold uppercase tracking-widest mb-4 backdrop-blur-md border border-green-500/30">New Content</span>
-                            <h1 class="text-5xl md:text-7xl font-black text-white mb-6 leading-tight">Master the <span class="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-500">Overworld</span></h1>
-                            <p class="text-xl text-gray-300 mb-8 leading-relaxed">Discover every creature, from the friendliest farm animals to the most dangerous night-stalkers.</p>
-                            <div class="flex space-x-4">
-                                <a href="{{ route('mobs.index') }}" class="btn-primary-mc">Explore Wiki</a>
+                            <span class="inline-block px-3 py-1.5 bg-green-500/20 text-green-400 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-widest mb-3 sm:mb-4 backdrop-blur-md border border-green-500/30">New Content</span>
+                            <h1 class="text-3xl sm:text-5xl md:text-7xl font-black text-white mb-4 sm:mb-6 leading-tight">Master the <span class="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-500">Overworld</span></h1>
+                            <p class="text-sm sm:text-lg md:text-xl text-gray-300 mb-6 sm:mb-8 leading-relaxed">Discover every creature, from the friendliest farm animals to the most dangerous night-stalkers.</p>
+                            <div class="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                                <a href="{{ route('mobs.index') }}" class="btn-primary-mc w-full sm:w-auto">Explore Wiki</a>
                                 @guest
-                                    <a href="{{ route('register') }}" class="px-8 py-3 bg-white/10 backdrop-blur-md text-white font-bold rounded-lg border border-white/20 hover:bg-white/20 transition-all">Join Contributors</a>
+                                    <a href="{{ route('register') }}" class="w-full sm:w-auto px-6 sm:px-8 py-3 bg-white/10 backdrop-blur-md text-white font-bold rounded-lg border border-white/20 hover:bg-white/20 transition-all text-center">Join Contributors</a>
                                 @endguest
                             </div>
                         </div>
@@ -52,10 +63,10 @@
                     <div class="swiper-slide group">
                         <img src="{{ asset('images/hero2.png') }}" alt="Face the Darkness" class="brightness-50 group-hover:scale-105 transition-transform duration-[10s] ease-linear">
                         <div class="slide-content">
-                            <span class="inline-block px-4 py-1.5 bg-purple-500/20 text-purple-400 rounded-full text-xs font-bold uppercase tracking-widest mb-4 backdrop-blur-md border border-purple-500/30">Dangerous Mobs</span>
-                            <h1 class="text-5xl md:text-7xl font-black text-white mb-6 leading-tight">Venture into <span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-brand-500">The End</span></h1>
-                            <p class="text-xl text-gray-300 mb-8 leading-relaxed">Learn the secrets of the Endermen and prepare your ultimate equipment for the final boss.</p>
-                            <a href="{{ route('mobs.index', ['category' => '1']) }}" class="btn-primary-mc">View Hostile Mobs</a>
+                            <span class="inline-block px-3 py-1.5 bg-purple-500/20 text-purple-400 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-widest mb-3 sm:mb-4 backdrop-blur-md border border-purple-500/30">Dangerous Mobs</span>
+                            <h1 class="text-3xl sm:text-5xl md:text-7xl font-black text-white mb-4 sm:mb-6 leading-tight">Venture into <span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-brand-500">The End</span></h1>
+                            <p class="text-sm sm:text-lg md:text-xl text-gray-300 mb-6 sm:mb-8 leading-relaxed">Learn the secrets of the Endermen and prepare your ultimate equipment for the final boss.</p>
+                            <a href="{{ route('mobs.index', ['category' => '1']) }}" class="btn-primary-mc w-full sm:w-auto">View Hostile Mobs</a>
                         </div>
                     </div>
 
@@ -63,17 +74,17 @@
                     <div class="swiper-slide group">
                         <img src="{{ asset('images/hero3.png') }}" alt="Cozy Adventures" class="brightness-50 group-hover:scale-105 transition-transform duration-[10s] ease-linear">
                         <div class="slide-content">
-                            <span class="inline-block px-4 py-1.5 bg-orange-500/20 text-orange-400 rounded-full text-xs font-bold uppercase tracking-widest mb-4 backdrop-blur-md border border-orange-500/30">Peaceful Life</span>
-                            <h1 class="text-5xl md:text-7xl font-black text-white mb-6 leading-tight">Cozy <span class="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-yellow-500">Villages</span></h1>
-                            <p class="text-xl text-gray-300 mb-8 leading-relaxed">Meet the local traders and find the best biomes to build your dream homestead.</p>
-                            <a href="{{ route('mobs.index', ['category' => '2']) }}" class="btn-primary-mc">View Passive Mobs</a>
+                            <span class="inline-block px-3 py-1.5 bg-orange-500/20 text-orange-400 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-widest mb-3 sm:mb-4 backdrop-blur-md border border-orange-500/30">Peaceful Life</span>
+                            <h1 class="text-3xl sm:text-5xl md:text-7xl font-black text-white mb-4 sm:mb-6 leading-tight">Cozy <span class="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-yellow-500">Villages</span></h1>
+                            <p class="text-sm sm:text-lg md:text-xl text-gray-300 mb-6 sm:mb-8 leading-relaxed">Meet the local traders and find the best biomes to build your dream homestead.</p>
+                            <a href="{{ route('mobs.index', ['category' => '2']) }}" class="btn-primary-mc w-full sm:w-auto">View Passive Mobs</a>
                         </div>
                     </div>
                 </div>
                 <!-- Add Pagination/Navigation -->
                 <div class="swiper-pagination"></div>
-                <div class="swiper-button-next text-white/50 hover:text-white transition-colors duration-300 mr-4"></div>
-                <div class="swiper-button-prev text-white/50 hover:text-white transition-colors duration-300 ml-4"></div>
+                <div class="swiper-button-next !hidden sm:!flex text-white/50 hover:text-white transition-colors duration-300 mr-4"></div>
+                <div class="swiper-button-prev !hidden sm:!flex text-white/50 hover:text-white transition-colors duration-300 ml-4"></div>
             </div>
         </div>
 
@@ -132,23 +143,23 @@
         </div>
 
         <!-- Wiki Stats -->
-        <div class="max-w-4xl mx-auto glass-card rounded-[3rem] p-12 text-center mb-24 border-brand-500/20">
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+        <div class="max-w-4xl mx-auto glass-card rounded-[2rem] sm:rounded-[3rem] p-6 sm:p-12 text-center mb-24 border-brand-500/20">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
                 <div>
-                    <div class="text-4xl font-black text-white mb-2 underline decoration-brand-500 decoration-4">{{ $stats['mobs'] }}</div>
-                    <div class="text-gray-400 text-sm uppercase tracking-tighter">Total Mobs</div>
+                    <div class="text-3xl sm:text-4xl font-black text-white mb-2 underline decoration-brand-500 decoration-4">{{ $stats['mobs'] }}</div>
+                    <div class="text-gray-400 text-xs sm:text-sm uppercase tracking-tighter">Total Mobs</div>
                 </div>
                 <div>
-                    <div class="text-4xl font-black text-white mb-2 underline decoration-green-500 decoration-4">{{ $stats['biomes'] }}</div>
-                    <div class="text-gray-400 text-sm uppercase tracking-tighter">Biomes</div>
+                    <div class="text-3xl sm:text-4xl font-black text-white mb-2 underline decoration-green-500 decoration-4">{{ $stats['biomes'] }}</div>
+                    <div class="text-gray-400 text-xs sm:text-sm uppercase tracking-tighter">Biomes</div>
                 </div>
                 <div>
-                    <div class="text-4xl font-black text-white mb-2 underline decoration-purple-500 decoration-4">{{ $stats['dimensions'] }}</div>
-                    <div class="text-gray-400 text-sm uppercase tracking-tighter">Dimensions</div>
+                    <div class="text-3xl sm:text-4xl font-black text-white mb-2 underline decoration-purple-500 decoration-4">{{ $stats['dimensions'] }}</div>
+                    <div class="text-gray-400 text-xs sm:text-sm uppercase tracking-tighter">Dimensions</div>
                 </div>
                 <div>
-                    <div class="text-4xl font-black text-white mb-2 underline decoration-yellow-500 decoration-4">∞</div>
-                    <div class="text-gray-400 text-sm uppercase tracking-tighter">Possibilities</div>
+                    <div class="text-3xl sm:text-4xl font-black text-white mb-2 underline decoration-yellow-500 decoration-4">Infinity</div>
+                    <div class="text-gray-400 text-xs sm:text-sm uppercase tracking-tighter">Possibilities</div>
                 </div>
             </div>
         </div>
@@ -175,6 +186,17 @@
                 effect: 'fade',
                 fadeEffect: {
                     crossFade: true
+                },
+                breakpoints: {
+                    0: {
+                        navigation: false,
+                    },
+                    640: {
+                        navigation: {
+                            nextEl: '.swiper-button-next',
+                            prevEl: '.swiper-button-prev',
+                        },
+                    },
                 },
             });
         });

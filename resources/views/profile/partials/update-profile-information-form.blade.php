@@ -72,6 +72,50 @@
             @endif
         </div>
 
+        <div class="p-6 bg-gray-900/50 border border-brand-500/10 rounded-2xl space-y-5">
+            <div>
+                <h3 class="text-md font-bold text-brand-400 flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    Public Researcher Identity
+                </h3>
+                <p class="mt-2 text-[11px] text-gray-500 uppercase tracking-widest">Control how your public researcher page is shared.</p>
+            </div>
+
+            <div>
+                <x-input-label for="public_slug" :value="__('Public Profile Slug')" />
+                <x-text-input id="public_slug" name="public_slug" type="text" class="mt-2 block w-full bg-gray-950 border-gray-800 text-gray-300 focus:border-brand-500 focus:ring-brand-500 rounded-xl" :value="old('public_slug', $user->public_slug)" autocomplete="off" placeholder="e.g. mob-hunter-arya" />
+                <p class="mt-2 text-[10px] text-gray-500 font-bold uppercase tracking-widest">Use lowercase letters, numbers, and hyphens only.</p>
+                <x-input-error class="mt-2" :messages="$errors->get('public_slug')" />
+            </div>
+
+            <label class="flex items-start justify-between gap-4 p-4 rounded-2xl border border-white/5 bg-black/20">
+                <div>
+                    <span class="block text-sm font-bold text-white">Public Profile Visibility</span>
+                    <span class="mt-1 block text-xs text-gray-500">Allow other researchers to open and share your profile page.</span>
+                </div>
+                <input type="hidden" name="profile_is_public" value="0">
+                <input id="profile_is_public" name="profile_is_public" type="checkbox" value="1" @checked(old('profile_is_public', $user->profile_is_public)) class="mt-1 rounded border-white/10 bg-gray-950 text-brand-500 focus:ring-brand-500" />
+            </label>
+
+            @if($user->public_slug)
+                <div class="p-4 rounded-2xl border border-white/5 bg-black/20">
+                    <p class="text-[10px] text-gray-500 font-bold uppercase tracking-[0.2em] mb-2">Public Link</p>
+                    <div class="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+                        <a href="{{ route('researchers.show', $user->public_slug) }}" target="_blank" class="text-sm text-brand-400 hover:text-brand-300 break-all">
+                            {{ route('researchers.show', $user->public_slug) }}
+                        </a>
+                        <button
+                            type="button"
+                            onclick="navigator.clipboard.writeText('{{ route('researchers.show', $user->public_slug) }}'); window.notify('Public profile link copied', 'success');"
+                            class="px-4 py-2 bg-white/5 hover:bg-white/10 text-white text-xs font-black uppercase tracking-widest rounded-xl border border-white/10 transition-all"
+                        >
+                            Copy Link
+                        </button>
+                    </div>
+                </div>
+            @endif
+        </div>
+
         <div class="flex items-center gap-4">
             <x-primary-button>{{ __('Save') }}</x-primary-button>
 

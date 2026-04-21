@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use App\Http\Requests\ProfileUpdateRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -29,6 +30,11 @@ class ProfileController extends Controller
     {
         $user = $request->user();
         $user->fill($request->validated());
+        $user->profile_is_public = $request->boolean('profile_is_public');
+
+        if (blank($user->public_slug)) {
+            $user->public_slug = User::generateUniqueSlug($user->name, $user->id);
+        }
 
         if ($request->hasFile('avatar')) {
             if ($user->avatar) {
@@ -39,6 +45,10 @@ class ProfileController extends Controller
 
         if ($user->isDirty('email')) {
             $user->email_verified_at = null;
+        }
+
+        if ($user->isDirty('name') && blank($request->input('public_slug'))) {
+            $user->public_slug = User::generateUniqueSlug($user->name, $user->id);
         }
 
         $user->save();

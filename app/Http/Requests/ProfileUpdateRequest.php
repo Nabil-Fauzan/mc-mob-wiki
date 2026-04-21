@@ -28,6 +28,14 @@ class ProfileUpdateRequest extends FormRequest
             ],
             'avatar' => ['nullable', 'image', 'max:2048'],
             'minecraft_username' => ['nullable', 'string', 'max:50'],
+            'public_slug' => [
+                'nullable',
+                'string',
+                'max:60',
+                'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/',
+                Rule::unique(User::class, 'public_slug')->ignore($this->user()->id),
+            ],
+            'profile_is_public' => ['nullable', 'boolean'],
         ];
     }
 }

@@ -160,7 +160,7 @@
                 console.error('Error toggling favorite:', error);
             }
         }
-    }" class="py-12 relative overflow-hidden">
+    }" class="py-8 sm:py-12 relative overflow-hidden">
         <!-- Floating Comparison Bar (Remains same) -->
         <div x-show="compareList.length > 0" 
              x-transition:enter="transition ease-out duration-500"
@@ -169,8 +169,8 @@
              x-transition:leave="transition ease-in duration-300"
              x-transition:leave-start="translate-y-0 opacity-100"
              x-transition:leave-end="translate-y-full opacity-0"
-             class="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 w-full max-w-2xl px-4">
-            <div class="glass-card rounded-full p-3 pl-6 flex items-center justify-between border-brand-500/30 shadow-[0_0_50px_rgba(14,165,233,0.3)]">
+             class="fixed bottom-20 md:bottom-8 left-1/2 -translate-x-1/2 z-50 w-full max-w-2xl px-3 sm:px-4">
+            <div class="glass-card rounded-[1.5rem] sm:rounded-full p-3 sm:pl-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-brand-500/30 shadow-[0_0_50px_rgba(14,165,233,0.3)]">
                 <div class="flex items-center -space-x-3 overflow-hidden">
                     <template x-for="mob in compareList" :key="mob.id">
                         <div class="w-10 h-10 rounded-full border-2 border-[#020617] overflow-hidden bg-gray-950 group relative">
@@ -185,7 +185,7 @@
                         <span class="text-[10px] text-gray-400">Comparing Stats</span>
                     </div>
                 </div>
-                <div class="flex items-center space-x-3">
+                <div class="flex items-center w-full sm:w-auto justify-between sm:justify-start space-x-3">
                     <button @click="compareList = []; localStorage.removeItem('mob_compare_list')" class="text-xs text-gray-500 hover:text-white transition-colors uppercase font-bold tracking-tighter">Clear All</button>
                     <a :href="comparisonUrl" class="px-6 py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-sm font-black rounded-full transition-all shadow-lg shadow-brand-600/40">
                         Compare Now
@@ -196,9 +196,9 @@
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <!-- Search and Filter Module -->
-            <div class="glass-card rounded-[2.5rem] mb-12 overflow-hidden border-brand-500/10 shadow-2xl">
-                <div class="p-8 lg:p-10">
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div class="glass-card rounded-[1.75rem] sm:rounded-[2.5rem] mb-10 sm:mb-12 overflow-hidden border-brand-500/10 shadow-2xl">
+                <div class="p-4 sm:p-8 lg:p-10">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-5 sm:gap-8">
                         <!-- Primary Search -->
                         <div class="md:col-span-2">
                             <x-input-label for="search" :value="__('Global Entity Search')" class="text-gray-500 mb-2 font-black uppercase tracking-widest text-[9px]" />
@@ -257,14 +257,14 @@
                     </div>
 
                     <!-- Advanced Filter Trigger -->
-                    <div class="mt-8 flex flex-col md:flex-row items-center justify-between gap-4 border-t border-white/5 pt-8">
+                    <div class="mt-6 sm:mt-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-t border-white/5 pt-6 sm:pt-8">
                         <button @click="showAdvanced = !showAdvanced" 
                             class="flex items-center space-x-2 text-xs font-black uppercase tracking-widest text-brand-400 hover:text-brand-300 transition-colors">
                             <span x-text="showAdvanced ? 'Hide Advanced Filters' : 'Show Advanced Filters'"></span>
                             <svg class="w-4 h-4 transition-transform duration-300" :class="showAdvanced ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"></path></svg>
                         </button>
                         
-                        <div class="flex items-center space-x-4">
+                        <div class="flex items-center flex-wrap gap-3 sm:gap-4">
                             <button @click="resetFilters()" 
                                 x-show="search || category || biome || loot_search || is_melee || is_ranged || sort !== 'newest'"
                                 x-transition
@@ -280,7 +280,7 @@
                     <!-- Advanced Filter Panel -->
                     <div x-show="showAdvanced" 
                         x-collapse
-                        class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-8 p-8 bg-black/20 rounded-[1.5rem] border border-white/5">
+                        class="mt-6 sm:mt-8 grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-8 p-4 sm:p-8 bg-black/20 rounded-[1.25rem] sm:rounded-[1.5rem] border border-white/5">
                         
                         <!-- Biome Filter (Grouped) -->
                         <div>
@@ -325,7 +325,7 @@
                         <!-- Combat Behavior Toggles -->
                         <div>
                             <x-input-label :value="__('Combat Matrix Proximity')" class="text-gray-500 mb-2 font-black uppercase tracking-widest text-[9px]" />
-                            <div class="flex items-center space-x-6 mt-3">
+                            <div class="flex flex-wrap items-center gap-4 sm:gap-6 mt-3">
                                 <label class="flex items-center cursor-pointer group">
                                     <div class="relative">
                                         <input type="checkbox" x-model="is_melee" @change="fetchResults()" class="sr-only">

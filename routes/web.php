@@ -5,6 +5,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\BiomeController;
 use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\CommentVoteController;
 use App\Http\Controllers\AnalyticsController;
 use Illuminate\Support\Facades\Route;
 
@@ -48,6 +49,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/mobs/{mob}/comments', [CommentController::class, 'store'])->name('comments.store');
     Route::patch('/comments/{comment}', [CommentController::class, 'update'])->name('comments.update');
     Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy');
+    Route::post('/comments/{comment}/vote', [CommentVoteController::class, 'toggle'])->name('comments.vote');
 });
 
 // Comparison Tool
@@ -70,7 +72,7 @@ Route::get('/mobs/{mob}', [MobController::class, 'show'])->name('mobs.show');
 Route::get('/api/search', [MobController::class, 'apiSearch'])->name('api.mobs.search');
 
 // Public Researcher Profiles
-Route::get('/researchers/{user}', [\App\Http\Controllers\ResearcherController::class, 'show'])->name('researchers.show');
+Route::get('/researchers/{user:public_slug}', [\App\Http\Controllers\ResearcherController::class, 'show'])->name('researchers.show');
 
 // Admin Security Gateway
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {

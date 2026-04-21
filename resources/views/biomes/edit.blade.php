@@ -158,7 +158,7 @@
                                                         <button type="button" @click="selectImage(path, 'preset')" class="group relative aspect-video rounded-lg overflow-hidden border border-white/5 hover:border-brand-500/50 transition-all">
                                                             <img :src="'{{ asset('') }}' + path" class="w-full h-full object-cover">
                                                             <div class="absolute inset-0 bg-black/40 group-hover:bg-black/10 transition-colors"></div>
-                                                            <p class="absolute bottom-1 left-2 right-2 text-[8px] text-white truncate font-bold" x-text="path.split('/').pop()"></p>
+                                                            <p class="absolute bottom-1 left-2 right-2 text-[8px] text-white truncate font-bold" x-text="typeof path === 'string' ? path.split('/').pop() : ''"></p>
                                                         </button>
                                                     </template>
                                                 </div>
@@ -174,7 +174,7 @@
                                                         <button type="button" @click="selectImage(path, 'upload')" class="group relative aspect-video rounded-lg overflow-hidden border border-white/5 hover:border-indigo-500/50 transition-all">
                                                             <img :src="'{{ asset('storage') }}' + '/' + path" class="w-full h-full object-cover">
                                                             <div class="absolute inset-0 bg-black/40 group-hover:bg-black/10 transition-colors"></div>
-                                                            <p class="absolute bottom-1 left-2 right-2 text-[8px] text-white truncate font-bold" x-text="path.split('/').pop()"></p>
+                                                            <p class="absolute bottom-1 left-2 right-2 text-[8px] text-white truncate font-bold" x-text="typeof path === 'string' ? path.split('/').pop() : ''"></p>
                                                         </button>
                                                     </template>
                                                 </div>

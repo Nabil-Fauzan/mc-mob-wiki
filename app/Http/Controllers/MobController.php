@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Mob;
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
 class MobController extends Controller
@@ -165,7 +166,22 @@ class MobController extends Controller
 
     public function show(Mob $mob)
     {
-        $mob->load(['category', 'biomes.dimension', 'loot']);
+        $mob->load([
+            'category',
+            'biomes.dimension',
+            'loot',
+            'comments' => function ($query) {
+                $query->with(['user', 'votes'])
+                    ->withCount('votes')
+                    ->latest();
+            },
+        ]);
+
+        if (Auth::check()) {
+            $mob->comments->each(function ($comment) {
+                $comment->is_voted = $comment->votes->contains('user_id', Auth::id());
+            });
+        }
         
         $biomeIds = $mob->biomes->pluck('id');
         $relatedMobs = Mob::whereHas('biomes', function($q) use ($biomeIds) {

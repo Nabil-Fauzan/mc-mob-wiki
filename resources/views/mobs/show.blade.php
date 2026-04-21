@@ -1,10 +1,10 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div class="flex flex-col">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div class="flex flex-col w-full min-w-0">
                 <!-- Breadcrumbs -->
-                <nav class="flex mb-4" aria-label="Breadcrumb">
-                    <ol class="inline-flex items-center space-x-1 md:space-x-3 text-[10px] uppercase font-black tracking-widest text-gray-500">
+                <nav class="flex mb-3 sm:mb-4 overflow-x-auto" aria-label="Breadcrumb">
+                    <ol class="inline-flex items-center space-x-1 md:space-x-3 text-[10px] uppercase font-black tracking-widest text-gray-500 whitespace-nowrap pr-4">
                         <li class="inline-flex items-center">
                             <a href="{{ route('mobs.index') }}" class="hover:text-brand-400">Wiki</a>
                         </li>
@@ -24,11 +24,11 @@
                         </li>
                     </ol>
                 </nav>
-                <h2 class="text-4xl font-black text-white tracking-tighter">
+                <h2 class="text-2xl sm:text-4xl font-black text-white tracking-tighter break-words">
                     {{ $mob->name }} <span class="text-brand-500 animate-pulse">_</span>
                 </h2>
             </div>
-            <div class="flex space-x-3" x-data="{ favorited: {{ $mob->favoritedBy()->where('user_id', auth()->id())->exists() ? 'true' : 'false' }}, count: {{ $mob->favoritedBy()->count() }} }">
+            <div class="flex flex-col sm:flex-row w-full md:w-auto gap-3" x-data="{ favorited: {{ $mob->favoritedBy()->where('user_id', auth()->id())->exists() ? 'true' : 'false' }}, count: {{ $mob->favoritedBy()->count() }} }">
                 <button @click="
                     fetch('{{ route('mobs.favorite', $mob) }}', {
                         method: 'POST',
@@ -43,26 +43,26 @@
                         count = data.count;
                         window.notify(favorited ? 'Added to favorites' : 'Removed from favorites', favorited ? 'success' : 'info');
                     })"
-                    class="flex items-center space-x-2 px-4 py-2 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-all group">
+                    class="flex items-center justify-center space-x-2 px-4 py-2 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-all group w-full sm:w-auto">
                     <svg class="w-5 h-5 transition-transform group-hover:scale-125" :class="favorited ? 'text-red-500 fill-current' : 'text-gray-400'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
                     </svg>
                     <span class="text-xs font-black text-white" x-text="count"></span>
                 </button>
                 @auth
-                    <a href="{{ route('mobs.edit', $mob) }}" class="btn-primary-mc flex items-center">
+                    <a href="{{ route('mobs.edit', $mob) }}" class="btn-primary-mc flex items-center justify-center w-full sm:w-auto">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                         Edit Registry
                     </a>
                 @endauth
-                <a href="{{ route('mobs.index') }}" class="px-6 py-2.5 bg-white/5 hover:bg-white/10 text-white font-bold rounded-lg border border-white/10 transition-all">
+                <a href="{{ route('mobs.index') }}" class="px-6 py-2.5 bg-white/5 hover:bg-white/10 text-white font-bold rounded-lg border border-white/10 transition-all text-center w-full sm:w-auto">
                     Back to Wiki
                 </a>
             </div>
         </div>
     </x-slot>
 
-    <div class="py-12" x-init="
+    <div class="py-8 sm:py-12" x-init="
         let recent = JSON.parse(localStorage.getItem('recent_research') || '[]');
         recent = recent.filter(m => m.id !== {{ $mob->id }});
         recent.unshift({
@@ -73,15 +73,15 @@
         localStorage.setItem('recent_research', JSON.stringify(recent.slice(0, 6)));
     ">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="glass-card rounded-[3rem] overflow-hidden fade-in-up">
-                <div class="p-8 md:p-12">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+            <div class="glass-card rounded-[1.75rem] sm:rounded-[3rem] overflow-hidden fade-in-up">
+                <div class="p-4 sm:p-8 md:p-12">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-12">
                         <!-- Left Column: Visuals & Quick Stats -->
-                        <div class="space-y-8">
-                            <div class="aspect-square bg-gray-950 rounded-[2rem] overflow-hidden border border-white/10 relative group">
+                        <div class="space-y-6 sm:space-y-8">
+                            <div class="aspect-square bg-gray-950 rounded-[1.5rem] sm:rounded-[2rem] overflow-hidden border border-white/10 relative group">
                                 <div class="absolute inset-0 bg-gradient-to-br from-brand-500/5 to-transparent"></div>
                                 @if($mob->image)
-                                    <img src="{{ asset('storage/' . $mob->image) }}" alt="{{ $mob->name }}" class="w-full h-full object-contain p-8 group-hover:scale-110 transition-transform duration-700">
+                                    <img src="{{ asset('storage/' . $mob->image) }}" alt="{{ $mob->name }}" class="w-full h-full object-contain p-4 sm:p-8 group-hover:scale-110 transition-transform duration-700">
                                 @else
                                     <div class="w-full h-full flex items-center justify-center text-gray-800">
                                         <svg class="w-32 h-32" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -94,7 +94,7 @@
                                 </div>
                             </div>
                             
-                            <div class="bg-white/5 p-8 rounded-[2rem] border border-white/10">
+                            <div class="bg-white/5 p-4 sm:p-8 rounded-[1.5rem] sm:rounded-[2rem] border border-white/10">
                                 <h4 class="text-xs font-black text-gray-500 uppercase tracking-[0.2em] mb-6 flex items-center">
                                     <span class="w-8 h-px bg-gray-800 mr-3"></span>
                                     Combat & Health
@@ -179,12 +179,12 @@
                                     @endif
 
                                     <!-- Interactive Radar Chart -->
-                                    <div class="col-span-full glass-card p-8 rounded-[2.5rem] border-brand-500/10 mt-4 overflow-hidden relative">
+                                    <div class="col-span-full glass-card p-4 sm:p-8 rounded-[1.5rem] sm:rounded-[2.5rem] border-brand-500/10 mt-4 overflow-hidden relative">
                                         <h5 class="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-6">Threat Intelligence Radar</h5>
-                                        <div class="aspect-square max-w-[300px] mx-auto opacity-80 hover:opacity-100 transition-opacity">
+                                        <div class="aspect-square max-w-[220px] sm:max-w-[300px] mx-auto opacity-80 hover:opacity-100 transition-opacity">
                                             <canvas id="threatRadar"></canvas>
                                         </div>
-                                        <div class="absolute top-8 right-8 text-[8px] font-black text-brand-500 uppercase tracking-widest leading-none">
+                                        <div class="absolute top-4 right-4 sm:top-8 sm:right-8 text-[8px] font-black text-brand-500 uppercase tracking-widest leading-none hidden sm:block">
                                             Analytical Node [0.4]<br>
                                             <span class="text-gray-700 italic">Simulated Data</span>
                                         </div>
@@ -248,20 +248,20 @@
                         <!-- Right Column: Description & Metadata -->
                         <div class="flex flex-col h-full">
                             <div class="mb-8">
-                                <h1 class="text-6xl font-black text-white mb-8 tracking-tighter">{{ $mob->name }}</h1>
+                                <h1 class="text-3xl sm:text-5xl lg:text-6xl font-black text-white mb-6 sm:mb-8 tracking-tighter break-words">{{ $mob->name }}</h1>
                                 
                                 <div class="space-y-6">
                                     <h4 class="text-xs font-black text-brand-500 uppercase tracking-[0.2em] flex items-center">
                                         Description
                                         <span class="flex-1 h-px bg-white/10 ml-4"></span>
                                     </h4>
-                                    <div class="text-xl text-gray-400 leading-relaxed font-medium">
+                                    <div class="text-base sm:text-lg lg:text-xl text-gray-400 leading-relaxed font-medium">
                                         {!! nl2br(e($mob->description)) !!}
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="mt-auto pt-8 border-t border-white/10 grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            <div class="mt-auto pt-6 sm:pt-8 border-t border-white/10 grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                                 <div class="glass-card p-6 rounded-2xl">
                                     <div class="flex items-center space-x-3 mb-3">
                                         <div class="w-8 h-8 bg-green-500/10 rounded-lg flex items-center justify-center">
@@ -291,7 +291,7 @@
                                     @endif
                                 </div>
                                 <div class="glass-card p-6 rounded-2xl border-yellow-500/10">
-                                    <div class="flex items-center justify-between mb-4">
+                                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
                                         <div class="flex items-center space-x-3">
                                             <div class="w-8 h-8 bg-yellow-500/20 rounded-lg flex items-center justify-center">
                                                 <svg class="w-4 h-4 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
@@ -299,7 +299,7 @@
                                             <span class="text-xs font-black text-gray-400 uppercase tracking-widest">Loot Intelligence</span>
                                         </div>
                                         @if($mob->xp_reward)
-                                            <div class="flex items-center bg-green-500/10 px-2 py-1 rounded-md border border-green-500/20">
+                                            <div class="inline-flex items-center bg-green-500/10 px-2 py-1 rounded-md border border-green-500/20 w-fit">
                                                 <span class="text-[9px] font-black text-green-500 uppercase mr-1">XP</span>
                                                 <span class="text-xs font-mono font-bold text-white">{{ $mob->xp_reward }}</span>
                                             </div>
@@ -308,12 +308,12 @@
 
                                     <div class="space-y-2">
                                         @forelse($mob->loot as $item)
-                                            <div class="flex items-center justify-between p-2 rounded-xl bg-white/5 border border-white/5 group hover:border-yellow-500/30 transition-all">
-                                                <div class="flex items-center space-x-3">
+                                            <div class="flex items-start justify-between gap-3 p-2 rounded-xl bg-white/5 border border-white/5 group hover:border-yellow-500/30 transition-all">
+                                                <div class="flex items-start space-x-3 min-w-0">
                                                     <span class="text-lg">{{ $item->icon ?: '📦' }}</span>
-                                                    <div>
+                                                    <div class="min-w-0">
                                                         <p class="text-xs font-bold text-white leading-none mb-1">{{ $item->item_name }}</p>
-                                                        <div class="flex items-center space-x-2">
+                                                        <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
                                                             <span class="text-[8px] font-black uppercase tracking-tighter
                                                                 {{ $item->rarity == 'Common' ? 'text-gray-400' : '' }}
                                                                 {{ $item->rarity == 'Uncommon' ? 'text-green-400' : '' }}
@@ -325,7 +325,7 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <span class="text-[10px] font-mono font-black text-yellow-500 bg-yellow-500/10 px-1.5 py-0.5 rounded">x{{ $item->quantity }}</span>
+                                                <span class="shrink-0 text-[10px] font-mono font-black text-yellow-500 bg-yellow-500/10 px-1.5 py-0.5 rounded">x{{ $item->quantity }}</span>
                                             </div>
                                         @empty
                                             @if($mob->drops)
@@ -340,7 +340,7 @@
 
                                     <!-- Loot Probability Calculator -->
                                     <div class="mt-6 pt-6 border-t border-white/5" x-data="{ kills: 10 }">
-                                        <div class="flex justify-between items-center mb-4">
+                                        <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3 mb-4">
                                             <span class="text-[9px] font-black text-yellow-600 uppercase tracking-widest">Farming Intelligence</span>
                                             <div class="flex items-center space-x-2">
                                                 <span class="text-[10px] text-gray-600 font-bold">Kills:</span>
@@ -349,7 +349,7 @@
                                         </div>
                                         <div class="space-y-2">
                                             @foreach($mob->loot->take(3) as $item)
-                                                <div class="flex justify-between text-[10px]">
+                                                <div class="flex justify-between items-start gap-3 text-[10px]">
                                                     <span class="text-gray-500">{{ $item->item_name }}</span>
                                                     @php
                                                         preg_match('/\d+/', $item->chance, $cM);
@@ -364,7 +364,7 @@
                             </div>
 
                             <!-- Professional Alert -->
-                            <div class="mt-10 p-6 bg-brand-500/5 border border-brand-500/20 rounded-3xl flex items-start space-x-4">
+                            <div class="mt-8 sm:mt-10 p-4 sm:p-6 bg-brand-500/5 border border-brand-500/20 rounded-[1.5rem] sm:rounded-3xl flex items-start space-x-4">
                                 <div class="flex-shrink-0 w-10 h-10 bg-brand-500/10 rounded-xl flex items-center justify-center text-brand-500">
                                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                                 </div>
@@ -379,8 +379,8 @@
             </div>
 
             <!-- Community Intelligence (Comments) -->
-            <div class="mt-12 max-w-4xl mx-auto">
-                <h3 class="text-xl font-black text-white mb-8 flex items-center">
+            <div class="mt-10 sm:mt-12 max-w-4xl mx-auto">
+                <h3 class="text-lg sm:text-xl font-black text-white mb-6 sm:mb-8 flex items-center">
                     <svg class="w-6 h-6 text-brand-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
                     Field Observations
                 </h3>
@@ -388,9 +388,9 @@
                 @auth
                     <form action="{{ route('comments.store', $mob) }}" method="POST" class="mb-10">
                         @csrf
-                        <div class="glass-card p-6 rounded-[2rem] border-brand-500/20">
+                        <div class="glass-card p-4 sm:p-6 rounded-[1.5rem] sm:rounded-[2rem] border-brand-500/20">
                             <textarea name="body" rows="3" class="w-full bg-transparent border-none focus:ring-0 text-white placeholder-gray-600 resize-none font-medium" placeholder="Record your observations about {{ strtolower($mob->name) }} species..."></textarea>
-                            <div class="flex justify-between items-center mt-4 pt-4 border-t border-white/5">
+                            <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3 mt-4 pt-4 border-t border-white/5">
                                 <p class="text-[10px] text-gray-600 font-mono tracking-widest uppercase">Encryption Active: {{ auth()->user()->name }}</p>
                                 <button type="submit" class="px-6 py-2 bg-brand-600 hover:bg-brand-700 text-white text-xs font-black rounded-full transition-all shadow-lg shadow-brand-600/30 uppercase tracking-widest">Transmit Note</button>
                             </div>
@@ -400,8 +400,8 @@
 
                 <div class="space-y-6">
                     @forelse($mob->comments as $comment)
-                        <div x-data="{ editing: false }" class="glass-card p-6 rounded-[2rem] border-white/5 relative group">
-                            <div class="flex items-start space-x-4">
+                        <div x-data="{ editing: false, voted: {{ !empty($comment->is_voted) ? 'true' : 'false' }}, votes: {{ $comment->votes_count ?? 0 }} }" class="glass-card p-4 sm:p-6 rounded-[1.5rem] sm:rounded-[2rem] border-white/5 relative group">
+                            <div class="flex items-start space-x-3 sm:space-x-4">
                                 <a href="{{ route('researchers.show', $comment->user) }}" class="block shrink-0 transition-transform hover:scale-105">
                                     @if($comment->user->avatar_url)
                                         <div class="w-10 h-10 rounded-xl overflow-hidden border border-brand-500/30 shadow-[0_0_10px_rgba(14,165,233,0.2)]">
@@ -413,8 +413,8 @@
                                         </div>
                                     @endif
                                 </a>
-                                <div class="flex-1">
-                                    <div class="flex items-center justify-between mb-1">
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-start justify-between gap-3 mb-1">
                                         <a href="{{ route('researchers.show', $comment->user) }}" class="text-sm font-black text-white hover:text-brand-400 transition-colors">
                                             {{ $comment->user->name }}
                                         </a>
@@ -439,7 +439,43 @@
                                         </div>
                                     @endcan
                                     
-                                    <div class="absolute top-6 right-6 flex items-center space-x-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <div class="mt-3 sm:mt-0 sm:absolute sm:top-6 sm:right-6 flex items-center space-x-3 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity">
+                                        @auth
+                                            @if(auth()->id() !== $comment->user_id)
+                                                <button
+                                                    type="button"
+                                                    @click="
+                                                        fetch('{{ route('comments.vote', $comment) }}', {
+                                                            method: 'POST',
+                                                            headers: {
+                                                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                                                'Accept': 'application/json'
+                                                            }
+                                                        })
+                                                        .then(res => res.json())
+                                                        .then(data => {
+                                                            voted = data.voted;
+                                                            votes = data.count;
+                                                        })
+                                                    "
+                                                    class="inline-flex items-center space-x-1.5 text-[10px] font-black uppercase tracking-widest px-2.5 py-1.5 rounded-full border transition-all"
+                                                    :class="voted ? 'text-amber-300 border-amber-500/40 bg-amber-500/10' : 'text-gray-400 border-white/10 bg-white/5 hover:text-white'"
+                                                >
+                                                    <span>Upvote</span>
+                                                    <span x-text="votes"></span>
+                                                </button>
+                                            @else
+                                                <div class="inline-flex items-center space-x-1.5 text-[10px] font-black uppercase tracking-widest px-2.5 py-1.5 rounded-full border border-white/10 bg-white/5 text-gray-400">
+                                                    <span>Rep</span>
+                                                    <span>{{ $comment->votes_count ?? 0 }}</span>
+                                                </div>
+                                            @endif
+                                        @else
+                                            <div class="inline-flex items-center space-x-1.5 text-[10px] font-black uppercase tracking-widest px-2.5 py-1.5 rounded-full border border-white/10 bg-white/5 text-gray-400">
+                                                <span>Rep</span>
+                                                <span>{{ $comment->votes_count ?? 0 }}</span>
+                                            </div>
+                                        @endauth
                                         @can('update', $comment)
                                             <button x-show="!editing" @click="editing = true" class="text-gray-500 hover:text-brand-400">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
@@ -477,17 +513,17 @@
                             <p class="text-gray-500 text-sm mt-2 italic">Entities often encountered in the same dimensional parameters.</p>
                         </div>
                     </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-5 sm:gap-8">
                         @foreach($relatedMobs as $rel)
-                            <a href="{{ route('mobs.show', $rel) }}" class="glass-card p-6 rounded-[2.5rem] border-white/5 group hover:border-brand-500/40 transition-all hover:-translate-y-2 duration-500">
-                                <div class="aspect-square bg-gray-950 rounded-3xl overflow-hidden mb-6">
+                            <a href="{{ route('mobs.show', $rel) }}" class="glass-card p-4 sm:p-6 rounded-[1.5rem] sm:rounded-[2.5rem] border-white/5 group hover:border-brand-500/40 transition-all hover:-translate-y-2 duration-500">
+                                <div class="aspect-square bg-gray-950 rounded-[1.25rem] sm:rounded-3xl overflow-hidden mb-4 sm:mb-6">
                                     @if($rel->image)
                                         <img src="{{ asset('storage/' . $rel->image) }}" alt="{{ $rel->name }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
                                     @else
                                         <div class="w-full h-full flex items-center justify-center text-gray-800">?</div>
                                     @endif
                                 </div>
-                                <h4 class="text-lg font-black text-white group-hover:text-brand-400 transition-colors uppercase tracking-tight">{{ $rel->name }}</h4>
+                                <h4 class="text-base sm:text-lg font-black text-white group-hover:text-brand-400 transition-colors uppercase tracking-tight">{{ $rel->name }}</h4>
                                 <span class="text-[9px] font-black text-gray-600 uppercase tracking-widest">{{ $rel->category->name }}</span>
                             </a>
                         @endforeach

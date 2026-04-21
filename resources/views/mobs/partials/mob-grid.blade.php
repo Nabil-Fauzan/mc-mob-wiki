@@ -1,11 +1,11 @@
 <!-- Mobs Grid -->
-<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 mb-12">
+<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 sm:gap-8 mb-12">
     @forelse($mobs as $mob)
         @php
             preg_match('/\d+/', $mob->damage_normal ?: $mob->damage, $dM);
             $isThreatening = intval($dM[0] ?? 0) >= 10;
         @endphp
-        <div class="glass-card rounded-[2rem] overflow-hidden group hover:-translate-y-2 transition-all duration-500 stagger-item" 
+        <div class="glass-card rounded-[1.5rem] sm:rounded-[2rem] overflow-hidden group hover:-translate-y-2 transition-all duration-500 stagger-item" 
              style="animation-delay: {{ ($loop->index % 8) * 75 }}ms">
             <div class="aspect-[4/5] bg-gray-900 relative overflow-hidden {{ $isThreatening ? 'threat-pulse' : '' }}">
                 @if($mob->image)
@@ -19,8 +19,8 @@
                 @endif
                 
                 <!-- Category Badge -->
-                <div class="absolute top-4 right-4 flex flex-col space-y-2">
-                    <span class="px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-full backdrop-blur-md border
+                <div class="absolute top-3 right-3 sm:top-4 sm:right-4 flex flex-col space-y-2">
+                    <span class="px-2.5 sm:px-3 py-1 text-[9px] sm:text-[10px] font-black uppercase tracking-widest rounded-full backdrop-blur-md border
                         {{ $mob->category->name == 'Hostile' ? 'bg-red-500/20 text-red-400 border-red-500/30' : '' }}
                         {{ $mob->category->name == 'Passive' ? 'bg-green-500/20 text-green-400 border-green-500/30' : '' }}
                         {{ $mob->category->name == 'Neutral' ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' : '' }}
@@ -49,15 +49,15 @@
                 </div>
 
                 <!-- Overlay on Hover -->
-                <div class="absolute inset-x-0 bottom-0 p-6 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <a href="{{ route('mobs.show', $mob) }}" class="w-full py-2 bg-white text-black text-center text-sm font-bold rounded-xl block transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
+                <div class="absolute inset-x-0 bottom-0 p-4 sm:p-6 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <a href="{{ route('mobs.show', $mob) }}" class="w-full py-2 bg-white text-black text-center text-sm font-bold rounded-xl block sm:transform sm:translate-y-4 sm:group-hover:translate-y-0 transition-transform duration-500">
                         Quick View
                     </a>
                 </div>
             </div>
 
-            <div class="p-6">
-                <h3 class="text-xl font-bold text-white mb-2 underline decoration-indigo-500/30 group-hover:decoration-indigo-500 transition-colors">{{ $mob->name }}</h3>
+            <div class="p-4 sm:p-6">
+                <h3 class="text-lg sm:text-xl font-bold text-white mb-2 underline decoration-indigo-500/30 group-hover:decoration-indigo-500 transition-colors">{{ $mob->name }}</h3>
                 <div class="flex flex-wrap items-center gap-1.5 mb-4 max-h-[24px] overflow-hidden">
                     @forelse($mob->biomes as $biome)
                         <span class="text-[10px] text-indigo-400/80 bg-indigo-500/5 border border-indigo-500/10 px-2 py-0.5 rounded-full whitespace-nowrap">
@@ -72,7 +72,7 @@
                     @endforelse
                 </div>
 
-                <p class="text-sm text-gray-400 mb-6 italic leading-relaxed">
+                <p class="text-sm text-gray-400 mb-5 sm:mb-6 italic leading-relaxed">
                     "{{ Str::limit($mob->description, 100) }}"
                 </p>
 
@@ -83,7 +83,7 @@
                         @forelse($mob->loot->take(4) as $drop)
                             <div class="flex items-center space-x-1 px-1.5 py-1 bg-white/5 rounded-md border border-white/5 hover:border-yellow-500/30 transition-all cursor-help" title="{{ $drop->item_name }}">
                                 <span class="text-xs">{{ $drop->icon ?: '📦' }}</span>
-                                <span class="text-[8px] text-gray-400 font-bold uppercase truncate max-w-[40px]">{{ $drop->item_name }}</span>
+                                <span class="text-[8px] text-gray-400 font-bold uppercase truncate max-w-[56px] sm:max-w-[40px]">{{ $drop->item_name }}</span>
                             </div>
                         @empty
                             <span class="text-[8px] text-gray-600 italic">No loot metadata</span>
@@ -96,7 +96,7 @@
                     </div>
                 </div>
                 
-                <div class="flex justify-between items-center pt-4 border-t border-white/5">
+                <div class="flex justify-between items-center pt-4 border-t border-white/5 gap-3">
                     <div class="flex -space-x-2">
                         @auth
                             <a href="{{ route('mobs.edit', $mob) }}" class="p-2 bg-indigo-500/10 text-indigo-400 rounded-lg hover:bg-indigo-500 hover:text-white transition-all">
@@ -111,7 +111,7 @@
                             </form>
                         @endauth
                     </div>
-                    <div class="text-[10px] text-gray-600 font-mono tracking-tighter">
+                    <div class="text-[10px] text-gray-600 font-mono tracking-tighter text-right">
                         {{ strtoupper($mob->category->name) }} // {{ $mob->id }}
                     </div>
                 </div>
