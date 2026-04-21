@@ -23,7 +23,7 @@
                         <!-- Category -->
                         <div>
                             <x-input-label for="category_id" :value="__('Category')" />
-                            <select id="category_id" name="category_id" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" required>
+                            <select id="category_id" name="category_id" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-brand-500 dark:focus:border-brand-600 focus:ring-brand-500 dark:focus:ring-brand-600 rounded-md shadow-sm" required>
                                 @foreach($categories as $category)
                                     <option value="{{ $category->id }}" {{ old('category_id', $mob->category_id) == $category->id ? 'selected' : '' }}>
                                         {{ $category->name }}
@@ -197,13 +197,13 @@
                                     @endphp
                                     @foreach($groupedBiomes as $dimensionName => $biomesInDim)
                                         <div class="space-y-3">
-                                            <h4 class="text-[10px] font-black uppercase tracking-widest text-indigo-400 border-b border-indigo-500/20 pb-1 mb-2">{{ $dimensionName }}</h4>
+                                            <h4 class="text-[10px] font-black uppercase tracking-widest text-brand-400 border-b border-brand-500/20 pb-1 mb-2">{{ $dimensionName }}</h4>
                                             @foreach($biomesInDim->whereNull('parent_id') as $parentBiome)
                                                 <div class="space-y-2">
                                                     <label class="flex items-center group cursor-pointer">
                                                         <div class="relative flex items-center">
                                                             <input type="checkbox" name="biome_ids[]" value="{{ $parentBiome->id }}" 
-                                                                class="w-4 h-4 rounded border-white/10 bg-black/40 text-indigo-600 focus:ring-indigo-500 focus:ring-offset-gray-900 transition-all cursor-pointer"
+                                                                class="w-4 h-4 rounded border-white/10 bg-black/40 text-brand-600 focus:ring-brand-500 focus:ring-offset-gray-900 transition-all cursor-pointer"
                                                                 {{ in_array($parentBiome->id, $selectedBiomes) ? 'checked' : '' }}>
                                                         </div>
                                                         <span class="ml-2 text-xs font-bold text-gray-300 group-hover:text-white transition-colors">{{ $parentBiome->name }}</span>
@@ -213,10 +213,10 @@
                                                         <label class="flex items-center group cursor-pointer ml-4">
                                                             <div class="relative flex items-center">
                                                                 <input type="checkbox" name="biome_ids[]" value="{{ $subBiome->id }}" 
-                                                                    class="w-3.5 h-3.5 rounded border-white/10 bg-black/40 text-indigo-500 focus:ring-indigo-500 focus:ring-offset-gray-900 transition-all cursor-pointer"
+                                                                    class="w-3.5 h-3.5 rounded border-white/10 bg-black/40 text-brand-500 focus:ring-brand-500 focus:ring-offset-gray-900 transition-all cursor-pointer"
                                                                     {{ in_array($subBiome->id, $selectedBiomes) ? 'checked' : '' }}>
                                                             </div>
-                                                            <span class="ml-2 text-[11px] font-medium text-gray-400 group-hover:text-indigo-300 transition-colors">↳ {{ $subBiome->name }}</span>
+                                                            <span class="ml-2 text-[11px] font-medium text-gray-400 group-hover:text-brand-300 transition-colors">↳ {{ $subBiome->name }}</span>
                                                         </label>
                                                     @endforeach
                                                 </div>
@@ -230,7 +230,7 @@
                         <!-- Description -->
                         <div>
                             <x-input-label for="description" :value="__('Behavior / Description')" />
-                            <textarea id="description" name="description" rows="4" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" required>{{ old('description', $mob->description) }}</textarea>
+                            <textarea id="description" name="description" rows="4" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-brand-500 dark:focus:border-brand-600 focus:ring-brand-500 dark:focus:ring-brand-600 rounded-md shadow-sm" required>{{ old('description', $mob->description) }}</textarea>
                             <x-input-error class="mt-2" :messages="$errors->get('description')" />
                         </div>
 
@@ -259,7 +259,7 @@
                                 <div class="flex-1">
                                     <input id="image" name="image" type="file" 
                                         @change="imageUrl = URL.createObjectURL($event.target.files[0])"
-                                        class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 dark:file:bg-gray-700 dark:file:text-gray-300" accept="image/*" />
+                                        class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100 dark:file:bg-gray-700 dark:file:text-gray-300" accept="image/*" />
                                     <p class="mt-1 text-xs text-gray-500">Field intelligence suggests JPG, PNG, or GIF up to 2MB. Leave blank to keep current image.</p>
                                 </div>
                             </div>

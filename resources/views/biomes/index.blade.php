@@ -3,7 +3,7 @@
         <div class="max-w-7xl mx-auto">
             <!-- Header -->
             <div class="text-center mb-16 relative">
-                <h1 class="text-4xl font-black text-white tracking-tight mb-4">Biomes <span class="text-indigo-500">& Dimensions</span></h1>
+                <h1 class="text-4xl font-black text-white tracking-tight mb-4">Biomes <span class="text-brand-500">& Dimensions</span></h1>
                 <p class="text-gray-400 max-w-2xl mx-auto mb-6">Explore the vast ecosystems of the Minecraft world, from the peaceful plains of the Overworld to the scorched valleys of the Nether.</p>
 
                 @if(Auth::check() && Auth::user()->is_admin)
@@ -44,8 +44,8 @@
                                     {{-- Sub-biome badge --}}
                                     @if($biome->subBiomes->count() > 0)
                                         <div class="absolute top-4 left-4 flex items-center space-x-1.5 bg-black/60 backdrop-blur-sm border border-white/10 px-3 py-1 rounded-full">
-                                            <svg class="w-3 h-3 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg>
-                                            <span class="text-[9px] font-black uppercase tracking-widest text-indigo-300">{{ $biome->subBiomes->count() }} Sub-biomes</span>
+                                            <svg class="w-3 h-3 text-brand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg>
+                                            <span class="text-[9px] font-black uppercase tracking-widest text-brand-300">{{ $biome->subBiomes->count() }} Sub-biomes</span>
                                         </div>
                                     @endif
 
@@ -67,7 +67,7 @@
                                             <p class="text-[9px] font-black uppercase tracking-widest text-gray-600 mb-3">Known Variants</p>
                                             <div class="flex flex-wrap gap-2">
                                                 @foreach($biome->subBiomes->take(4) as $sub)
-                                                    <span class="px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 rounded-full">{{ $sub->name }}</span>
+                                                    <span class="px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider bg-brand-500/10 border border-brand-500/20 text-brand-300 rounded-full">{{ $sub->name }}</span>
                                                 @endforeach
                                                 @if($biome->subBiomes->count() > 4)
                                                     <span class="px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider bg-white/5 text-gray-500 rounded-full">+{{ $biome->subBiomes->count() - 4 }} more</span>

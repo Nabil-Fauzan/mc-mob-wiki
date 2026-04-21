@@ -288,4 +288,21 @@ class MobController extends Controller
 
         return view('mobs.compare', compact('mobs'));
     }
+
+    /**
+     * API Search for live results.
+     */
+    public function apiSearch(Request $request)
+    {
+        $query = $request->query('q');
+        if (!$query) return response()->json([]);
+
+        $mobs = Mob::with('category')
+            ->where('name', 'like', "%{$query}%")
+            ->orWhere('description', 'like', "%{$query}%")
+            ->limit(5)
+            ->get();
+
+        return response()->json($mobs);
+    }
 }

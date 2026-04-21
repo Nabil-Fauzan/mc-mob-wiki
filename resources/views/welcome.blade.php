@@ -30,7 +30,7 @@
     <div class="py-8 px-4 sm:px-6 lg:px-8">
         <!-- Hero Section with Swiper -->
         <div class="max-w-7xl mx-auto mb-16">
-            <div class="swiper hero-swiper shadow-2xl shadow-indigo-500/10">
+            <div class="swiper hero-swiper shadow-2xl shadow-brand-500/10">
                 <div class="swiper-wrapper">
                     <!-- Slide 1 -->
                     <div class="swiper-slide group">
@@ -53,7 +53,7 @@
                         <img src="{{ asset('images/hero2.png') }}" alt="Face the Darkness" class="brightness-50 group-hover:scale-105 transition-transform duration-[10s] ease-linear">
                         <div class="slide-content">
                             <span class="inline-block px-4 py-1.5 bg-purple-500/20 text-purple-400 rounded-full text-xs font-bold uppercase tracking-widest mb-4 backdrop-blur-md border border-purple-500/30">Dangerous Mobs</span>
-                            <h1 class="text-5xl md:text-7xl font-black text-white mb-6 leading-tight">Venture into <span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-500">The End</span></h1>
+                            <h1 class="text-5xl md:text-7xl font-black text-white mb-6 leading-tight">Venture into <span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-brand-500">The End</span></h1>
                             <p class="text-xl text-gray-300 mb-8 leading-relaxed">Learn the secrets of the Endermen and prepare your ultimate equipment for the final boss.</p>
                             <a href="{{ route('mobs.index', ['category' => '1']) }}" class="btn-primary-mc">View Hostile Mobs</a>
                         </div>
@@ -79,7 +79,7 @@
 
         <!-- Featured Categories -->
         <div class="max-w-7xl mx-auto mb-24">
-            <h2 class="text-3xl font-bold text-white mb-12 text-center">Classifications <span class="text-indigo-500 font-mono">_</span></h2>
+            <h2 class="text-3xl font-bold text-white mb-12 text-center">Classifications <span class="text-brand-500 font-mono">_</span></h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <!-- Hostile -->
                 <div class="glass-card p-8 rounded-3xl group hover:-translate-y-2 transition-all duration-500 relative overflow-hidden">
@@ -132,10 +132,10 @@
         </div>
 
         <!-- Wiki Stats -->
-        <div class="max-w-4xl mx-auto glass-card rounded-[3rem] p-12 text-center mb-24 border-indigo-500/20">
+        <div class="max-w-4xl mx-auto glass-card rounded-[3rem] p-12 text-center mb-24 border-brand-500/20">
             <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
                 <div>
-                    <div class="text-4xl font-black text-white mb-2 underline decoration-indigo-500 decoration-4">{{ $stats['mobs'] }}</div>
+                    <div class="text-4xl font-black text-white mb-2 underline decoration-brand-500 decoration-4">{{ $stats['mobs'] }}</div>
                     <div class="text-gray-400 text-sm uppercase tracking-tighter">Total Mobs</div>
                 </div>
                 <div>

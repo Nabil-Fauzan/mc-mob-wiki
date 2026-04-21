@@ -6,26 +6,26 @@
                 <nav class="flex mb-4" aria-label="Breadcrumb">
                     <ol class="inline-flex items-center space-x-1 md:space-x-3 text-[10px] uppercase font-black tracking-widest text-gray-500">
                         <li class="inline-flex items-center">
-                            <a href="{{ route('mobs.index') }}" class="hover:text-indigo-400">Wiki</a>
+                            <a href="{{ route('mobs.index') }}" class="hover:text-brand-400">Wiki</a>
                         </li>
                         @if($mob->biomes->first()?->dimension)
                         <li>
                             <div class="flex items-center">
                                 <svg class="w-3 h-3 text-gray-600 mx-1" fill="currentColor" viewBox="0 0 20 20"><path d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"></path></svg>
-                                <a href="{{ route('dimensions.index') }}" class="hover:text-indigo-400">{{ $mob->biomes->first()->dimension->name }}</a>
+                                <a href="{{ route('dimensions.index') }}" class="hover:text-brand-400">{{ $mob->biomes->first()->dimension->name }}</a>
                             </div>
                         </li>
                         @endif
                         <li aria-current="page">
                             <div class="flex items-center">
                                 <svg class="w-3 h-3 text-gray-600 mx-1" fill="currentColor" viewBox="0 0 20 20"><path d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"></path></svg>
-                                <span class="text-indigo-500">{{ $mob->name }}</span>
+                                <span class="text-brand-500">{{ $mob->name }}</span>
                             </div>
                         </li>
                     </ol>
                 </nav>
                 <h2 class="text-4xl font-black text-white tracking-tighter">
-                    {{ $mob->name }} <span class="text-indigo-500 animate-pulse">_</span>
+                    {{ $mob->name }} <span class="text-brand-500 animate-pulse">_</span>
                 </h2>
             </div>
             <div class="flex space-x-3" x-data="{ favorited: {{ $mob->favoritedBy()->where('user_id', auth()->id())->exists() ? 'true' : 'false' }}, count: {{ $mob->favoritedBy()->count() }} }">
@@ -41,6 +41,7 @@
                     .then(data => {
                         favorited = data.favorited;
                         count = data.count;
+                        window.notify(favorited ? 'Added to favorites' : 'Removed from favorites', favorited ? 'success' : 'info');
                     })"
                     class="flex items-center space-x-2 px-4 py-2 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-all group">
                     <svg class="w-5 h-5 transition-transform group-hover:scale-125" :class="favorited ? 'text-red-500 fill-current' : 'text-gray-400'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -61,7 +62,16 @@
         </div>
     </x-slot>
 
-    <div class="py-12">
+    <div class="py-12" x-init="
+        let recent = JSON.parse(localStorage.getItem('recent_research') || '[]');
+        recent = recent.filter(m => m.id !== {{ $mob->id }});
+        recent.unshift({
+            id: {{ $mob->id }},
+            name: '{{ $mob->name }}',
+            image: '{{ $mob->image }}'
+        });
+        localStorage.setItem('recent_research', JSON.stringify(recent.slice(0, 6)));
+    ">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="glass-card rounded-[3rem] overflow-hidden fade-in-up">
                 <div class="p-8 md:p-12">
@@ -69,7 +79,7 @@
                         <!-- Left Column: Visuals & Quick Stats -->
                         <div class="space-y-8">
                             <div class="aspect-square bg-gray-950 rounded-[2rem] overflow-hidden border border-white/10 relative group">
-                                <div class="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent"></div>
+                                <div class="absolute inset-0 bg-gradient-to-br from-brand-500/5 to-transparent"></div>
                                 @if($mob->image)
                                     <img src="{{ asset('storage/' . $mob->image) }}" alt="{{ $mob->name }}" class="w-full h-full object-contain p-8 group-hover:scale-110 transition-transform duration-700">
                                 @else
@@ -80,7 +90,7 @@
                                     </div>
                                 @endif
                                 <div class="absolute bottom-4 left-4">
-                                    <span class="px-3 py-1 bg-black/40 backdrop-blur-md border border-white/10 text-xs text-indigo-400 rounded-full font-mono">UID: {{ str_pad($mob->id, 4, '0', STR_PAD_LEFT) }}</span>
+                                    <span class="px-3 py-1 bg-black/40 backdrop-blur-md border border-white/10 text-xs text-brand-400 rounded-full font-mono">UID: {{ str_pad($mob->id, 4, '0', STR_PAD_LEFT) }}</span>
                                 </div>
                             </div>
                             
@@ -142,9 +152,9 @@
 
                                     <!-- Specific Attack Profiles -->
                                     @if($mob->melee_attack || $mob->ranged_attack)
-                                        <div class="col-span-full glass-card p-6 rounded-2xl border-indigo-500/10 mt-2">
-                                            <h5 class="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-6 flex items-center">
-                                                <span class="w-2 h-2 bg-indigo-500 rounded-full mr-2 animate-pulse"></span>
+                                        <div class="col-span-full glass-card p-6 rounded-2xl border-brand-500/10 mt-2">
+                                            <h5 class="text-[10px] font-black text-brand-400 uppercase tracking-widest mb-6 flex items-center">
+                                                <span class="w-2 h-2 bg-brand-500 rounded-full mr-2 animate-pulse"></span>
                                                 Specialized Attack Arsenal
                                             </h5>
                                             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -169,12 +179,12 @@
                                     @endif
 
                                     <!-- Interactive Radar Chart -->
-                                    <div class="col-span-full glass-card p-8 rounded-[2.5rem] border-indigo-500/10 mt-4 overflow-hidden relative">
+                                    <div class="col-span-full glass-card p-8 rounded-[2.5rem] border-brand-500/10 mt-4 overflow-hidden relative">
                                         <h5 class="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-6">Threat Intelligence Radar</h5>
                                         <div class="aspect-square max-w-[300px] mx-auto opacity-80 hover:opacity-100 transition-opacity">
                                             <canvas id="threatRadar"></canvas>
                                         </div>
-                                        <div class="absolute top-8 right-8 text-[8px] font-black text-indigo-500 uppercase tracking-widest leading-none">
+                                        <div class="absolute top-8 right-8 text-[8px] font-black text-brand-500 uppercase tracking-widest leading-none">
                                             Analytical Node [0.4]<br>
                                             <span class="text-gray-700 italic">Simulated Data</span>
                                         </div>
@@ -209,12 +219,12 @@
                                                 70
                                             ],
                                             fill: true,
-                                            backgroundColor: 'rgba(99, 102, 241, 0.2)',
-                                            borderColor: 'rgb(99, 102, 241)',
-                                            pointBackgroundColor: 'rgb(99, 102, 241)',
+                                            backgroundColor: 'rgba(14, 165, 233, 0.2)',
+                                            borderColor: 'rgb(14, 165, 233)',
+                                            pointBackgroundColor: 'rgb(14, 165, 233)',
                                             pointBorderColor: '#fff',
                                             pointHoverBackgroundColor: '#fff',
-                                            pointHoverBorderColor: 'rgb(99, 102, 241)'
+                                            pointHoverBorderColor: 'rgb(14, 165, 233)'
                                         }]
                                     },
                                     options: {
@@ -241,7 +251,7 @@
                                 <h1 class="text-6xl font-black text-white mb-8 tracking-tighter">{{ $mob->name }}</h1>
                                 
                                 <div class="space-y-6">
-                                    <h4 class="text-xs font-black text-indigo-500 uppercase tracking-[0.2em] flex items-center">
+                                    <h4 class="text-xs font-black text-brand-500 uppercase tracking-[0.2em] flex items-center">
                                         Description
                                         <span class="flex-1 h-px bg-white/10 ml-4"></span>
                                     </h4>
@@ -261,7 +271,7 @@
                                     </div>
                                     <div class="flex flex-wrap gap-2">
                                         @forelse($mob->biomes as $biome)
-                                            <a href="{{ route('biomes.show', $biome) }}" class="bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/20 px-3 py-1 rounded-full text-[10px] font-bold text-indigo-300 transition-all">
+                                            <a href="{{ route('biomes.show', $biome) }}" class="bg-brand-500/10 hover:bg-brand-500/20 border border-brand-500/20 px-3 py-1 rounded-full text-[10px] font-bold text-brand-300 transition-all">
                                                 {{ $biome->name }}
                                             </a>
                                         @empty
@@ -273,7 +283,7 @@
                                     
                                     @if($mob->spawning_conditions)
                                         <div class="mt-4 pt-4 border-t border-white/5">
-                                            <span class="text-[9px] font-black uppercase tracking-widest text-indigo-400 block mb-2">Special Conditions</span>
+                                            <span class="text-[9px] font-black uppercase tracking-widest text-brand-400 block mb-2">Special Conditions</span>
                                             <p class="text-xs text-gray-300 font-medium leading-relaxed italic">
                                                 "{{ $mob->spawning_conditions }}"
                                             </p>
@@ -354,13 +364,13 @@
                             </div>
 
                             <!-- Professional Alert -->
-                            <div class="mt-10 p-6 bg-indigo-500/5 border border-indigo-500/20 rounded-3xl flex items-start space-x-4">
-                                <div class="flex-shrink-0 w-10 h-10 bg-indigo-500/10 rounded-xl flex items-center justify-center text-indigo-500">
+                            <div class="mt-10 p-6 bg-brand-500/5 border border-brand-500/20 rounded-3xl flex items-start space-x-4">
+                                <div class="flex-shrink-0 w-10 h-10 bg-brand-500/10 rounded-xl flex items-center justify-center text-brand-500">
                                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                                 </div>
                                 <div>
-                                    <p class="text-sm font-bold text-indigo-400 mb-1">Behavior Protocol</p>
-                                    <p class="text-xs text-indigo-300/70 leading-relaxed">Intelligence reports suggest that {{ strtolower($mob->name) }} species exhibit {{ strtolower($mob->category->name) }} behavior traits. Exercise standard field protocols when engaging.</p>
+                                    <p class="text-sm font-bold text-brand-400 mb-1">Behavior Protocol</p>
+                                    <p class="text-xs text-brand-300/70 leading-relaxed">Intelligence reports suggest that {{ strtolower($mob->name) }} species exhibit {{ strtolower($mob->category->name) }} behavior traits. Exercise standard field protocols when engaging.</p>
                                 </div>
                             </div>
                         </div>
@@ -371,18 +381,18 @@
             <!-- Community Intelligence (Comments) -->
             <div class="mt-12 max-w-4xl mx-auto">
                 <h3 class="text-xl font-black text-white mb-8 flex items-center">
-                    <svg class="w-6 h-6 text-indigo-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
+                    <svg class="w-6 h-6 text-brand-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
                     Field Observations
                 </h3>
 
                 @auth
                     <form action="{{ route('comments.store', $mob) }}" method="POST" class="mb-10">
                         @csrf
-                        <div class="glass-card p-6 rounded-[2rem] border-indigo-500/20">
+                        <div class="glass-card p-6 rounded-[2rem] border-brand-500/20">
                             <textarea name="body" rows="3" class="w-full bg-transparent border-none focus:ring-0 text-white placeholder-gray-600 resize-none font-medium" placeholder="Record your observations about {{ strtolower($mob->name) }} species..."></textarea>
                             <div class="flex justify-between items-center mt-4 pt-4 border-t border-white/5">
                                 <p class="text-[10px] text-gray-600 font-mono tracking-widest uppercase">Encryption Active: {{ auth()->user()->name }}</p>
-                                <button type="submit" class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-black rounded-full transition-all shadow-lg shadow-indigo-600/30 uppercase tracking-widest">Transmit Note</button>
+                                <button type="submit" class="px-6 py-2 bg-brand-600 hover:bg-brand-700 text-white text-xs font-black rounded-full transition-all shadow-lg shadow-brand-600/30 uppercase tracking-widest">Transmit Note</button>
                             </div>
                         </div>
                     </form>
@@ -394,18 +404,18 @@
                             <div class="flex items-start space-x-4">
                                 <a href="{{ route('researchers.show', $comment->user) }}" class="block shrink-0 transition-transform hover:scale-105">
                                     @if($comment->user->avatar_url)
-                                        <div class="w-10 h-10 rounded-xl overflow-hidden border border-indigo-500/30 shadow-[0_0_10px_rgba(79,70,229,0.2)]">
+                                        <div class="w-10 h-10 rounded-xl overflow-hidden border border-brand-500/30 shadow-[0_0_10px_rgba(14,165,233,0.2)]">
                                             <img src="{{ $comment->user->avatar_url }}" alt="{{ $comment->user->name }}" class="w-full h-full object-cover">
                                         </div>
                                     @else
-                                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-black text-xs uppercase shadow-inner">
+                                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-accent-400 flex items-center justify-center text-white font-black text-xs uppercase shadow-inner">
                                             {{ substr($comment->user->name, 0, 2) }}
                                         </div>
                                     @endif
                                 </a>
                                 <div class="flex-1">
                                     <div class="flex items-center justify-between mb-1">
-                                        <a href="{{ route('researchers.show', $comment->user) }}" class="text-sm font-black text-white hover:text-indigo-400 transition-colors">
+                                        <a href="{{ route('researchers.show', $comment->user) }}" class="text-sm font-black text-white hover:text-brand-400 transition-colors">
                                             {{ $comment->user->name }}
                                         </a>
                                         <span class="text-[9px] text-gray-600 font-mono uppercase">{{ $comment->created_at->diffForHumans() }}</span>
@@ -420,9 +430,9 @@
                                             <form action="{{ route('comments.update', $comment) }}" method="POST">
                                                 @csrf
                                                 @method('PATCH')
-                                                <textarea name="body" rows="2" class="w-full bg-white/5 border border-white/10 rounded-xl text-white text-sm p-3 mb-2 focus:ring-indigo-500">{{ $comment->body }}</textarea>
+                                                <textarea name="body" rows="2" class="w-full bg-white/5 border border-white/10 rounded-xl text-white text-sm p-3 mb-2 focus:ring-brand-500">{{ $comment->body }}</textarea>
                                                 <div class="flex space-x-2">
-                                                    <button type="submit" class="px-3 py-1 bg-indigo-600 text-[10px] font-bold text-white rounded-lg">Save Changes</button>
+                                                    <button type="submit" class="px-3 py-1 bg-brand-600 text-[10px] font-bold text-white rounded-lg">Save Changes</button>
                                                     <button @click="editing = false" type="button" class="px-3 py-1 bg-white/5 text-[10px] font-bold text-gray-400 rounded-lg">Cancel</button>
                                                 </div>
                                             </form>
@@ -431,7 +441,7 @@
                                     
                                     <div class="absolute top-6 right-6 flex items-center space-x-3 opacity-0 group-hover:opacity-100 transition-opacity">
                                         @can('update', $comment)
-                                            <button x-show="!editing" @click="editing = true" class="text-gray-500 hover:text-indigo-400">
+                                            <button x-show="!editing" @click="editing = true" class="text-gray-500 hover:text-brand-400">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                                             </button>
                                         @endcan
@@ -469,7 +479,7 @@
                     </div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
                         @foreach($relatedMobs as $rel)
-                            <a href="{{ route('mobs.show', $rel) }}" class="glass-card p-6 rounded-[2.5rem] border-white/5 group hover:border-indigo-500/40 transition-all hover:-translate-y-2 duration-500">
+                            <a href="{{ route('mobs.show', $rel) }}" class="glass-card p-6 rounded-[2.5rem] border-white/5 group hover:border-brand-500/40 transition-all hover:-translate-y-2 duration-500">
                                 <div class="aspect-square bg-gray-950 rounded-3xl overflow-hidden mb-6">
                                     @if($rel->image)
                                         <img src="{{ asset('storage/' . $rel->image) }}" alt="{{ $rel->name }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
@@ -477,7 +487,7 @@
                                         <div class="w-full h-full flex items-center justify-center text-gray-800">?</div>
                                     @endif
                                 </div>
-                                <h4 class="text-lg font-black text-white group-hover:text-indigo-400 transition-colors uppercase tracking-tight">{{ $rel->name }}</h4>
+                                <h4 class="text-lg font-black text-white group-hover:text-brand-400 transition-colors uppercase tracking-tight">{{ $rel->name }}</h4>
                                 <span class="text-[9px] font-black text-gray-600 uppercase tracking-widest">{{ $rel->category->name }}</span>
                             </a>
                         @endforeach

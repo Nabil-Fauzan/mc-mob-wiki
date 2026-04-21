@@ -2,13 +2,13 @@
     <div class="py-12 px-4 sm:px-6 lg:px-8 relative">
         <div class="fixed inset-0 z-0 pointer-events-none">
             <div class="absolute inset-0 bg-gray-950"></div>
-            <div class="absolute w-full h-full bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900/40 via-gray-900/90 to-black"></div>
+            <div class="absolute w-full h-full bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-brand-900/40 via-gray-900/90 to-black"></div>
         </div>
 
         <div class="max-w-4xl mx-auto relative z-10">
             <!-- Header -->
             <div class="mb-8">
-                <a href="{{ route('biomes.show', $biome) }}" class="inline-flex items-center text-indigo-400 hover:text-indigo-300 font-bold tracking-widest uppercase text-[10px] mb-6 transition-colors">
+                <a href="{{ route('biomes.show', $biome) }}" class="inline-flex items-center text-brand-400 hover:text-brand-300 font-bold tracking-widest uppercase text-[10px] mb-6 transition-colors">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                     Return to Detail View
                 </a>
@@ -28,8 +28,8 @@
                     @method('PUT')
 
                     <!-- Type Toggle -->
-                    <div class="bg-indigo-500/5 border border-indigo-500/20 rounded-2xl p-5">
-                        <label class="block text-xs font-black uppercase tracking-widest text-indigo-400 mb-3">
+                    <div class="bg-brand-500/5 border border-brand-500/20 rounded-2xl p-5">
+                        <label class="block text-xs font-black uppercase tracking-widest text-brand-400 mb-3">
                             <svg class="w-4 h-4 inline mr-1.5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg>
                             Type
                         </label>
@@ -37,9 +37,9 @@
                             <label class="flex items-center space-x-3 cursor-pointer group">
                                 <div class="relative w-5 h-5">
                                     <input type="radio" name="_biome_type" value="top" class="sr-only" x-model="biomeType">
-                                    <div class="w-5 h-5 rounded-full border-2 border-white/20 group-hover:border-indigo-400 transition-colors" x-bind:class="biomeType === 'top' ? 'border-indigo-500 bg-indigo-500/30' : ''"></div>
+                                    <div class="w-5 h-5 rounded-full border-2 border-white/20 group-hover:border-brand-400 transition-colors" x-bind:class="biomeType === 'top' ? 'border-brand-500 bg-brand-500/30' : ''"></div>
                                     <div class="absolute inset-0 flex items-center justify-center" x-show="biomeType === 'top'">
-                                        <div class="w-2 h-2 rounded-full bg-indigo-400"></div>
+                                        <div class="w-2 h-2 rounded-full bg-brand-400"></div>
                                     </div>
                                 </div>
                                 <span class="text-sm font-bold text-gray-300">Top-level Biome</span>
@@ -47,9 +47,9 @@
                             <label class="flex items-center space-x-3 cursor-pointer group">
                                 <div class="relative w-5 h-5">
                                     <input type="radio" name="_biome_type" value="sub" class="sr-only" x-model="biomeType">
-                                    <div class="w-5 h-5 rounded-full border-2 border-white/20 group-hover:border-indigo-400 transition-colors" x-bind:class="biomeType === 'sub' ? 'border-indigo-500 bg-indigo-500/30' : ''"></div>
+                                    <div class="w-5 h-5 rounded-full border-2 border-white/20 group-hover:border-brand-400 transition-colors" x-bind:class="biomeType === 'sub' ? 'border-brand-500 bg-brand-500/30' : ''"></div>
                                     <div class="absolute inset-0 flex items-center justify-center" x-show="biomeType === 'sub'">
-                                        <div class="w-2 h-2 rounded-full bg-indigo-400"></div>
+                                        <div class="w-2 h-2 rounded-full bg-brand-400"></div>
                                     </div>
                                 </div>
                                 <span class="text-sm font-bold text-gray-300">Sub-biome (Variant)</span>
@@ -59,7 +59,7 @@
                         <!-- Parent dropdown for sub-biome -->
                         <div x-show="biomeType === 'sub'" x-transition class="mt-4">
                             <label class="block text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2">Parent Biome</label>
-                            <select name="parent_id" x-model="parentId" class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-indigo-500 transition-all appearance-none">
+                            <select name="parent_id" x-model="parentId" class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-brand-500 transition-all appearance-none">
                                 <option value="" class="bg-gray-900">Select Parent Biome</option>
                                 @foreach($parentBiomes as $pb)
                                     <option value="{{ $pb->id }}" {{ $biome->parent_id == $pb->id ? 'selected' : '' }} class="bg-gray-900">
@@ -74,18 +74,18 @@
                         <div class="space-y-6">
                             <!-- Name -->
                             <div>
-                                <label for="name" class="block text-xs font-black uppercase tracking-widest text-indigo-400 mb-2">Biome Name</label>
+                                <label for="name" class="block text-xs font-black uppercase tracking-widest text-brand-400 mb-2">Biome Name</label>
                                 <input type="text" name="name" id="name" required value="{{ old('name', $biome->name) }}"
-                                    class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all">
+                                    class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all">
                                 @error('name') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
                             </div>
 
                             <!-- Dimension (only for top-level) -->
                             <div x-show="biomeType === 'top'" x-transition>
-                                <label for="dimension_id" class="block text-xs font-black uppercase tracking-widest text-indigo-400 mb-2">Dimension</label>
+                                <label for="dimension_id" class="block text-xs font-black uppercase tracking-widest text-brand-400 mb-2">Dimension</label>
                                 <div class="relative">
                                     <select name="dimension_id" id="dimension_id"
-                                        class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all appearance-none cursor-pointer">
+                                        class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all appearance-none cursor-pointer">
                                         @foreach($dimensions as $dimension)
                                             <option value="{{ $dimension->id }}" {{ (old('dimension_id', $biome->dimension_id) == $dimension->id) ? 'selected' : '' }} class="bg-gray-900">
                                                 {{ $dimension->name }}
@@ -103,8 +103,8 @@
                         <!-- Image -->
                         <div class="relative">
                             <div class="flex justify-between items-center mb-2">
-                                <label class="block text-xs font-black uppercase tracking-widest text-indigo-400">Visual Feed (Image)</label>
-                                <button type="button" @click="showSelector = !showSelector" class="text-[10px] font-black uppercase tracking-widest text-indigo-500 hover:text-indigo-400 transition-colors flex items-center">
+                                <label class="block text-xs font-black uppercase tracking-widest text-brand-400">Visual Feed (Image)</label>
+                                <button type="button" @click="showSelector = !showSelector" class="text-[10px] font-black uppercase tracking-widest text-brand-500 hover:text-brand-400 transition-colors flex items-center">
                                     <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg>
                                     Quick Select
                                 </button>
@@ -114,12 +114,12 @@
                             <input type="hidden" name="existing_image" x-model="selectedPath">
 
                             <div class="relative group">
-                                <label for="image" class="block relative h-[200px] rounded-2xl overflow-hidden border-2 border-dashed border-white/20 bg-black/40 hover:bg-black/60 hover:border-indigo-500/50 transition-all cursor-pointer">
+                                <label for="image" class="block relative h-[200px] rounded-2xl overflow-hidden border-2 border-dashed border-white/20 bg-black/40 hover:bg-black/60 hover:border-brand-500/50 transition-all cursor-pointer">
                                     <template x-if="imageUrl">
                                         <img x-bind:src="imageUrl" class="absolute inset-0 w-full h-full object-cover z-10" alt="Preview">
                                     </template>
                                     <div class="absolute inset-0 flex flex-col items-center justify-center z-20" x-bind:class="imageUrl ? 'opacity-0 group-hover:opacity-100 transition-opacity' : ''">
-                                        <div class="w-12 h-12 rounded-full bg-indigo-500/20 flex items-center justify-center mx-auto mb-3 text-indigo-400 group-hover:bg-indigo-500 group-hover:text-white transition-colors">
+                                        <div class="w-12 h-12 rounded-full bg-brand-500/20 flex items-center justify-center mx-auto mb-3 text-brand-400 group-hover:bg-brand-500 group-hover:text-white transition-colors">
                                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                                         </div>
                                         <span class="text-sm font-bold text-gray-300 text-center block px-4"
@@ -145,7 +145,7 @@
                                     class="absolute top-full left-0 right-0 mt-2 z-50 bg-gray-900 border border-white/10 rounded-2xl shadow-2xl overflow-hidden backdrop-blur-xl">
                                     
                                     <div class="p-3 border-b border-white/10">
-                                        <input type="text" x-model="searchQuery" placeholder="Search images..." class="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-xs text-white focus:ring-1 focus:ring-indigo-500 outline-none">
+                                        <input type="text" x-model="searchQuery" placeholder="Search images..." class="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-xs text-white focus:ring-1 focus:ring-brand-500 outline-none">
                                     </div>
 
                                     <div class="max-h-[300px] overflow-y-auto custom-scrollbar">
@@ -155,7 +155,7 @@
                                                 <p class="text-[9px] font-black uppercase tracking-widest text-gray-500 mb-2 px-2">Preset Ecosystems</p>
                                                 <div class="grid grid-cols-2 gap-2">
                                                     <template x-for="path in filteredPresets" :key="path">
-                                                        <button type="button" @click="selectImage(path, 'preset')" class="group relative aspect-video rounded-lg overflow-hidden border border-white/5 hover:border-indigo-500/50 transition-all">
+                                                        <button type="button" @click="selectImage(path, 'preset')" class="group relative aspect-video rounded-lg overflow-hidden border border-white/5 hover:border-brand-500/50 transition-all">
                                                             <img :src="'{{ asset('') }}' + path" class="w-full h-full object-cover">
                                                             <div class="absolute inset-0 bg-black/40 group-hover:bg-black/10 transition-colors"></div>
                                                             <p class="absolute bottom-1 left-2 right-2 text-[8px] text-white truncate font-bold" x-text="path.split('/').pop()"></p>
@@ -196,9 +196,9 @@
 
                     <!-- Description -->
                     <div class="pt-4">
-                        <label for="description" class="block text-xs font-black uppercase tracking-widest text-indigo-400 mb-2">Ecosystem Profile</label>
+                        <label for="description" class="block text-xs font-black uppercase tracking-widest text-brand-400 mb-2">Ecosystem Profile</label>
                         <textarea name="description" id="description" rows="5" required
-                            class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all overflow-hidden resize-none">{{ old('description', $biome->description) }}</textarea>
+                            class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all overflow-hidden resize-none">{{ old('description', $biome->description) }}</textarea>
                         @error('description') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
                     </div>
 
@@ -214,7 +214,7 @@
                         <div class="flex items-center gap-4">
                             <a href="{{ route('biomes.show', $biome) }}" class="text-gray-400 hover:text-white font-bold text-sm transition-colors">Cancel</a>
                             <button type="submit" class="relative group cursor-pointer">
-                                <div class="absolute -inset-1 bg-gradient-to-r from-red-600 to-indigo-600 rounded-xl blur opacity-25 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
+                                <div class="absolute -inset-1 bg-gradient-to-r from-red-600 to-brand-600 rounded-xl blur opacity-25 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
                                 <div class="relative px-8 py-4 bg-gray-900 border border-white/10 rounded-xl leading-none flex items-center">
                                     <span class="pl-2 flex-1 font-black tracking-widest uppercase text-white group-hover:text-red-400 transition-colors">Commit Overwrite</span>
                                     <svg class="w-5 h-5 ml-4 text-gray-400 group-hover:text-red-400 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>

@@ -4,7 +4,7 @@
             <!-- Header -->
             <div class="flex items-center justify-between mb-12">
                 <div>
-                    <h1 class="text-4xl font-black text-white tracking-tight">Mob <span class="text-indigo-500">Comparison</span></h1>
+                    <h1 class="text-4xl font-black text-white tracking-tight">Mob <span class="text-brand-500">Comparison</span></h1>
                     <p class="text-gray-400 mt-2">Side-by-side analysis of Minecraft species and entities.</p>
                 </div>
                 <a href="{{ route('mobs.index') }}" class="px-6 py-2.5 bg-white/5 hover:bg-white/10 text-white font-bold rounded-xl border border-white/10 transition-all flex items-center">
@@ -38,7 +38,7 @@
             <!-- Comparison Grid -->
             <div class="relative">
                 @if(count($mobs) === 2)
-                    <div class="hidden md:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20 w-16 h-16 bg-black border-4 border-indigo-500/30 rounded-full items-center justify-center shadow-[0_0_30px_rgba(99,102,241,0.4)]">
+                    <div class="hidden md:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20 w-16 h-16 bg-black border-4 border-brand-500/30 rounded-full items-center justify-center shadow-[0_0_30px_rgba(14,165,233,0.4)]">
                         <span class="text-xl font-black text-white italic tracking-tighter">VS</span>
                     </div>
                 @endif
@@ -71,7 +71,7 @@
                                     </span>
                                 </div>
                             @elseif($isBestHealth)
-                                <div class="absolute top-6 right-6 z-10 bg-indigo-600 px-3 py-1 rounded-full shadow-lg border border-white/20">
+                                <div class="absolute top-6 right-6 z-10 bg-brand-600 px-3 py-1 rounded-full shadow-lg border border-white/20">
                                     <span class="text-[9px] font-black text-white uppercase tracking-widest flex items-center">
                                         Fortified
                                     </span>
@@ -88,7 +88,7 @@
                                     </div>
                                 @endif
                                 <div class="absolute inset-x-0 bottom-0 p-6 bg-gradient-to-t from-black/90 via-black/40 to-transparent">
-                                    <span class="text-[10px] font-black uppercase tracking-widest text-indigo-400 block mb-1">{{ $mob->category->name }}</span>
+                                    <span class="text-[10px] font-black uppercase tracking-widest text-brand-400 block mb-1">{{ $mob->category->name }}</span>
                                     <h2 class="text-3xl font-black text-white tracking-tight">{{ $mob->name }}</h2>
                                 </div>
                             </div>
@@ -188,7 +188,7 @@
                                 
                                 <!-- Action -->
                                 <div class="pt-8">
-                                    <a href="{{ route('mobs.show', $mob) }}" class="w-full py-4 bg-white/5 hover:bg-white/10 text-white text-center font-black rounded-2xl block transition-all border border-white/10 group-hover:border-indigo-500/50">
+                                    <a href="{{ route('mobs.show', $mob) }}" class="w-full py-4 bg-white/5 hover:bg-white/10 text-white text-center font-black rounded-2xl block transition-all border border-white/10 group-hover:border-brand-500/50">
                                         Access Full Intel
                                     </a>
                                 </div>

@@ -41,13 +41,13 @@
                 </div>
 
                 <!-- Stat Card 2 -->
-                <div class="glass-card rounded-3xl border border-indigo-500/10 p-6 bg-gray-900/40 hover:bg-gray-800/60 transition-colors group">
+                <div class="glass-card rounded-3xl border-brand-500/10 p-6 bg-gray-900/40 hover:bg-gray-800/60 transition-colors group">
                     <div class="flex justify-between items-start">
                         <div>
                             <p class="text-gray-500 font-bold uppercase tracking-widest text-[10px] mb-1">Entities Tracked</p>
-                            <h3 class="text-4xl font-black text-white group-hover:text-indigo-400 transition-colors">{{ $stats['total_mobs'] }}</h3>
+                            <h3 class="text-4xl font-black text-white group-hover:text-brand-400 transition-colors">{{ $stats['total_mobs'] }}</h3>
                         </div>
-                        <div class="p-3 bg-indigo-500/10 rounded-xl text-indigo-500">
+                        <div class="p-3 bg-brand-500/10 rounded-xl text-brand-500">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
                         </div>
                     </div>
@@ -92,7 +92,7 @@
                         @foreach($recentUsers as $usr)
                             <div class="flex justify-between items-center bg-white/5 border border-white/5 rounded-xl p-4">
                                 <div class="flex items-center space-x-4">
-                                    <div class="w-10 h-10 rounded-lg overflow-hidden shrink-0 border border-indigo-500/30">
+                                    <div class="w-10 h-10 rounded-lg overflow-hidden shrink-0 border border-brand-500/30">
                                         @if($usr->avatar_url)
                                             <img src="{{ $usr->avatar_url }}" alt="{{ $usr->name }}" class="w-full h-full object-cover">
                                         @else
@@ -124,7 +124,7 @@
                                     <div class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">
                                         <a href="{{ route('researchers.show', $comment->user) }}" class="text-red-400 hover:underline">{{ $comment->user->name }}</a>
                                         on
-                                        <a href="{{ route('mobs.show', $comment->mob) }}" class="text-indigo-400 hover:underline">{{ $comment->mob->name }}</a>
+                                        <a href="{{ route('mobs.show', $comment->mob) }}" class="text-brand-400 hover:underline">{{ $comment->mob->name }}</a>
                                     </div>
                                     <span class="text-[9px] text-gray-600 font-mono">{{ $comment->created_at->diffForHumans() }}</span>
                                 </div>

@@ -2,7 +2,7 @@
     <x-slot name="header">
         <div class="flex flex-col md:flex-row justify-between items-center gap-4">
             <div>
-                <h1 class="text-3xl font-black text-white tracking-tight">Minecraft <span class="text-indigo-500">Wiki</span></h1>
+                <h1 class="text-3xl font-black text-white tracking-tight">Minecraft <span class="text-brand-500">Wiki</span></h1>
                 <p class="text-gray-400 text-sm">Explore the database of overworld and beyond.</p>
             </div>
             @auth
@@ -38,12 +38,14 @@
             const index = this.compareList.findIndex(m => m.id === id);
             if (index === -1) {
                 if (this.compareList.length >= 3) {
-                    alert('You can only compare up to 3 mobs at once.');
+                    window.notify('You can only compare up to 3 entities at once.', 'error');
                     return;
                 }
                 this.compareList.push({ id, name, image });
+                window.notify(`Added ${name} to comparison lab`, 'success');
             } else {
                 this.compareList.splice(index, 1);
+                window.notify(`Removed ${name} from analysis`, 'info');
             }
             localStorage.setItem('mob_compare_list', JSON.stringify(this.compareList));
         },
@@ -168,7 +170,7 @@
              x-transition:leave-start="translate-y-0 opacity-100"
              x-transition:leave-end="translate-y-full opacity-0"
              class="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 w-full max-w-2xl px-4">
-            <div class="glass-card rounded-full p-3 pl-6 flex items-center justify-between border-indigo-500/30 shadow-[0_0_50px_rgba(79,70,229,0.3)]">
+            <div class="glass-card rounded-full p-3 pl-6 flex items-center justify-between border-brand-500/30 shadow-[0_0_50px_rgba(14,165,233,0.3)]">
                 <div class="flex items-center -space-x-3 overflow-hidden">
                     <template x-for="mob in compareList" :key="mob.id">
                         <div class="w-10 h-10 rounded-full border-2 border-[#020617] overflow-hidden bg-gray-950 group relative">
@@ -185,7 +187,7 @@
                 </div>
                 <div class="flex items-center space-x-3">
                     <button @click="compareList = []; localStorage.removeItem('mob_compare_list')" class="text-xs text-gray-500 hover:text-white transition-colors uppercase font-bold tracking-tighter">Clear All</button>
-                    <a :href="comparisonUrl" class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-black rounded-full transition-all shadow-lg shadow-indigo-600/40">
+                    <a :href="comparisonUrl" class="px-6 py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-sm font-black rounded-full transition-all shadow-lg shadow-brand-600/40">
                         Compare Now
                     </a>
                 </div>
@@ -194,20 +196,20 @@
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <!-- Search and Filter Module -->
-            <div class="glass-card rounded-[2.5rem] mb-12 overflow-hidden border-indigo-500/10 shadow-2xl">
+            <div class="glass-card rounded-[2.5rem] mb-12 overflow-hidden border-brand-500/10 shadow-2xl">
                 <div class="p-8 lg:p-10">
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
                         <!-- Primary Search -->
                         <div class="md:col-span-2">
                             <x-input-label for="search" :value="__('Global Entity Search')" class="text-gray-500 mb-2 font-black uppercase tracking-widest text-[9px]" />
                             <div class="relative group">
-                                <span class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none transition-colors group-focus-within:text-indigo-500">
-                                    <svg class="h-5 w-5 text-gray-600 group-focus-within:text-indigo-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                                <span class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none transition-colors group-focus-within:text-brand-500">
+                                    <svg class="h-5 w-5 text-gray-600 group-focus-within:text-brand-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                                 </span>
                                 <input id="search" type="text" 
                                     x-model.debounce.300ms="search"
                                     @input="fetchResults()"
-                                    class="block w-full pl-12 pr-4 py-4 bg-white/5 border-white/5 rounded-[1.25rem] text-white placeholder-gray-600 focus:ring-2 focus:ring-indigo-500/50 focus:bg-white/10 transition-all font-bold" 
+                                    class="block w-full pl-12 pr-4 py-4 bg-white/5 border-white/5 rounded-[1.25rem] text-white placeholder-gray-600 focus:ring-2 focus:ring-brand-500/50 focus:bg-white/10 transition-all font-bold" 
                                     placeholder="Search by name or description..." />
                             </div>
                         </div>
@@ -219,7 +221,7 @@
                                 <select id="category" 
                                     x-model="category"
                                     @change="fetchResults()"
-                                    class="block w-full py-4 pl-4 pr-10 bg-white/5 border-white/5 rounded-[1.25rem] text-white focus:ring-2 focus:ring-indigo-500/50 transition-all appearance-none cursor-pointer font-bold">
+                                    class="block w-full py-4 pl-4 pr-10 bg-white/5 border-white/5 rounded-[1.25rem] text-white focus:ring-2 focus:ring-brand-500/50 transition-all appearance-none cursor-pointer font-bold">
                                     <option value="" class="bg-gray-950 text-gray-500">All Species</option>
                                     @foreach($categories as $category)
                                         <option value="{{ $category->id }}" class="bg-gray-950 text-white font-bold">
@@ -240,7 +242,7 @@
                                 <select id="sort" 
                                     x-model="sort"
                                     @change="fetchResults()"
-                                    class="block w-full py-4 pl-4 pr-10 bg-white/5 border-white/5 rounded-[1.25rem] text-white focus:ring-2 focus:ring-indigo-500/50 transition-all appearance-none cursor-pointer font-bold">
+                                    class="block w-full py-4 pl-4 pr-10 bg-white/5 border-white/5 rounded-[1.25rem] text-white focus:ring-2 focus:ring-brand-500/50 transition-all appearance-none cursor-pointer font-bold">
                                     <option value="newest" class="bg-gray-950 text-white font-bold">Latest Discovery</option>
                                     <option value="name_asc" class="bg-gray-950 text-white font-bold">Name (A-Z)</option>
                                     <option value="health_desc" class="bg-gray-950 text-white font-bold">Vitality (Highest)</option>
@@ -257,7 +259,7 @@
                     <!-- Advanced Filter Trigger -->
                     <div class="mt-8 flex flex-col md:flex-row items-center justify-between gap-4 border-t border-white/5 pt-8">
                         <button @click="showAdvanced = !showAdvanced" 
-                            class="flex items-center space-x-2 text-xs font-black uppercase tracking-widest text-indigo-400 hover:text-indigo-300 transition-colors">
+                            class="flex items-center space-x-2 text-xs font-black uppercase tracking-widest text-brand-400 hover:text-brand-300 transition-colors">
                             <span x-text="showAdvanced ? 'Hide Advanced Filters' : 'Show Advanced Filters'"></span>
                             <svg class="w-4 h-4 transition-transform duration-300" :class="showAdvanced ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"></path></svg>
                         </button>
@@ -269,7 +271,7 @@
                                 class="text-[10px] font-black uppercase tracking-widest text-gray-500 hover:text-red-500 transition-colors">
                                 Reset Parameter Intelligence
                             </button>
-                            <div x-show="isLoading" class="flex items-center text-indigo-500 text-[10px] font-black uppercase tracking-[0.2em] animate-pulse">
+                            <div x-show="isLoading" class="flex items-center text-brand-500 text-[10px] font-black uppercase tracking-[0.2em] animate-pulse">
                                 Data Syncing...
                             </div>
                         </div>
@@ -287,10 +289,10 @@
                                 <select id="biome" 
                                     x-model="biome"
                                     @change="fetchResults()"
-                                    class="block w-full py-3 pl-4 pr-10 bg-white/5 border-white/5 rounded-xl text-white focus:ring-2 focus:ring-indigo-500/50 appearance-none cursor-pointer font-bold text-sm">
+                                    class="block w-full py-3 pl-4 pr-10 bg-white/5 border-white/5 rounded-xl text-white focus:ring-2 focus:ring-brand-500/50 appearance-none cursor-pointer font-bold text-sm">
                                     <option value="" class="bg-gray-950 text-gray-500">All Biomes</option>
                                     @foreach($allBiomes->groupBy('dimension.name') as $dimension => $biomes)
-                                        <optgroup label="{{ $dimension }}" class="bg-gray-950 text-indigo-400 uppercase font-black text-[10px]">
+                                        <optgroup label="{{ $dimension }}" class="bg-gray-950 text-brand-400 uppercase font-black text-[10px]">
                                             @foreach($biomes as $b)
                                                 <option value="{{ $b->id }}" class="bg-gray-950 text-white font-medium">
                                                     {{ $b->name }}

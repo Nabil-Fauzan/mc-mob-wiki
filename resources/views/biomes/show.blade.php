@@ -11,7 +11,7 @@
                         <li>
                             <div class="flex items-center">
                                 <svg class="w-6 h-6 text-gray-700" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path></svg>
-                                <a href="{{ route('biomes.show', $biome->parent) }}" class="ml-1 text-sm font-bold text-indigo-400 hover:text-indigo-300 transition-colors uppercase tracking-widest">{{ $biome->parent->name }}</a>
+                                <a href="{{ route('biomes.show', $biome->parent) }}" class="ml-1 text-sm font-bold text-brand-400 hover:text-brand-300 transition-colors uppercase tracking-widest">{{ $biome->parent->name }}</a>
                             </div>
                         </li>
                     @endif
@@ -27,13 +27,13 @@
                     <div class="flex items-center space-x-3">
                         {{-- Add sub-biome (only for top-level biomes) --}}
                         @if(!$biome->parent_id)
-                            <a href="{{ route('admin.biomes.create', ['parent_id' => $biome->id]) }}" class="inline-flex items-center space-x-2 bg-indigo-900/30 hover:bg-indigo-600 border border-indigo-500/30 hover:border-indigo-500 px-4 py-2 rounded-xl transition-all group">
-                                <svg class="w-4 h-4 text-indigo-400 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                                <span class="text-indigo-400 group-hover:text-white font-bold text-xs uppercase tracking-widest">Add Sub-biome</span>
+                            <a href="{{ route('admin.biomes.create', ['parent_id' => $biome->id]) }}" class="inline-flex items-center space-x-2 bg-brand-900/30 hover:bg-brand-600 border border-brand-500/30 hover:border-brand-500 px-4 py-2 rounded-xl transition-all group">
+                                <svg class="w-4 h-4 text-brand-400 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                                <span class="text-brand-400 group-hover:text-white font-bold text-xs uppercase tracking-widest">Add Sub-biome</span>
                             </a>
                         @endif
                         <a href="{{ route('admin.biomes.edit', $biome) }}" class="inline-flex items-center space-x-2 bg-white/5 hover:bg-white/10 border border-white/10 px-4 py-2 rounded-xl transition-all">
-                            <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                            <svg class="w-4 h-4 text-brand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                             <span class="text-gray-300 font-bold text-xs uppercase tracking-widest">Reconfigure</span>
                         </a>
                         <form action="{{ route('admin.biomes.destroy', $biome) }}" method="POST" onsubmit="return confirm('WARNING: Are you sure you want to erase this from the registry? This cannot be undone.');">
@@ -50,9 +50,9 @@
 
             <!-- Sub-biome indicator badge -->
             @if($biome->parent)
-                <div class="inline-flex items-center space-x-2 bg-indigo-500/10 border border-indigo-500/20 px-4 py-2 rounded-full mb-6">
-                    <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"></path></svg>
-                    <span class="text-indigo-300 text-xs font-black uppercase tracking-widest">Sub-biome of {{ $biome->parent->name }}</span>
+                <div class="inline-flex items-center space-x-2 bg-brand-500/10 border border-brand-500/20 px-4 py-2 rounded-full mb-6">
+                    <svg class="w-4 h-4 text-brand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"></path></svg>
+                    <span class="text-brand-300 text-xs font-black uppercase tracking-widest">Sub-biome of {{ $biome->parent->name }}</span>
                 </div>
             @endif
 
@@ -104,11 +104,11 @@
                 <div class="mb-16">
                     <div class="flex items-center justify-between mb-8">
                         <div class="flex items-center space-x-4">
-                            <h2 class="text-2xl font-bold text-white">Known <span class="text-indigo-500">Variants</span></h2>
+                            <h2 class="text-2xl font-bold text-white">Known <span class="text-brand-500">Variants</span></h2>
                             <div class="flex-1 h-[1px] bg-white/10 w-24"></div>
                         </div>
                         @if(Auth::check() && Auth::user()->is_admin)
-                            <a href="{{ route('admin.biomes.create', ['parent_id' => $biome->id]) }}" class="inline-flex items-center space-x-2 bg-indigo-900/20 border border-indigo-500/20 hover:border-indigo-500/60 px-4 py-2 rounded-xl transition-all text-indigo-400 hover:text-indigo-300">
+                            <a href="{{ route('admin.biomes.create', ['parent_id' => $biome->id]) }}" class="inline-flex items-center space-x-2 bg-brand-900/20 border border-brand-500/20 hover:border-brand-500/60 px-4 py-2 rounded-xl transition-all text-brand-400 hover:text-brand-300">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                                 <span class="text-xs font-black uppercase tracking-widest">New Variant</span>
                             </a>
@@ -117,14 +117,14 @@
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                         @foreach($biome->subBiomes as $sub)
-                            <a href="{{ route('biomes.show', $sub) }}" class="group glass-card rounded-[2rem] overflow-hidden hover:-translate-y-2 transition-all duration-500 border border-white/5 hover:border-indigo-500/30 flex flex-col">
+                            <a href="{{ route('biomes.show', $sub) }}" class="group glass-card rounded-[2rem] overflow-hidden hover:-translate-y-2 transition-all duration-500 border border-white/5 hover:border-brand-500/30 flex flex-col">
                                 <div class="aspect-video relative overflow-hidden bg-gray-900 border-b border-white/5">
                                     @if($sub->image)
                                         <img src="{{ asset('storage/' . $sub->image) }}" alt="{{ $sub->name }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000">
                                     @else
-                                        <div class="w-full h-full bg-gradient-to-br from-indigo-900/20 via-gray-900 to-black flex items-center justify-center relative">
-                                            <div class="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-indigo-500 via-transparent to-transparent"></div>
-                                            <svg class="w-10 h-10 text-indigo-500/30 opacity-50 group-hover:scale-125 group-hover:text-indigo-400 group-hover:opacity-100 transition-all duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <div class="w-full h-full bg-gradient-to-br from-brand-900/20 via-gray-900 to-black flex items-center justify-center relative">
+                                            <div class="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-brand-500 via-transparent to-transparent"></div>
+                                            <svg class="w-10 h-10 text-brand-500/30 opacity-50 group-hover:scale-125 group-hover:text-brand-400 group-hover:opacity-100 transition-all duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                             </svg>
                                         </div>
@@ -136,7 +136,7 @@
                                     @if(Auth::check() && Auth::user()->is_admin)
                                         <div class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
                                             <object>
-                                                <a href="{{ route('admin.biomes.edit', $sub) }}" class="p-2 bg-black/60 backdrop-blur-md rounded-xl border border-white/10 text-indigo-400 hover:text-white hover:bg-indigo-600 transition-all">
+                                                <a href="{{ route('admin.biomes.edit', $sub) }}" class="p-2 bg-black/60 backdrop-blur-md rounded-xl border border-white/10 text-brand-400 hover:text-white hover:bg-brand-600 transition-all">
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                                                 </a>
                                             </object>
@@ -146,16 +146,16 @@
 
                                 <div class="p-6 flex-1 flex flex-col justify-between">
                                     <div>
-                                        <h3 class="text-lg font-black text-white mb-2 group-hover:text-indigo-400 transition-colors tracking-tight">{{ $sub->name }}</h3>
+                                        <h3 class="text-lg font-black text-white mb-2 group-hover:text-brand-400 transition-colors tracking-tight">{{ $sub->name }}</h3>
                                         <p class="text-gray-400 text-[11px] leading-relaxed italic line-clamp-3 mb-6">"{{ $sub->description }}"</p>
                                     </div>
 
                                     <div class="flex items-center justify-between pt-4 border-t border-white/5">
                                         <div class="flex items-center space-x-2">
-                                            <div class="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse"></div>
+                                            <div class="w-1.5 h-1.5 rounded-full bg-brand-500 animate-pulse"></div>
                                             <span class="text-[9px] font-black uppercase tracking-[0.2em] text-gray-500">{{ $sub->mobs->count() }} Species</span>
                                         </div>
-                                        <span class="text-[9px] font-black uppercase tracking-[0.2em] text-indigo-500/80 group-hover:text-indigo-400">Variant</span>
+                                        <span class="text-[9px] font-black uppercase tracking-[0.2em] text-brand-500/80 group-hover:text-brand-400">Variant</span>
                                     </div>
                                 </div>
                             </a>
@@ -167,7 +167,7 @@
             <!-- Inhabitant Mobs -->
             <div>
                 <div class="flex items-center space-x-4 mb-8">
-                    <h2 class="text-2xl font-bold text-white">Known <span class="text-indigo-500">Inhabitants</span></h2>
+                    <h2 class="text-2xl font-bold text-white">Known <span class="text-brand-500">Inhabitants</span></h2>
                     <div class="flex-1 h-[1px] bg-white/10"></div>
                 </div>
 
@@ -189,7 +189,7 @@
                                 </div>
                                 <div class="absolute inset-x-0 bottom-0 p-6 bg-gradient-to-t from-black/80 to-transparent">
                                     <h3 class="text-xl font-bold text-white mb-2">{{ $mob->name }}</h3>
-                                    <a href="{{ route('mobs.show', $mob) }}" class="text-xs text-indigo-400 font-bold hover:text-indigo-300 transition-colors flex items-center">
+                                    <a href="{{ route('mobs.show', $mob) }}" class="text-xs text-brand-400 font-bold hover:text-brand-300 transition-colors flex items-center">
                                         View Full Intel
                                         <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                                     </a>

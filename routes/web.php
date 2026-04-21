@@ -66,6 +66,9 @@ Route::get('/dimensions', [\App\Http\Controllers\DimensionController::class, 'in
 // Show route is public but must be last to avoid catching 'create'
 Route::get('/mobs/{mob}', [MobController::class, 'show'])->name('mobs.show');
 
+// Internal Search API
+Route::get('/api/search', [MobController::class, 'apiSearch'])->name('api.mobs.search');
+
 // Public Researcher Profiles
 Route::get('/researchers/{user}', [\App\Http\Controllers\ResearcherController::class, 'show'])->name('researchers.show');
 
