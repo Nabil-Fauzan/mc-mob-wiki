@@ -14,59 +14,236 @@
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    </head>
-    <body class="font-sans antialiased bg-[#020617] text-gray-100 selection:bg-brand-500/30"
-          x-data="{ 
-            paletteOpen: false,
-            paletteSearch: '',
-            liveResults: [],
-            recentResearch: [],
-            isLoading: false,
-            quickLinks: [
-                { name: 'Research Center (Wiki)', url: '{{ route('mobs.index') }}', desc: 'Browse all entitites', icon: 'Search' },
-                { name: 'Dimension Hub', url: '{{ route('dimensions.index') }}', desc: 'Cross-dimensional stats', icon: 'Worlds' },
-                { name: 'Biome Discovery', url: '{{ route('biomes.index') }}', desc: 'Environmental intel', icon: 'Biomes' },
-                { name: 'Analytics Terminal', url: '{{ route('stats.index') }}', desc: 'Global data charts', icon: 'Stats' },
-                { name: 'Comparison Lab', url: '{{ route('mobs.comparison') }}', desc: 'Combat per mob', icon: 'Compare' },
-            ],
-            init() {
-                this.recentResearch = JSON.parse(localStorage.getItem('recent_research') || '[]');
-                window.notify = (content, type = 'info') => {
-                    window.dispatchEvent(new CustomEvent('notify', { detail: { content, type } }));
-                };
-                
-                this.$watch('paletteOpen', value => {
-                    if (value) {
-                        this.recentResearch = JSON.parse(localStorage.getItem('recent_research') || '[]');
-                    }
-                });
 
-                this.$watch('paletteSearch', value => {
-                    this.fetchLiveResults(value);
-                });
-            },
-            async fetchLiveResults(query) {
-                if (query.length < 2) {
-                    this.liveResults = [];
-                    return;
-                }
-                this.isLoading = true;
-                try {
-                    const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
-                    this.liveResults = await response.json();
-                } catch (error) {
-                    console.error('Search error:', error);
-                } finally {
-                    this.isLoading = false;
-                }
-            },
-            filteredLinks() {
-                return this.quickLinks.filter(l => l.name.toLowerCase().includes(this.paletteSearch.toLowerCase()));
+        <style>
+            .terminal-glass {
+                background: linear-gradient(135deg, rgba(2, 6, 23, 0.95), rgba(15, 23, 42, 0.98));
+                box-shadow: 0 0 50px rgba(220, 38, 38, 0.15), inset 0 0 20px rgba(220, 38, 38, 0.1);
             }
-          }"
+            .scanline {
+                width: 100%;
+                height: 100px;
+                z-index: 5;
+                background: linear-gradient(0deg, rgba(0, 0, 0, 0) 0%, rgba(220, 38, 38, 0.05) 50%, rgba(0, 0, 0, 0) 100%);
+                opacity: 0.1;
+                position: absolute;
+                bottom: 100%;
+                animation: scanline 6s linear infinite;
+            }
+            @keyframes scanline {
+                0% { bottom: 100%; }
+                100% { bottom: -100px; }
+            }
+            .terminal-grid {
+                background-image: radial-gradient(rgba(220, 38, 38, 0.05) 1px, transparent 0);
+                background-size: 30px 30px;
+            }
+            .oracle-glow {
+                text-shadow: 0 0 10px rgba(220, 38, 38, 0.5);
+            }
+        </style>
+    </head>
+    <body class="font-sans antialiased bg-[#020617] text-gray-100 selection:bg-brand-500/30 overflow-x-hidden {{ 
+                $theme === 'Nether' ? 'theme-nether' : ($theme === 'The End' ? 'theme-end' : '') 
+          }}"
+          x-data="aetherProtocol"
           @keydown.window.ctrl.k.prevent="paletteOpen = true"
           @keydown.window.cmd.k.prevent="paletteOpen = true"
-          @keydown.escape="paletteOpen = false">
+          @keydown.escape="paletteOpen = false"
+          @keydown.window.ctrl.s.prevent="if($el.querySelector('form')) $el.querySelector('form').submit()"
+          @keydown.window.cmd.s.prevent="if($el.querySelector('form')) $el.querySelector('form').submit()"
+          @auth
+            @if(auth()->user()->is_admin)
+              @keydown.window.alt.g.prevent="window.location.href = '{{ route('admin.dashboard') }}'"
+              @keydown.window.alt.c.prevent="window.location.href = '{{ route('mobs.create') }}'"
+              @keydown.window.alt.b.prevent="window.location.href = '{{ route('admin.biomes.create') }}'"
+            @endif
+          @endauth>
+
+        <script>
+            document.addEventListener('alpine:init', () => {
+                Alpine.data('aetherProtocol', () => ({
+                    paletteOpen: false,
+                    paletteSearch: '',
+                    liveResults: [],
+                    recentResearch: [],
+                    isLoading: false,
+                    mouseX: 0,
+                    mouseY: 0,
+                    terminalOpen: false,
+                    terminalInput: '',
+                    terminalOutput: ['AETHER PROTOCOL [v.2] - UNAUTHORIZED ACCESS PROHIBITED'],
+                    konami: [],
+                    konamiCode: ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'],
+                    selectedIndex: -1,
+                    isAdmin: {{ auth()->check() && auth()->user()->is_admin ? 'true' : 'false' }},
+                    quickLinks: [
+                        { name: 'Research Center (Wiki)', url: '{{ route('mobs.index') }}', desc: 'Browse all entitites', icon: 'Search' },
+                        { name: 'Dimension Hub', url: '{{ route('dimensions.index') }}', desc: 'Cross-dimensional stats', icon: 'Worlds' },
+                        { name: 'Biome Discovery', url: '{{ route('biomes.index') }}', desc: 'Environmental intel', icon: 'Biomes' },
+                        { name: 'Analytics Terminal', url: '{{ route('stats.index') }}', desc: 'Global data charts', icon: 'Stats' },
+                        { name: 'Comparison Lab', url: '{{ route('mobs.comparison') }}', desc: 'Combat per mob', icon: 'Compare' },
+                    ],
+                    init() {
+                        this.recentResearch = JSON.parse(localStorage.getItem('recent_research') || '[]');
+                        window.notify = (content, type = 'info') => {
+                            window.dispatchEvent(new CustomEvent('notify', { detail: { content, type } }));
+                        };
+
+                        window.trackResearch = (mob) => {
+                            let history = JSON.parse(localStorage.getItem('recent_research') || '[]');
+                            history = history.filter(h => h.id !== mob.id);
+                            history.unshift({
+                                id: mob.id,
+                                name: mob.name,
+                                image: mob.image,
+                                category: mob.category,
+                                url: mob.url
+                            });
+                            history = history.slice(0, 6);
+                            localStorage.setItem('recent_research', JSON.stringify(history));
+                            this.recentResearch = history;
+                        };
+                        
+                        this.$watch('paletteOpen', value => {
+                            if (value) {
+                                this.recentResearch = JSON.parse(localStorage.getItem('recent_research') || '[]');
+                                this.selectedIndex = -1;
+                            }
+                        });
+
+                        this.$watch('paletteSearch', value => {
+                            this.fetchLiveResults(value);
+                            this.selectedIndex = -1;
+                        });
+
+                        window.addEventListener('mousemove', (e) => {
+                            this.mouseX = e.clientX;
+                            this.mouseY = e.clientY;
+                        });
+
+                        window.addEventListener('keydown', (e) => {
+                            this.konami.push(e.key);
+                            this.konami = this.konami.slice(-10);
+                            if (JSON.stringify(this.konami) === JSON.stringify(this.konamiCode)) {
+                                if (this.isAdmin) {
+                                    this.terminalOpen = true;
+                                    this.konami = [];
+                                    window.notify('ADMIN OVERRIDE DETECTED', 'warning');
+                                } else {
+                                    window.notify('ACCESS DENIED: Protocol Restricted to Rank Admin', 'error');
+                                    this.konami = [];
+                                }
+                            }
+                        });
+                    },
+                    get totalResults() {
+                        if (this.paletteSearch.length >= 2) return this.liveResults.length + this.filteredLinks().length;
+                        return this.recentResearch.length + this.filteredLinks().length;
+                    },
+                    navigatePalette(dir) {
+                        if (this.totalResults === 0) return;
+                        if (dir === 'down') {
+                            this.selectedIndex = (this.selectedIndex + 1) % this.totalResults;
+                        } else {
+                            this.selectedIndex = (this.selectedIndex - 1 + this.totalResults) % this.totalResults;
+                        }
+                        this.$nextTick(() => {
+                            const el = document.querySelector('[data-index="' + this.selectedIndex + '"]');
+                            if (el) el.scrollIntoView({ block: 'nearest' });
+                        });
+                    },
+                    openSelected(isEdit = false) {
+                        if (this.selectedIndex === -1) return;
+                        const el = document.querySelector('[data-index="' + this.selectedIndex + '"]');
+                        if (el) {
+                            if (isEdit && el.dataset.editUrl && this.isAdmin) {
+                                window.location.href = el.dataset.editUrl;
+                            } else {
+                                el.click();
+                            }
+                        }
+                    },
+                    executeTerminal() {
+                        const cmd = this.terminalInput.toLowerCase().trim();
+                        this.terminalOutput.push('> ' + this.terminalInput);
+                        
+                        if (cmd === 'help') {
+                            this.terminalOutput.push('Available: override, intel, oracle [query], registry, explorer, cls, exit');
+                        } else if (cmd.startsWith('oracle')) {
+                            const query = cmd.replace('oracle', '').trim();
+                            if (!query) {
+                                this.terminalOutput.push('ORACLE: Please provide a research subject for analysis.');
+                                return;
+                            }
+                            this.terminalOutput.push('ORACLE: INITIALIZING DEEP ANALYSIS...');
+                            this.terminalOutput.push('ORACLE: ACCESSING MULTIVERSAL DATA...');
+                            
+                            fetch('/api/oracle?query=' + encodeURIComponent(query))
+                                .then(res => res.json())
+                                .then(data => {
+                                    this.terminalOutput.push(data.response);
+                                    this.terminalOutput.push('ORACLE: ANALYSIS COMPLETE.');
+                                })
+                                .catch(err => {
+                                    this.terminalOutput.push('ORACLE: [SIGNAL INTERRUPTED] Multiverse communication failed.');
+                                })
+                                .finally(() => {
+                                    this.$nextTick(() => {
+                                        const el = document.getElementById('terminal-scroll');
+                                        if (el) el.scrollTop = el.scrollHeight;
+                                    });
+                                });
+                        } else if (cmd === 'override' || cmd === 'admin') {
+                            window.location.href = '{{ route('admin.dashboard') }}';
+                        } else if (cmd === 'intel') {
+                            this.terminalOutput.push('SCANNING REGISTRY...');
+                            this.terminalOutput.push('-------------------------');
+                            this.terminalOutput.push('TOTAL ENTITIES: {{ \App\Models\Mob::count() }}');
+                            this.terminalOutput.push('UNCATEGORIZED: {{ \App\Models\Mob::whereNull('category_id')->count() }}');
+                            this.terminalOutput.push('MISSING BIOMES: {{ \App\Models\Mob::doesntHave('biomes')->count() }}');
+                            this.terminalOutput.push('MISSING IMAGES: {{ \App\Models\Mob::whereNull('image')->count() }}');
+                            this.terminalOutput.push('-------------------------');
+                            this.terminalOutput.push('SCAN COMPLETE. ALL SYSTEMS NOMINAL.');
+                        } else if (cmd === 'registry') {
+                            window.location.href = '{{ route('mobs.index') }}';
+                        } else if (cmd === 'explorer') {
+                            window.location.href = '{{ route('biomes.index') }}';
+                        } else if (cmd === 'cls') {
+                            this.terminalOutput = ['AETHER PROTOCOL [v.2]'];
+                        } else if (cmd === 'exit') {
+                            this.terminalOpen = false;
+                        } else {
+                            this.terminalOutput.push('Unknown command: ' + cmd);
+                        }
+                        
+                        this.terminalInput = '';
+                        this.$nextTick(() => {
+                            const el = document.getElementById('terminal-scroll');
+                            if (el) el.scrollTop = el.scrollHeight;
+                        });
+                    },
+                    async fetchLiveResults(query) {
+                        if (query.length < 2) {
+                            this.liveResults = [];
+                            return;
+                        }
+                        this.isLoading = true;
+                        try {
+                            const response = await fetch('/api/search?q=' + encodeURIComponent(query));
+                            this.liveResults = await response.json();
+                        } catch (error) {
+                            console.error('Search error:', error);
+                        } finally {
+                            this.isLoading = false;
+                        }
+                    },
+                    filteredLinks() {
+                        return this.quickLinks.filter(l => l.name.toLowerCase().includes(this.paletteSearch.toLowerCase()));
+                    }
+                }));
+            });
+        </script>
         
         <!-- Command Palette Modal -->
         <div x-show="paletteOpen" 
@@ -91,6 +268,10 @@
                         x-model="paletteSearch"
                         x-ref="paletteInput"
                         @show.window="if(paletteOpen) $nextTick(() => $refs.paletteInput.focus())"
+                        @keydown.down.prevent="navigatePalette('down')"
+                        @keydown.up.prevent="navigatePalette('up')"
+                        @keydown.enter.prevent="openSelected()"
+                        @keydown.e.prevent="openSelected(true)"
                         class="block w-full pl-11 sm:pl-12 pr-4 py-3 sm:py-4 bg-transparent border-none text-white text-base sm:text-xl placeholder-gray-600 focus:ring-0 font-bold" 
                         placeholder="Search Intelligence Terminal... (Ctrl+K)" />
                     <div x-show="isLoading" class="absolute right-4 sm:right-6 top-1/2 -translate-y-1/2">
@@ -103,27 +284,52 @@
                     <!-- Live Entity Search Results (ORACLE) -->
                     <template x-if="paletteSearch.length >= 2">
                         <div>
-                            <h4 class="px-4 text-[9px] font-black text-brand-500 uppercase tracking-[0.2em] mb-3">Entity Intelligence Found</h4>
+                            <div class="flex items-center justify-between px-4 mb-3">
+                                <h4 class="text-[9px] font-black text-brand-500 uppercase tracking-[0.2em]">Entity Intelligence Found</h4>
+                                <span class="text-[8px] font-mono text-gray-700" x-text="liveResults.length + ' Result(s)'"></span>
+                            </div>
                             <div class="space-y-2">
-                                <template x-for="mob in liveResults" :key="mob.id">
-                                    <a :href="'/mobs/' + mob.id" class="flex items-center p-3 rounded-2xl hover:bg-brand-500/10 border border-transparent hover:border-brand-500/20 transition-all group">
-                                        <div class="w-14 h-14 rounded-xl bg-gray-950 overflow-hidden mr-4 border border-white/5">
-                                            <img :src="'/storage/' + mob.image" class="w-full h-full object-cover" x-show="mob.image">
-                                            <div class="w-full h-full flex items-center justify-center text-gray-800" x-show="!mob.image">?</div>
-                                        </div>
-                                        <div class="flex-1 min-w-0">
-                                            <span class="block text-white font-black uppercase tracking-tight text-sm truncate" x-text="mob.name"></span>
-                                            <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1">
-                                                <span class="text-[9px] font-bold text-gray-500 uppercase tracking-widest" x-text="mob.category.name"></span>
-                                                <span class="w-1 h-1 bg-gray-800 rounded-full hidden sm:inline-block"></span>
-                                                <span class="text-[9px] font-mono text-red-500/70" x-text="mob.health_normal + ' HP'"></span>
+                                <template x-for="(mob, index) in liveResults" :key="mob.id">
+                                    <a :href="mob.url" 
+                                       @click="window.trackResearch(mob)"
+                                       :data-index="index"
+                                       :data-edit-url="'/mobs/' + mob.id + '/edit'"
+                                       :class="selectedIndex === index ? 'bg-brand-500/20 border-brand-500/40' : 'hover:bg-brand-500/10 border-transparent'"
+                                       class="flex items-center p-3 rounded-2xl border transition-all group">
+                                        <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-black overflow-hidden mr-4 border border-white/5 shadow-xl group-hover:scale-105 transition-transform duration-500 flex-shrink-0">
+                                                <img :src="mob.image" :alt="mob.name" class="w-full h-full object-cover" onerror="this.src = 'https://ui-avatars.com/api/?name=' + this.alt + '&background=0f172a&color=0ea5e9'">
+                                            <div class="w-full h-full flex items-center justify-center text-gray-800" x-show="!mob.image">
+                                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
                                             </div>
                                         </div>
-                                        <svg class="w-5 h-5 text-brand-500 opacity-0 group-hover:opacity-100 transition-opacity hidden sm:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 7l5 5m0 0l-5 5m5-5H6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                                        <div class="flex-1 min-w-0">
+                                            <span class="block text-white font-black uppercase tracking-tight text-sm truncate group-hover:text-brand-400 transition-colors" x-text="mob.name"></span>
+                                            <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1">
+                                                <span class="text-[9px] font-bold text-gray-500 uppercase tracking-widest" x-text="mob.category"></span>
+                                                <span class="w-1 h-1 bg-gray-800 rounded-full"></span>
+                                                <span class="text-[9px] font-bold text-brand-500/70 uppercase tracking-tighter" x-text="mob.habitat"></span>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center space-x-2">
+                                            <template x-if="isAdmin">
+                                                <a :href="'/mobs/' + mob.id + '/edit'" 
+                                                   class="p-2 bg-white/5 hover:bg-yellow-500/20 text-gray-500 hover:text-yellow-500 rounded-lg transition-all"
+                                                   @click.stop
+                                                   title="Protocol Override: Quick Edit">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                                                </a>
+                                            </template>
+                                            <svg class="w-5 h-5 text-brand-500 opacity-0 group-hover:opacity-100 transition-all group-hover:translate-x-1 duration-300 hidden sm:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 7l5 5m0 0l-5 5m5-5H6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                                        </div>
                                     </a>
                                 </template>
                                 <template x-if="liveResults.length === 0 && !isLoading">
-                                    <div class="p-8 text-center text-gray-600 text-xs italic">No matching entities in database</div>
+                                    <div class="p-12 text-center">
+                                        <div class="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4">
+                                            <svg class="w-8 h-8 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                                        </div>
+                                        <p class="text-xs text-gray-600 font-bold uppercase tracking-widest italic">No intelligence matching query</p>
+                                    </div>
                                 </template>
                             </div>
                         </div>
@@ -132,14 +338,33 @@
                     <!-- Recent Research (CHRONOS) -->
                     <template x-if="paletteSearch.length < 2 && recentResearch.length > 0">
                         <div>
-                            <h4 class="px-4 text-[9px] font-black text-gray-500 uppercase tracking-[0.2em] mb-3">Recent Research History</h4>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                <template x-for="item in recentResearch" :key="item.id">
-                                    <a :href="'/mobs/' + item.id" class="flex items-center p-3 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/5 transition-all group">
-                                        <div class="w-10 h-10 rounded-lg bg-gray-950 overflow-hidden mr-3">
-                                            <img :src="'/storage/' + item.image" class="w-full h-full object-cover" x-show="item.image">
+                            <div class="flex items-center justify-between px-4 mb-3">
+                                <h4 class="text-[9px] font-black text-gray-500 uppercase tracking-[0.2em]">Recently Analyzed Subjects</h4>
+                                <button @click="localStorage.removeItem('recent_research'); recentResearch = []; window.notify('Research history purged', 'info');" class="text-[8px] font-black text-red-500/50 hover:text-red-500 uppercase tracking-widest transition-colors">Clear History</button>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <template x-for="(item, index) in recentResearch" :key="item.id">
+                                    <a :href="item.url" 
+                                       :data-index="index"
+                                       :data-edit-url="'/mobs/' + item.id + '/edit'"
+                                       :class="selectedIndex === index ? 'bg-brand-500/20 border-brand-500/40' : 'bg-white/5 border-white/5 hover:bg-brand-500/10 hover:border-brand-500/20'"
+                                       class="flex items-center p-2.5 rounded-2xl border transition-all group relative overflow-hidden">
+                                        <div class="absolute inset-0 bg-gradient-to-r from-brand-500/0 to-brand-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                        <div class="w-10 h-10 rounded-lg bg-black overflow-hidden mr-3 border border-white/5 shadow-lg group-hover:scale-110 transition-transform duration-500 flex-shrink-0">
+                                            <template x-if="item.image">
+                                                <img :src="item.image.includes('http') ? item.image : '/storage/' + item.image" 
+                                                     :alt="item.name"
+                                                     class="w-full h-full object-cover" 
+                                                     onerror="this.src = 'https://ui-avatars.com/api/?name=' + this.alt + '&background=0f172a&color=0ea5e9'">
+                                            </template>
+                                            <div class="w-full h-full flex items-center justify-center text-gray-800" x-show="!item.image">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+                                            </div>
                                         </div>
-                                        <span class="text-[11px] font-bold text-gray-300 truncate group-hover:text-white" x-text="item.name"></span>
+                                        <div class="min-w-0">
+                                            <span class="block text-[11px] font-black text-white truncate group-hover:text-brand-400 transition-colors uppercase tracking-tight" x-text="item.name"></span>
+                                            <span class="text-[8px] font-bold text-gray-500 uppercase tracking-widest" x-text="item.category"></span>
+                                        </div>
                                     </a>
                                 </template>
                             </div>
@@ -150,8 +375,11 @@
                     <div>
                         <h4 class="px-4 text-[9px] font-black text-gray-500 uppercase tracking-[0.2em] mb-3" x-text="paletteSearch.length >= 2 ? 'Related Systems' : 'System Navigation'"></h4>
                         <div class="space-y-1">
-                            <template x-for="link in filteredLinks()" :key="link.url">
-                                <a :href="link.url" class="flex items-center p-4 rounded-2xl hover:bg-white/5 border border-transparent hover:border-white/10 transition-all group">
+                            <template x-for="(link, index) in filteredLinks()" :key="link.url">
+                                <a :href="link.url" 
+                                   :data-index="(paletteSearch.length >= 2 ? liveResults.length : recentResearch.length) + index"
+                                   :class="selectedIndex === (paletteSearch.length >= 2 ? liveResults.length : recentResearch.length) + index ? 'bg-white/10 border-white/20' : 'hover:bg-white/5 border-transparent'"
+                                   class="flex items-center p-4 rounded-2xl border transition-all group">
                                     <div class="min-w-0 flex-1">
                                         <span class="block text-white font-black uppercase tracking-widest text-[11px]" x-text="link.name"></span>
                                         <span class="text-xs text-gray-500" x-text="link.desc"></span>
@@ -182,9 +410,72 @@
 
         <!-- Background Decorations -->
         <div class="fixed inset-0 overflow-hidden pointer-events-none -z-10">
+            <!-- Dynamic Mouse Glow (Aether Atmosphere) -->
+            <div class="hidden lg:block absolute transition-opacity duration-700 pointer-events-none opacity-0"
+                 :style="{ 
+                    left: (mouseX - 400) + 'px', 
+                    top: (mouseY - 400) + 'px', 
+                    opacity: (mouseX === 0 ? 0 : 1) 
+                 }">
+                <div class="w-[800px] h-[800px] bg-brand-500/10 blur-[150px] rounded-full"></div>
+            </div>
+
             <div class="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] bg-brand-600/20 blur-[120px] rounded-full animate-pulse"></div>
             <div class="absolute top-[20%] -right-[10%] w-[35%] h-[35%] bg-accent-400/10 blur-[120px] rounded-full" style="animation: float 8s ease-in-out infinite;"></div>
             <div class="absolute -bottom-[10%] left-[20%] w-[30%] h-[30%] bg-brand-400/10 blur-[120px] rounded-full"></div>
+        </div>
+
+        <!-- Secret Admin Terminal -->
+        <div x-show="terminalOpen" 
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 scale-95"
+             x-transition:enter-end="opacity-100 scale-100"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 scale-100"
+             x-transition:leave-end="opacity-0 scale-95"
+             class="fixed inset-0 z-[110] flex items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-md"
+             x-cloak>
+            
+            <div @click.away="terminalOpen = false" 
+                 class="w-full max-w-3xl terminal-glass border border-red-500/30 rounded-lg shadow-[0_0_50px_rgba(239,68,68,0.2)] overflow-hidden flex flex-col font-mono text-sm relative">
+                
+                <!-- Scanline Effect -->
+                <div class="scanline"></div>
+
+                <!-- Terminal Header -->
+                <div class="px-4 py-2 bg-red-950/20 border-b border-red-500/20 flex justify-between items-center relative z-10">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
+                        <span class="text-[10px] text-red-500 font-bold uppercase tracking-widest oracle-glow">Master Override Terminal</span>
+                    </div>
+                    <button @click="terminalOpen = false" class="text-red-500 hover:text-white transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                    </button>
+                </div>
+
+                <!-- Terminal Body -->
+                <div id="terminal-scroll" class="p-4 h-80 overflow-y-auto space-y-1 bg-black/40 terminal-grid relative z-10">
+                    <template x-for="(line, index) in terminalOutput" :key="index">
+                        <div class="text-red-400/80 break-words" 
+                             :class="line.startsWith('ORACLE:') ? 'text-red-300 font-black oracle-glow' : ''"
+                             x-text="line"></div>
+                    </template>
+                </div>
+
+                <!-- Terminal Input -->
+                <div class="p-4 bg-red-950/10 border-t border-red-500/20">
+                    <div class="flex items-center space-x-2">
+                        <span class="text-red-500 font-black">#</span>
+                        <input type="text" 
+                               x-model="terminalInput" 
+                               x-ref="terminalInput"
+                               @show.window="if(terminalOpen) $nextTick(() => $refs.terminalInput.focus())"
+                               @keydown.enter="executeTerminal()"
+                               class="flex-1 bg-transparent border-none focus:ring-0 text-red-500 font-bold p-0" 
+                               placeholder="Type command (help)..." />
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="min-h-screen">

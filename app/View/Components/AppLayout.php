@@ -7,6 +7,13 @@ use Illuminate\View\View;
 
 class AppLayout extends Component
 {
+    public $theme;
+
+    public function __construct($theme = 'Overworld')
+    {
+        $this->theme = $theme;
+    }
+
     /**
      * Get the view / contents that represents the component.
      */

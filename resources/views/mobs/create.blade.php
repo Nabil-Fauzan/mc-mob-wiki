@@ -255,7 +255,7 @@
                         <!-- Spawning Conditions -->
                         <div>
                             <x-input-label for="spawning_conditions" :value="__('Special Spawning Conditions (Optional)')" />
-                            <textarea id="spawning_conditions" name="spawning_conditions" rows="2" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" placeholder="e.g. Spawned via Ender Pearl, Village Mechanics, etc.">{{ old('spawning_conditions') }}</textarea>
+                            <textarea id="spawning_conditions" name="spawning_conditions" rows="2" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-brand-500 dark:focus:border-brand-600 focus:ring-brand-500 dark:focus:ring-brand-600 rounded-md shadow-sm" placeholder="e.g. Spawned via Ender Pearl, Village Mechanics, etc.">{{ old('spawning_conditions') }}</textarea>
                             <p class="mt-1 text-xs text-gray-500 italic">Use this for mobs that don't spawn naturally in biomes.</p>
                             <x-input-error class="mt-2" :messages="$errors->get('spawning_conditions')" />
                         </div>

@@ -188,9 +188,8 @@
                     crossFade: true
                 },
                 breakpoints: {
-                    0: {
-                        navigation: false,
-                    },
+                    // Mobile-first: navigation is hidden via CSS (!hidden) 
+                    // and only shown from sm: (!flex)
                     640: {
                         navigation: {
                             nextEl: '.swiper-button-next',

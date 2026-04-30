@@ -11,8 +11,24 @@
         --mc-glow: rgba(14, 165, 233, 0.4);
     }
 
+    .theme-nether {
+        --mc-brand: #ef4444; /* Red 500 */
+        --mc-brand-dark: #b91c1c; /* Red 700 */
+        --mc-accent: #f87171; /* Red 400 */
+        --mc-glass: rgba(239, 68, 68, 0.05);
+        --mc-glow: rgba(239, 68, 68, 0.4);
+    }
+
+    .theme-end {
+        --mc-brand: #a855f7; /* Purple 500 */
+        --mc-brand-dark: #7e22ce; /* Purple 700 */
+        --mc-accent: #c084fc; /* Purple 400 */
+        --mc-glass: rgba(168, 85, 247, 0.05);
+        --mc-glow: rgba(168, 85, 247, 0.4);
+    }
+
     body {
-        @apply bg-brand-950 text-gray-100;
+        @apply bg-brand-950 text-gray-100 transition-colors duration-1000;
         scroll-behavior: smooth;
     }
 
@@ -28,7 +44,7 @@
         border-radius: 10px;
     }
     ::-webkit-scrollbar-thumb:hover {
-        background: var(--mc-green);
+        background: var(--mc-brand);
     }
 }
 

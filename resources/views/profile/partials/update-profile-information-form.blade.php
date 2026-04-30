@@ -13,7 +13,7 @@
         @csrf
     </form>
 
-    <form method="post" action="{{ route('profile.update') }}" class="mt-6 space-y-6" enctype="multipart/form-data">
+    <form method="post" action="{{ route('profile.update') }}" class="mt-6 space-y-6" enctype="multipart/form-data" x-data="{ imageUrl: '{{ $user->avatar_url }}' }">
         @csrf
         @method('patch')
 
@@ -25,12 +25,35 @@
             
             <div>
                 <x-input-label for="avatar" :value="__('Avatar (Local Upload)')" />
-                @if ($user->avatar_url)
-                    <div class="mt-3 mb-4">
-                        <img src="{{ $user->avatar_url }}" alt="Profile Avatar" class="w-24 h-24 rounded-2xl border-2 border-brand-500/50 object-cover shadow-[0_0_15px_rgba(14,165,233,0.3)]">
+                
+                <div class="mt-3 mb-6 flex flex-col md:flex-row items-center gap-8" x-data="{ mcUser: '{{ $user->minecraft_username }}' }">
+                    <!-- Local Avatar -->
+                    <div x-show="imageUrl" class="relative group">
+                        <img :src="imageUrl" alt="Profile Avatar Preview" class="w-32 h-32 rounded-2xl border-2 border-brand-500/50 object-cover shadow-[0_0_20px_rgba(14,165,233,0.4)] transition-all duration-500 group-hover:scale-105">
+                        <p class="absolute -bottom-2 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-brand-600 text-[8px] font-black uppercase rounded text-white opacity-0 group-hover:opacity-100 transition-opacity">Local Asset</p>
                     </div>
-                @endif
-                <input id="avatar" name="avatar" type="file" class="mt-2 block w-full text-sm text-gray-400 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-black file:uppercase file:tracking-widest file:bg-brand-500/10 file:text-brand-400 hover:file:bg-brand-500/20 transition-all cursor-pointer" />
+
+                    <!-- 3D Body Render (Mojang API) -->
+                    <template x-if="mcUser && !imageUrl">
+                        <div class="relative group">
+                            <div class="w-32 h-48 bg-black/40 rounded-2xl border border-white/10 flex items-center justify-center overflow-hidden shadow-2xl backdrop-blur-sm">
+                                <img :src="'https://mc-heads.net/body/' + mcUser" class="h-40 group-hover:scale-110 transition-transform duration-700" alt="3D Minecraft Skin">
+                            </div>
+                            <p class="absolute -bottom-2 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-brand-600 text-[8px] font-black uppercase rounded text-white">Aether Link Active</p>
+                        </div>
+                    </template>
+                </div>
+
+                <input id="avatar" name="avatar" type="file" 
+                    @change="
+                        const file = $event.target.files[0];
+                        if (file) {
+                            const reader = new FileReader();
+                            reader.onload = (e) => { imageUrl = e.target.result; };
+                            reader.readAsDataURL(file);
+                        }
+                    "
+                    class="mt-2 block w-full text-sm text-gray-400 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-black file:uppercase file:tracking-widest file:bg-brand-500/10 file:text-brand-400 hover:file:bg-brand-500/20 transition-all cursor-pointer" />
                 <x-input-error class="mt-2" :messages="$errors->get('avatar')" />
             </div>
 

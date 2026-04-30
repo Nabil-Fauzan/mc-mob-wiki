@@ -313,11 +313,21 @@ class MobController extends Controller
         $query = $request->query('q');
         if (!$query) return response()->json([]);
 
-        $mobs = Mob::with('category')
+        $mobs = Mob::with(['category', 'biomes'])
             ->where('name', 'like', "%{$query}%")
             ->orWhere('description', 'like', "%{$query}%")
             ->limit(5)
-            ->get();
+            ->get()
+            ->map(function($mob) {
+                return [
+                    'id' => $mob->id,
+                    'name' => $mob->name,
+                    'category' => $mob->category->name,
+                    'habitat' => $mob->biomes->first()->name ?? 'Global',
+                    'image' => $mob->image ? asset('storage/' . $mob->image) : null,
+                    'url' => route('mobs.show', $mob)
+                ];
+            });
 
         return response()->json($mobs);
     }

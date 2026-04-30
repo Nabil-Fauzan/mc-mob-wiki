@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-app-layout :theme="$biome->dimension->name">
     <div class="py-12 px-4 sm:px-6 lg:px-8">
         <div class="max-w-7xl mx-auto">
             <!-- Breadcrumbs + Admin Controls -->
@@ -70,10 +70,17 @@
                         <div class="absolute inset-x-0 bottom-0 p-8 bg-gradient-to-t from-black to-transparent lg:hidden">
                             <h1 class="text-4xl font-black text-white">{{ $biome->name }}</h1>
                         </div>
+                        <div class="absolute top-4 left-4 z-20">
+                            <span class="px-3 py-1 bg-black/40 backdrop-blur-md border border-white/10 text-xs text-brand-400 rounded-full font-mono cursor-pointer hover:bg-brand-500/20 hover:text-white transition-all active:scale-95" 
+                                  title="Click to copy ID"
+                                  @click="navigator.clipboard.writeText('{{ $biome->id }}'); window.notify('ID {{ $biome->id }} copied to clipboard', 'success')">
+                                UID: {{ str_pad($biome->id, 4, '0', STR_PAD_LEFT) }}
+                            </span>
+                        </div>
                     </div>
                     <div class="p-8 lg:p-12">
                         <div class="hidden lg:block mb-6">
-                            <span class="text-xs font-black uppercase tracking-[0.3em] text-indigo-500 mb-2 block">Region Discovery</span>
+                            <span class="text-xs font-black uppercase tracking-[0.3em] text-brand-500 mb-2 block">Region Discovery</span>
                             <h1 class="text-5xl font-black text-white">{{ $biome->name }}</h1>
                         </div>
                         <p class="text-gray-400 leading-relaxed text-lg mb-8 italic">

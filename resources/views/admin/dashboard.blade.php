@@ -25,6 +25,57 @@
                 </div>
             </div>
 
+            <!-- Quick Action Hub -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="glass-card p-2 rounded-[2rem] border border-white/10 bg-gray-900/40">
+                    <a href="{{ route('mobs.create') }}" class="flex items-center space-x-4 p-4 rounded-[1.75rem] hover:bg-red-500/10 transition-all group">
+                        <div class="w-12 h-12 bg-red-500/20 rounded-xl flex items-center justify-center text-red-500 group-hover:scale-110 transition-transform">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                        </div>
+                        <div>
+                            <span class="block text-xs font-black text-white uppercase tracking-widest">Deploy Mob</span>
+                            <span class="text-[9px] text-gray-500 uppercase font-bold">New Entity Entry</span>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="glass-card p-2 rounded-[2rem] border border-white/10 bg-gray-900/40">
+                    <a href="{{ route('admin.biomes.create') }}" class="flex items-center space-x-4 p-4 rounded-[1.75rem] hover:bg-brand-500/10 transition-all group">
+                        <div class="w-12 h-12 bg-brand-500/20 rounded-xl flex items-center justify-center text-brand-500 group-hover:scale-110 transition-transform">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        </div>
+                        <div>
+                            <span class="block text-xs font-black text-white uppercase tracking-widest">Map Biome</span>
+                            <span class="text-[9px] text-gray-500 uppercase font-bold">New Environment</span>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="glass-card p-2 rounded-[2rem] border border-white/10 bg-gray-900/40">
+                    <div class="flex items-center space-x-4 p-4 rounded-[1.75rem] opacity-50 cursor-not-allowed">
+                        <div class="w-12 h-12 bg-gray-500/20 rounded-xl flex items-center justify-center text-gray-500">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                        </div>
+                        <div>
+                            <span class="block text-xs font-black text-white uppercase tracking-widest">Expansion Hub</span>
+                            <span class="text-[9px] text-gray-500 uppercase font-bold text-red-500/70">Locked</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-card p-2 rounded-[2rem] border border-white/10 bg-gray-900/40">
+                    <div class="flex items-center space-x-4 p-4 rounded-[1.75rem] opacity-50 cursor-not-allowed">
+                        <div class="w-12 h-12 bg-gray-500/20 rounded-xl flex items-center justify-center text-gray-500">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 002 2h2a2 2 0 002-2"></path></svg>
+                        </div>
+                        <div>
+                            <span class="block text-xs font-black text-white uppercase tracking-widest">Global Pail</span>
+                            <span class="text-[9px] text-gray-500 uppercase font-bold text-red-500/70">Terminal Off</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Stats Grid -->
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
                 <!-- Stat Card 1 -->
@@ -66,17 +117,88 @@
                     </div>
                 </div>
 
-                <!-- Stat Card 4 -->
-                <div class="glass-card rounded-3xl border border-purple-500/10 p-6 bg-gray-900/40 hover:bg-gray-800/60 transition-colors group">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <p class="text-gray-500 font-bold uppercase tracking-widest text-[10px] mb-1">New Intel (7 Days)</p>
-                            <h3 class="text-4xl font-black text-white group-hover:text-purple-400 transition-colors">+{{ $stats['new_users'] }}</h3>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- System Health Monitor -->
+                <div class="lg:col-span-2 glass-card rounded-[2.5rem] border border-red-500/10 p-8 bg-gray-900/40 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 p-8 opacity-10">
+                        <svg class="w-32 h-32 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 002 2h2a2 2 0 002-2"></path></svg>
+                    </div>
+                    <div class="flex items-center space-x-3 mb-8">
+                        <div class="w-2 h-2 bg-green-500 rounded-full animate-ping"></div>
+                        <h2 class="text-lg font-black text-white uppercase tracking-widest">Real-time System Diagnostics</h2>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-8">
+                        <div class="space-y-4">
+                            <div class="flex justify-between text-[10px] font-black uppercase tracking-widest text-gray-500">
+                                <span>Processor Load</span>
+                                <span class="text-red-400">24%</span>
+                            </div>
+                            <div class="h-2 bg-white/5 rounded-full overflow-hidden border border-white/5">
+                                <div class="h-full bg-gradient-to-r from-red-500 to-pink-500 w-[24%]"></div>
+                            </div>
+                            <p class="text-[9px] text-gray-600 font-mono italic">Thread active: [0x7f88]</p>
                         </div>
-                        <div class="p-3 bg-purple-500/10 rounded-xl text-purple-500">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+
+                        <div class="space-y-4">
+                            <div class="flex justify-between text-[10px] font-black uppercase tracking-widest text-gray-500">
+                                <span>Memory Integrity</span>
+                                <span class="text-red-400">1.2 GB</span>
+                            </div>
+                            <div class="h-2 bg-white/5 rounded-full overflow-hidden border border-white/5">
+                                <div class="h-full bg-gradient-to-r from-red-500 to-pink-500 w-[45%]"></div>
+                            </div>
+                            <p class="text-[9px] text-gray-600 font-mono italic">Swap: [0.2 GB] Cache: [0.8 GB]</p>
+                        </div>
+
+                        <div class="space-y-4">
+                            <div class="flex justify-between text-[10px] font-black uppercase tracking-widest text-gray-500">
+                                <span>Storage Matrix</span>
+                                <span class="text-red-400">8.4 GB</span>
+                            </div>
+                            <div class="h-2 bg-white/5 rounded-full overflow-hidden border border-white/5">
+                                <div class="h-full bg-gradient-to-r from-red-500 to-pink-500 w-[68%]"></div>
+                            </div>
+                            <p class="text-[9px] text-gray-600 font-mono italic">Registry Image Indexing: [OK]</p>
                         </div>
                     </div>
+
+                    <div class="mt-10 pt-8 border-t border-white/5 flex items-center justify-between">
+                        <div class="flex space-x-6">
+                            <div class="flex flex-col">
+                                <span class="text-[9px] text-gray-600 uppercase font-black tracking-widest">Database Latency</span>
+                                <span class="text-white font-mono text-sm">12ms</span>
+                            </div>
+                            <div class="flex flex-col">
+                                <span class="text-[9px] text-gray-600 uppercase font-black tracking-widest">Active Threads</span>
+                                <span class="text-white font-mono text-sm">342</span>
+                            </div>
+                        </div>
+                        <button class="px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 text-[10px] font-black uppercase tracking-widest border border-red-500/20 rounded-lg transition-all">Flush System Cache</button>
+                    </div>
+                </div>
+
+                <!-- Global Broadcast Terminal -->
+                <div class="glass-card rounded-[2.5rem] border border-red-500/10 p-8 bg-gray-900/40" x-data="{ sending: false }">
+                    <div class="flex items-center space-x-3 mb-6">
+                        <svg class="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M16.5 13a3 3 0 000-6m-8.5 6a3 3 0 010-6"></path></svg>
+                        <h2 class="text-lg font-black text-white uppercase tracking-widest">Broadcast Intel</h2>
+                    </div>
+                    <p class="text-xs text-gray-500 mb-6 font-medium">Transmit a global alert to all active agents in the Aether Wiki system.</p>
+                    
+                    <textarea class="w-full bg-white/5 border border-white/5 rounded-2xl text-white text-sm p-4 placeholder-gray-700 focus:ring-red-500 focus:border-red-500 resize-none h-32 mb-4" placeholder="Enter transmission message..."></textarea>
+                    
+                    <button @click="sending = true; setTimeout(() => { sending = false; window.notify('Transmission Successful', 'success') }, 1500)" 
+                            :disabled="sending"
+                            class="w-full py-4 bg-red-600 hover:bg-red-700 disabled:bg-gray-800 text-white font-black uppercase tracking-[0.2em] rounded-2xl shadow-xl shadow-red-600/20 transition-all active:scale-95 flex items-center justify-center">
+                        <span x-show="!sending">Execute Broadcast</span>
+                        <span x-show="sending" class="flex items-center">
+                            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                            Transmitting...
+                        </span>
+                    </button>
                 </div>
             </div>
 

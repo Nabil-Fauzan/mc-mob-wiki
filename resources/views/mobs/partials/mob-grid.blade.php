@@ -29,7 +29,7 @@
                     </span>
                     <button @click.prevent.stop="toggleCompare({{ $mob->id }}, '{{ $mob->name }}', '{{ asset('storage/' . $mob->image) }}')" 
                         class="p-2 backdrop-blur-md border border-white/10 rounded-full transition-all group/btn"
-                        :class="isComparing({{ $mob->id }}) ? 'bg-indigo-600 border-indigo-500' : 'bg-black/20 hover:bg-white/10'">
+                        :class="isComparing({{ $mob->id }}) ? 'bg-brand-600 border-brand-500' : 'bg-black/20 hover:bg-white/10'">
                         <svg class="w-4 h-4 transition-transform group-hover/btn:scale-125" :class="isComparing({{ $mob->id }}) ? 'text-white' : 'text-gray-400'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" x-show="!isComparing({{ $mob->id }})"></path>
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" x-show="isComparing({{ $mob->id }})"></path>
@@ -57,10 +57,10 @@
             </div>
 
             <div class="p-4 sm:p-6">
-                <h3 class="text-lg sm:text-xl font-bold text-white mb-2 underline decoration-indigo-500/30 group-hover:decoration-indigo-500 transition-colors">{{ $mob->name }}</h3>
+                <h3 class="text-lg sm:text-xl font-bold text-white mb-2 underline decoration-brand-500/30 group-hover:decoration-brand-500 transition-colors">{{ $mob->name }}</h3>
                 <div class="flex flex-wrap items-center gap-1.5 mb-4 max-h-[24px] overflow-hidden">
                     @forelse($mob->biomes as $biome)
-                        <span class="text-[10px] text-indigo-400/80 bg-indigo-500/5 border border-indigo-500/10 px-2 py-0.5 rounded-full whitespace-nowrap">
+                        <span class="text-[10px] text-brand-400/80 bg-brand-500/5 border border-brand-500/10 px-2 py-0.5 rounded-full whitespace-nowrap">
                             {{ $biome->name }}
                         </span>
                         @if($loop->iteration >= 2 && $mob->biomes->count() > 2)
@@ -99,7 +99,7 @@
                 <div class="flex justify-between items-center pt-4 border-t border-white/5 gap-3">
                     <div class="flex -space-x-2">
                         @auth
-                            <a href="{{ route('mobs.edit', $mob) }}" class="p-2 bg-indigo-500/10 text-indigo-400 rounded-lg hover:bg-indigo-500 hover:text-white transition-all">
+                            <a href="{{ route('mobs.edit', $mob) }}" class="p-2 bg-brand-500/10 text-brand-400 rounded-lg hover:bg-brand-600 hover:text-white transition-all">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                             </a>
                             <form action="{{ route('mobs.destroy', $mob) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this mob entries?')">
@@ -124,7 +124,7 @@
             </div>
             <h3 class="text-2xl font-bold text-white mb-2">No Mobs Discovered</h3>
             <p class="text-gray-500">We couldn't find any mobs matching your current search parameters.</p>
-            <button @click="search = ''; category = ''; fetchResults()" class="mt-8 inline-block text-indigo-500 font-bold hover:text-indigo-400">Clear Search Criteria</button>
+            <button @click="search = ''; category = ''; fetchResults()" class="mt-8 inline-block text-brand-500 font-bold hover:text-brand-400">Clear Search Criteria</button>
         </div>
     @endforelse
 </div>

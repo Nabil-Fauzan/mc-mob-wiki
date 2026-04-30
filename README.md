@@ -1,58 +1,85 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🌊 Aether Ocean: Multiversal Intelligence Protocol
+
+Welcome to the **Aether Ocean Wiki**, a high-performance, cinematic intelligence terminal for Minecraft entities and environments. This platform transforms traditional documentation into an immersive, AI-powered atmospheric experience.
+
+---
+
+## 🚀 Key Features
+
+### 🧠 The Oracle: AI Intelligence (Groq & Gemini)
+- **Multiversal Knowledge**: A secret integrated AI assistant that understands both Minecraft lore and your specific database.
+- **Aether Vision**: The Oracle is aware of your registry's real-time stats (Total mobs, latest discoveries, and category distribution).
+- **Cinematic Interface**: Accessible via the Master Terminal with real-time deep analysis simulations.
+
+### 🧬 Researcher Identity (Mojang Sync)
+- **3D Skin Integration**: Dynamic synchronization with Mojang API to display 3D heads in navigation and full-body 3D renders in profiles.
+- **Aether Link**: Researchers can link their Minecraft identities directly to their digital profiles for a truly immersive experience.
+
+### 💎 Cinematic Visual Engine
+- **Aether Ocean Aesthetics**: A bespoke design system featuring glassmorphism, dynamic gradients, and atmospheric blurs.
+- **CRT Terminal Terminal**: A hidden admin terminal featuring scanline effects, CRT grid overlays, and glow animations.
+- **Dimension-Based Theming**: The entire site's color palette (Blue/Red/Purple) shifts dynamically based on current dimensional focus.
+
+### ⚔️ Interactive Intelligence
+- **The Mob Duel Simulator**: A built-in battle engine that simulates combat between entities based on actual in-game statistics (HP & DMG).
+- **Interactive Radar Stats**: Visual threat analysis using interactive radar charts (Chart.js).
+- **Recently Viewed (Chronos)**: Intelligent tracking of your research history for lightning-fast access.
+
+### ⌨️ Power User Interface (Keyboard-First)
+- **Command Palette (Ctrl+K)**: A global search and navigation hub with full arrow-key support.
+- **Protocol Overrides**: Admin-only shortcuts like `'E'` for Quick Edit directly from search results.
+- **Konami Code Access**: The secret gateway to the Master Override Terminal (`↑↑↓↓←→←→BA`).
+
+---
+
+## 🛠️ Technology Stack
+
+- **Core**: [Laravel 11](https://laravel.com)
+- **Intelligence**: [Groq LPU](https://groq.com) (Llama 3.3) & Google Gemini.
+- **Frontend**: [Tailwind CSS](https://tailwindcss.com) & [Alpine.js](https://alpinejs.dev)
+- **Visuals**: [Chart.js](https://www.chartjs.org/) & [Mojang/Mc-Heads API](https://mc-heads.net)
+
+---
+
+## ⚡ Quick Start
+
+1. **Clone & Install**:
+   ```bash
+   composer install
+   npm install
+   ```
+
+2. **Environment Setup**:
+   ```bash
+   cp .env.example .env
+   php artisan key:generate
+   ```
+   *Don't forget to add your `GROQ_API_KEY` for The Oracle.*
+
+3. **Database & Storage**:
+   ```bash
+   php artisan migrate --seed
+   php artisan storage:link
+   ```
+
+4. **Launch Engine**:
+   ```bash
+   php artisan serve
+   npm run dev
+   ```
+
+---
+
+## 🧬 Protocol Access
+
+- **Standard Entry**: `/mobs` (Registry)
+- **Explorer Hub**: `/biomes`
+- **Master Control**: `/admin/dashboard`
+- **Emergency Override**: Use the **Konami Code** on any page to summon **The Oracle**.
+
+---
 
 <p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
+  <i>"Mapping the impossible, one dimension at a time."</i><br>
+  <b>Wiki Protocol [v.3.0.0] - AI ASCENSION</b>
 </p>
-
-## About Laravel
-
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
-
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
-
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
-
-## Learning Laravel
-
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
-
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
-
-```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
-```
-
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
-
-## Contributing
-
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).

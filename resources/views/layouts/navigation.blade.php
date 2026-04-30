@@ -36,6 +36,17 @@
                 </div>
             </div>
 
+            <!-- Search Hint (Desktop) -->
+            <div class="hidden lg:flex items-center flex-1 max-w-xs mx-8">
+                <button @click="paletteOpen = true" class="w-full flex items-center justify-between px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-gray-500 hover:bg-white/10 hover:border-brand-500/30 transition-all group">
+                    <div class="flex items-center">
+                        <svg class="w-4 h-4 mr-2 group-hover:text-brand-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                        <span class="text-xs font-bold uppercase tracking-widest">Search...</span>
+                    </div>
+                    <span class="text-[9px] font-black bg-white/10 px-1.5 py-0.5 rounded border border-white/5 group-hover:border-brand-500/30 transition-colors">CTRL + K</span>
+                </button>
+            </div>
+
             <!-- Settings Dropdown -->
             <div class="hidden sm:flex sm:items-center sm:ms-6">
                 @auth
@@ -43,7 +54,7 @@
                         <x-dropdown align="right" width="48">
                             <x-slot name="trigger">
                                 <button class="inline-flex items-center px-4 py-2 bg-white/5 border border-white/10 text-sm leading-4 font-medium rounded-full text-white hover:bg-white/10 focus:outline-none transition ease-in-out duration-150 backdrop-blur-sm">
-                                    <img class="h-6 w-6 rounded-full mr-2" src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name) }}&color=0EA5E9&background=E0F2FE" alt="{{ Auth::user()->name }}" />
+                                    <img class="h-6 w-6 rounded-full mr-2 border border-brand-500/30" src="{{ Auth::user()->avatar_url ?? 'https://ui-avatars.com/api/?name=' . urlencode(Auth::user()->name) . '&color=0EA5E9&background=E0F2FE' }}" alt="{{ Auth::user()->name }}" />
                                     <div>{{ Auth::user()->name }}</div>
 
                                     <div class="ms-2">
@@ -55,18 +66,59 @@
                             </x-slot>
 
                             <x-slot name="content">
-                                <x-dropdown-link :href="route('profile.edit')" class="hover:bg-brand-600/20">
+                                <div class="px-4 py-3 bg-white/5 border-b border-white/10 mb-2">
+                                    <div class="flex items-center space-x-3 mb-3">
+                                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-accent-500 p-0.5">
+                                            <div class="w-full h-full bg-gray-900 rounded-[0.6rem] overflow-hidden flex items-center justify-center text-xs font-black text-white">
+                                                <img class="w-full h-full object-cover" src="{{ Auth::user()->avatar_url ?? 'https://ui-avatars.com/api/?name=' . urlencode(Auth::user()->name) . '&color=0EA5E9&background=E0F2FE' }}" alt="{{ Auth::user()->name }}" />
+                                            </div>
+                                        </div>
+                                        <div class="min-w-0">
+                                            <p class="text-[10px] font-black text-brand-500 uppercase tracking-widest leading-none mb-1">Active Agent</p>
+                                            <p class="text-sm font-black text-white truncate">{{ Auth::user()->name }}</p>
+                                        </div>
+                                    </div>
+                                    @php
+                                        $fCount = Auth::user()->favorite_mobs()->count();
+                                        $cCount = Auth::user()->comments()->count();
+                                        $uXp = ($fCount * 125) + ($cCount * 350);
+                                        $uLvl = floor(sqrt($uXp / 100)) + 1;
+                                        $uNextLvlXp = pow($uLvl, 2) * 100;
+                                        $uProgress = min(100, round(($uXp / $uNextLvlXp) * 100));
+                                    @endphp
+                                    <div class="space-y-1.5">
+                                        <div class="flex justify-between text-[8px] font-black uppercase tracking-widest text-gray-500">
+                                            <span>Lvl {{ $uLvl }}</span>
+                                            <span>{{ $uProgress }}%</span>
+                                        </div>
+                                        <div class="h-1 bg-white/10 rounded-full overflow-hidden">
+                                            <div class="h-full bg-brand-500" style="width: {{ $uProgress }}%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <x-dropdown-link :href="route('profile.edit')" class="hover:bg-brand-600/20 group flex items-center">
+                                    <svg class="w-4 h-4 mr-2 text-gray-500 group-hover:text-brand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
                                     {{ __('Profile') }}
                                 </x-dropdown-link>
+
+                                @if(Auth::user()->is_admin)
+                                    <x-dropdown-link :href="route('admin.dashboard')" class="text-red-400 hover:bg-red-600/20 group flex items-center font-black uppercase tracking-widest text-[10px]">
+                                        <svg class="w-4 h-4 mr-2 text-red-500 group-hover:animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                                        {{ __('Master Control') }}
+                                    </x-dropdown-link>
+                                @endif
+
+                                <div class="border-t border-white/5 my-1"></div>
 
                                 <!-- Authentication -->
                                 <form method="POST" action="{{ route('logout') }}">
                                     @csrf
-
                                     <x-dropdown-link :href="route('logout')"
                                             onclick="event.preventDefault();
                                                         this.closest('form').submit();"
-                                            class="hover:bg-red-600/20">
+                                            class="hover:bg-red-600/20 group flex items-center text-gray-400 hover:text-red-400">
+                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
                                         {{ __('Log Out') }}
                                     </x-dropdown-link>
                                 </form>
@@ -117,7 +169,7 @@
         <div class="pt-4 pb-1 border-t border-white/5">
             @auth
                 <div class="px-4 flex items-center">
-                    <img class="h-10 w-10 rounded-full mr-3 border-2 border-brand-500/50" src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name) }}&color=0EA5E9&background=E0F2FE" alt="{{ Auth::user()->name }}" />
+                    <img class="h-10 w-10 rounded-full mr-3 border-2 border-brand-500/50" src="{{ Auth::user()->avatar_url ?? 'https://ui-avatars.com/api/?name=' . urlencode(Auth::user()->name) . '&color=0EA5E9&background=E0F2FE' }}" alt="{{ Auth::user()->name }}" />
                     <div>
                         <div class="font-medium text-base text-white">{{ Auth::user()->name }}</div>
                         <div class="font-medium text-sm text-gray-400">{{ Auth::user()->email }}</div>
@@ -128,6 +180,12 @@
                     <x-responsive-nav-link :href="route('profile.edit')" class="text-gray-300">
                         {{ __('Profile') }}
                     </x-responsive-nav-link>
+
+                    @if(Auth::user()->is_admin)
+                        <x-responsive-nav-link :href="route('admin.dashboard')" class="text-red-400 font-black uppercase tracking-widest text-[10px]">
+                            {{ __('Master Control') }}
+                        </x-responsive-nav-link>
+                    @endif
 
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf

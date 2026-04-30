@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-app-layout :theme="$mob->biomes->first()?->dimension?->name">
     <x-slot name="header">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div class="flex flex-col w-full min-w-0">
@@ -63,14 +63,13 @@
     </x-slot>
 
     <div class="py-8 sm:py-12" x-init="
-        let recent = JSON.parse(localStorage.getItem('recent_research') || '[]');
-        recent = recent.filter(m => m.id !== {{ $mob->id }});
-        recent.unshift({
+        window.trackResearch({
             id: {{ $mob->id }},
             name: '{{ $mob->name }}',
-            image: '{{ $mob->image }}'
+            image: '{{ $mob->image ? asset('storage/' . $mob->image) : '' }}',
+            category: '{{ $mob->category->name }}',
+            url: '{{ route('mobs.show', $mob) }}'
         });
-        localStorage.setItem('recent_research', JSON.stringify(recent.slice(0, 6)));
     ">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="glass-card rounded-[1.75rem] sm:rounded-[3rem] overflow-hidden fade-in-up">
@@ -90,7 +89,11 @@
                                     </div>
                                 @endif
                                 <div class="absolute bottom-4 left-4">
-                                    <span class="px-3 py-1 bg-black/40 backdrop-blur-md border border-white/10 text-xs text-brand-400 rounded-full font-mono">UID: {{ str_pad($mob->id, 4, '0', STR_PAD_LEFT) }}</span>
+                                    <span class="px-3 py-1 bg-black/40 backdrop-blur-md border border-white/10 text-xs text-brand-400 rounded-full font-mono cursor-pointer hover:bg-brand-500/20 hover:text-white transition-all active:scale-95" 
+                                          title="Click to copy ID"
+                                          @click="navigator.clipboard.writeText('{{ $mob->id }}'); window.notify('ID {{ $mob->id }} copied to clipboard', 'success')">
+                                        UID: {{ str_pad($mob->id, 4, '0', STR_PAD_LEFT) }}
+                                    </span>
                                 </div>
                             </div>
                             

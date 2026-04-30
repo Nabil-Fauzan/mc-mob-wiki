@@ -198,6 +198,136 @@
                 </div>
             </div>
 
+            <!-- The Mob Duel: Battle Simulator -->
+            @if(count($mobs) === 2)
+                <div class="mt-24 pt-12 border-t border-white/10" x-data="{ 
+                    battleStarted: false,
+                    log: [],
+                    winner: null,
+                    mob1: { name: '{{ $mobs[0]->name }}', hp: {{ intval($mobs[0]->health_normal ?: $mobs[0]->health) }}, maxHp: {{ intval($mobs[0]->health_normal ?: $mobs[0]->health) }}, dmg: {{ intval($mobs[0]->damage_normal ?: $mobs[0]->damage) }} },
+                    mob2: { name: '{{ $mobs[1]->name }}', hp: {{ intval($mobs[1]->health_normal ?: $mobs[1]->health) }}, maxHp: {{ intval($mobs[1]->health_normal ?: $mobs[1]->health) }}, dmg: {{ intval($mobs[1]->damage_normal ?: $mobs[1]->damage) }} },
+                    startBattle() {
+                        this.battleStarted = true;
+                        this.log = ['BATTLE INITIALIZED: ' + this.mob1.name + ' vs ' + this.mob2.name];
+                        this.winner = null;
+                        this.mob1.hp = this.mob1.maxHp;
+                        this.mob2.hp = this.mob2.maxHp;
+                        
+                        let turn = 0;
+                        const interval = setInterval(() => {
+                            if (this.mob1.hp <= 0 || this.mob2.hp <= 0) {
+                                clearInterval(interval);
+                                this.winner = this.mob1.hp > 0 ? this.mob1.name : this.mob2.name;
+                                this.log.push('CRITICAL HIT! ' + this.winner + ' EMERGES VICTORIOUS!');
+                                window.notify('Battle Concluded: ' + this.winner + ' Wins!', 'success');
+                                return;
+                            }
+
+                            if (turn % 2 === 0) {
+                                const d = Math.floor(Math.random() * this.mob1.dmg) + 1;
+                                this.mob2.hp = Math.max(0, this.mob2.hp - d);
+                                this.log.push(this.mob1.name + ' strikes for ' + d + ' damage!');
+                            } else {
+                                const d = Math.floor(Math.random() * this.mob2.dmg) + 1;
+                                this.mob1.hp = Math.max(0, this.mob1.hp - d);
+                                this.log.push(this.mob2.name + ' strikes for ' + d + ' damage!');
+                            }
+                            
+                            turn++;
+                            this.$nextTick(() => {
+                                const logEl = document.getElementById('battle-log');
+                                logEl.scrollTop = logEl.scrollHeight;
+                            });
+                        }, 600);
+                    }
+                }">
+                    <div class="text-center mb-12">
+                        <h2 class="text-3xl font-black text-white uppercase tracking-tighter">The <span class="text-red-500">Mob Duel</span> Simulator</h2>
+                        <p class="text-gray-500 text-xs mt-2 uppercase tracking-widest font-bold">Predictive Combat Analysis Engine [v.1]</p>
+                    </div>
+
+                    <div class="glass-card rounded-[3rem] border border-red-500/20 p-8 sm:p-12 bg-black/40 overflow-hidden relative">
+                        <!-- Visual Arena -->
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-12 items-center">
+                            <!-- Mob 1 State -->
+                            <div class="space-y-6 text-center lg:text-right">
+                                <h3 class="text-2xl font-black text-white uppercase" x-text="mob1.name"></h3>
+                                <div class="space-y-2">
+                                    <div class="flex justify-between lg:justify-end items-center mb-1">
+                                        <span class="text-[10px] font-black text-red-500 uppercase mr-3">Vitality</span>
+                                        <span class="text-sm font-mono text-white" x-text="mob1.hp + ' / ' + mob1.maxHp"></span>
+                                    </div>
+                                    <div class="h-3 bg-white/5 rounded-full overflow-hidden border border-white/10 p-0.5">
+                                        <div class="h-full bg-gradient-to-r from-red-600 to-red-400 transition-all duration-300" :style="'width: ' + (mob1.hp / mob1.maxHp * 100) + '%'"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- VS / Controls -->
+                            <div class="flex flex-col items-center justify-center">
+                                <div class="w-24 h-24 rounded-full bg-red-600/10 border border-red-500/30 flex items-center justify-center mb-8 relative">
+                                    <span class="text-4xl font-black text-white italic tracking-tighter" :class="battleStarted && !winner ? 'animate-pulse text-red-500' : ''">VS</span>
+                                    <div x-show="battleStarted && !winner" class="absolute inset-0 rounded-full border-4 border-red-500 border-t-transparent animate-spin"></div>
+                                </div>
+                                <button @click="startBattle()" 
+                                        :disabled="battleStarted && !winner"
+                                        class="px-8 py-4 bg-red-600 hover:bg-red-700 disabled:bg-gray-800 text-white font-black uppercase tracking-[0.2em] rounded-2xl shadow-xl shadow-red-600/30 transition-all active:scale-95 flex items-center">
+                                    <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"></path></svg>
+                                    <span x-text="winner ? 'RE-ENGAGE SIMULATION' : (battleStarted ? 'COMBAT IN PROGRESS' : 'INITIATE DUEL')"></span>
+                                </button>
+                            </div>
+
+                            <!-- Mob 2 State -->
+                            <div class="space-y-6 text-center lg:text-left">
+                                <h3 class="text-2xl font-black text-white uppercase" x-text="mob2.name"></h3>
+                                <div class="space-y-2">
+                                    <div class="flex justify-between lg:justify-start items-center mb-1">
+                                        <span class="text-[10px] font-black text-red-500 uppercase">Vitality</span>
+                                        <span class="text-sm font-mono text-white ml-3" x-text="mob2.hp + ' / ' + mob2.maxHp"></span>
+                                    </div>
+                                    <div class="h-3 bg-white/5 rounded-full overflow-hidden border border-white/10 p-0.5">
+                                        <div class="h-full bg-gradient-to-r from-red-600 to-red-400 transition-all duration-300" :style="'width: ' + (mob2.hp / mob2.maxHp * 100) + '%'"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Battle Log Terminal -->
+                        <div class="mt-12 bg-black/60 rounded-3xl border border-white/5 p-6 font-mono text-xs overflow-hidden">
+                            <div class="flex items-center justify-between mb-4 border-b border-white/5 pb-3">
+                                <span class="text-gray-500 font-bold uppercase tracking-widest text-[10px]">Transmission Log</span>
+                                <div class="flex space-x-1">
+                                    <div class="w-1.5 h-1.5 rounded-full bg-red-500/40"></div>
+                                    <div class="w-1.5 h-1.5 rounded-full bg-red-500/20"></div>
+                                </div>
+                            </div>
+                            <div id="battle-log" class="h-48 overflow-y-auto space-y-2 scrollbar-none">
+                                <template x-for="(entry, index) in log" :key="index">
+                                    <div class="flex items-start">
+                                        <span class="text-red-500 mr-2">>></span>
+                                        <span class="text-gray-400 font-medium" :class="index === log.length - 1 ? 'text-white' : ''" x-text="entry"></span>
+                                    </div>
+                                </template>
+                                <div x-show="!battleStarted" class="text-gray-700 italic">Awaiting combat initialization...</div>
+                            </div>
+                        </div>
+
+                        <!-- Victory Overlay -->
+                        <div x-show="winner" 
+                             x-transition:enter="transition ease-out duration-500"
+                             x-transition:enter-start="opacity-0 scale-110"
+                             x-transition:enter-end="opacity-100 scale-100"
+                             class="absolute inset-0 bg-red-600/10 backdrop-blur-sm flex flex-col items-center justify-center p-8 text-center">
+                            <div class="p-6 bg-black border-2 border-red-500 rounded-3xl shadow-[0_0_50px_rgba(239,68,68,0.5)]">
+                                <span class="text-[10px] font-black text-red-500 uppercase tracking-[0.3em] block mb-2">Simulation Complete</span>
+                                <h4 class="text-4xl font-black text-white uppercase mb-4" x-text="winner + ' WINS'"></h4>
+                                <button @click="winner = null" class="px-6 py-2 bg-red-600 text-white text-[10px] font-black uppercase rounded-full">Reset Arena</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
             <!-- Footer Note -->
             <div class="mt-20 text-center">
                 <div class="inline-block p-1 bg-white/5 rounded-full px-6 py-2 border border-white/10">
@@ -206,6 +336,7 @@
                     </p>
                 </div>
             </div>
+
         </div>
     </div>
 </x-app-layout>

@@ -7,6 +7,7 @@ use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\CommentVoteController;
 use App\Http\Controllers\AnalyticsController;
+use App\Http\Controllers\OracleController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -25,10 +26,26 @@ Route::middleware(['auth', 'verified'])->group(function () {
         /** @var \App\Models\User $user */
         $user = \Illuminate\Support\Facades\Auth::user();
         $favorites = $user->favorite_mobs()->with(['category', 'biomes'])->latest()->get();
+        
+        $commentsCount = $user->comments()->count();
+        $favoritesCount = $favorites->count();
+        $xp = ($favoritesCount * 125) + ($commentsCount * 350);
+        $level = floor(sqrt($xp / 100)) + 1;
+        $nextLevelXp = pow($level, 2) * 100;
+        $progress = min(100, round(($xp / $nextLevelXp) * 100));
+
         $stats = [
-            'favorites_count' => $favorites->count(),
-            'comments_count' => $user->comments()->count(),
+            'favorites_count' => $favoritesCount,
+            'comments_count' => $commentsCount,
             'recent_comments' => $user->comments()->with('mob')->latest()->limit(5)->get(),
+            'xp' => $xp,
+            'level' => $level,
+            'progress' => $progress,
+            'skills' => [
+                'combat' => min(100, ($user->favorite_mobs()->whereHas('category', fn($q) => $q->where('name', 'Hostile'))->count() * 15) + ($user->comments()->whereHas('mob.category', fn($q) => $q->where('name', 'Hostile'))->count() * 10)),
+                'survival' => min(100, ($user->favorite_mobs()->whereHas('category', fn($q) => $q->where('name', '!=', 'Hostile'))->count() * 15) + ($user->comments()->whereHas('mob.category', fn($q) => $q->where('name', '!=', 'Hostile'))->count() * 10)),
+                'explorer' => min(100, $user->favorite_mobs()->with('biomes')->get()->pluck('biomes')->flatten()->unique('id')->count() * 20),
+            ]
         ];
         return view('dashboard', compact('favorites', 'stats'));
     })->name('dashboard');
@@ -40,6 +57,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('/mobs/{mob}', [MobController::class, 'update'])->name('mobs.update');
     Route::delete('/mobs/{mob}', [MobController::class, 'destroy'])->name('mobs.destroy');
     
+    Route::get('/api/oracle', [OracleController::class, 'ask'])->name('api.oracle');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');

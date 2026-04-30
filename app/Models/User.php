@@ -84,7 +84,7 @@ class User extends Authenticatable
         }
         
         if ($this->minecraft_username) {
-            return 'https://minotar.net/helm/' . $this->minecraft_username . '/256.png';
+            return 'https://mc-heads.net/avatar/' . $this->minecraft_username . '/100';
         }
 
         return null;

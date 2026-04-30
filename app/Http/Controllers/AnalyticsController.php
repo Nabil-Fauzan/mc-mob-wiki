@@ -44,10 +44,39 @@ class AnalyticsController extends Controller
             ->get();
 
         // 5. Total Metrics
+        // 6. Top Researchers (Leaderboard)
+        $topResearchers = \App\Models\User::all()->map(function($user) {
+            $favs = $user->favorite_mobs()->count();
+            $coms = $user->comments()->count();
+            $xp = ($favs * 125) + ($coms * 350);
+            $user->xp = $xp;
+            $user->lvl = floor(sqrt($xp / 100)) + 1;
+            return $user;
+        })->sortByDesc('xp')->take(5);
+
+        // 7. Dimension Stability (Hostile vs Passive Ratio)
+        $dimensionStability = $dimensions->map(function($dim) {
+            $mobs = Mob::whereHas('biomes', function($q) use ($dim) {
+                $q->where('dimension_id', $dim->id);
+            })->get();
+            
+            $hostile = $mobs->filter(fn($m) => $m->category->name == 'Hostile')->count();
+            $total = $mobs->count();
+            $stability = $total > 0 ? round((($total - $hostile) / $total) * 100) : 100;
+            
+            return [
+                'name' => $dim->name,
+                'stability' => $stability,
+                'status' => $stability > 70 ? 'Stable' : ($stability > 40 ? 'Volatile' : 'Critical')
+            ];
+        });
+
         $totalStats = [
             'mobs' => Mob::count(),
             'biomes' => Biome::count(),
             'dimensions' => Dimension::count(),
+            'top_researchers' => $topResearchers,
+            'stability' => $dimensionStability
         ];
 
         return view('pages.stats', compact(
