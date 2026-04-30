@@ -294,6 +294,28 @@
                 </form>
             </div>
 
+            <div id="oracle-console" class="glass-card rounded-[2rem] border border-indigo-500/20 p-8 bg-gray-900/40">
+                <div class="flex items-center justify-between mb-5">
+                    <h2 class="text-lg font-black text-white uppercase tracking-widest">Oracle Console</h2>
+                    <span class="text-xs text-gray-400">Admin validation panel</span>
+                </div>
+                <div x-data="{ q: 'Creeper', mode: 'data', lang: 'id', out: '', loading: false }" class="space-y-4">
+                    <div class="grid md:grid-cols-4 gap-3">
+                        <input x-model="q" class="md:col-span-2 bg-black/30 border border-white/10 rounded-xl px-3 py-2 text-sm text-white" placeholder="Oracle query..." />
+                        <select x-model="mode" class="bg-black/30 border border-white/10 rounded-xl px-3 py-2 text-sm text-white">
+                            <option value="data">Data</option>
+                            <option value="lore">Lore</option>
+                        </select>
+                        <select x-model="lang" class="bg-black/30 border border-white/10 rounded-xl px-3 py-2 text-sm text-white">
+                            <option value="id">ID</option>
+                            <option value="en">EN</option>
+                        </select>
+                    </div>
+                    <button @click="loading = true; fetch('/api/oracle', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').getAttribute('content') }, body: JSON.stringify({ query: q, mode, lang }) }).then(r => r.json()).then(d => out = JSON.stringify(d, null, 2)).finally(() => loading = false)" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold uppercase tracking-widest">Run Oracle Check</button>
+                    <pre class="bg-black/40 border border-white/10 rounded-xl p-4 text-xs text-indigo-200 overflow-auto min-h-[140px]" x-text="loading ? 'Running...' : (out || 'No result yet.')"></pre>
+                </div>
+            </div>
+
         </div>
     </div>
 </x-app-layout>

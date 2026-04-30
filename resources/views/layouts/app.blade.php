@@ -189,6 +189,14 @@
                             this.terminalOutput.push('ORACLE: INITIALIZING DEEP ANALYSIS...');
                             this.terminalOutput.push('ORACLE: ACCESSING MULTIVERSAL DATA...');
 
+                            fetch('/api/oracle', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').getAttribute('content')
+                                },
+                                body: JSON.stringify({ query, lang: 'id', mode: 'lore' })
+                            })
                             fetch('/api/oracle?query=' + encodeURIComponent(query))
                                 .then(res => res.json())
                                 .then(data => {
