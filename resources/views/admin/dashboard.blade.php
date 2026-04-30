@@ -30,6 +30,11 @@
                 <div class="mt-4 md:mt-0 flex space-x-3">
                     <a href="{{ route('dashboard') }}" class="px-6 py-3 bg-white/5 hover:bg-white/10 text-white font-bold rounded-xl border border-white/10 transition-colors uppercase tracking-wider text-xs">Return to User Profile</a>
                 </div>
+                <a href="#oracle-console"
+                   class="absolute bottom-4 right-4 inline-flex items-center gap-1.5 px-3 py-2 rounded-full border border-indigo-400/40 bg-indigo-500/15 text-indigo-200 text-[10px] font-black uppercase tracking-widest hover:bg-indigo-500/25 transition-all shadow-[0_0_20px_rgba(99,102,241,0.25)]">
+                    <span class="w-1.5 h-1.5 rounded-full bg-indigo-300 animate-pulse"></span>
+                    Oracle Console
+                </a>
             </div>
 
             <!-- Quick Action Hub -->
