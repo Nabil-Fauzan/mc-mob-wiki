@@ -37,13 +37,19 @@
             </div>
 
             <!-- Search Hint (Desktop) -->
-            <div class="hidden lg:flex items-center flex-1 max-w-xs mx-8">
+            <div class="hidden lg:flex items-center flex-1 max-w-xs mx-8 gap-2">
                 <button @click="paletteOpen = true" class="w-full flex items-center justify-between px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-gray-500 hover:bg-white/10 hover:border-brand-500/30 transition-all group">
                     <div class="flex items-center">
                         <svg class="w-4 h-4 mr-2 group-hover:text-brand-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                         <span class="text-xs font-bold uppercase tracking-widest">Search...</span>
                     </div>
                     <span class="text-[9px] font-black bg-white/10 px-1.5 py-0.5 rounded border border-white/5 group-hover:border-brand-500/30 transition-colors">CTRL + K</span>
+                </button>
+                <button @click="togglePerformanceMode()"
+                        :aria-pressed="performanceMode.toString()"
+                        class="px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-xs font-bold text-gray-300 hover:text-white hover:border-brand-500/40 transition-all"
+                        :class="performanceMode ? 'bg-brand-500/20 border-brand-500/40 text-brand-300' : ''">
+                    PERF
                 </button>
             </div>
 

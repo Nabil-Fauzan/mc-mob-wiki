@@ -5,7 +5,7 @@
             preg_match('/\d+/', $mob->damage_normal ?: $mob->damage, $dM);
             $isThreatening = intval($dM[0] ?? 0) >= 10;
         @endphp
-        <div class="glass-card rounded-[1.5rem] sm:rounded-[2rem] overflow-hidden group hover:-translate-y-2 transition-all duration-500 stagger-item" 
+        <div class="ui-panel overflow-hidden group hover:-translate-y-2 transition-all duration-500 stagger-item"
              style="animation-delay: {{ ($loop->index % 8) * 75 }}ms">
             <div class="aspect-[4/5] bg-gray-900 relative overflow-hidden {{ $isThreatening ? 'threat-pulse' : '' }}">
                 @if($mob->image)
@@ -17,7 +17,7 @@
                         </svg>
                     </div>
                 @endif
-                
+
                 <!-- Category Badge -->
                 <div class="absolute top-3 right-3 sm:top-4 sm:right-4 flex flex-col space-y-2">
                     <span class="px-2.5 sm:px-3 py-1 text-[9px] sm:text-[10px] font-black uppercase tracking-widest rounded-full backdrop-blur-md border
@@ -27,7 +27,7 @@
                     ">
                         {{ $mob->category->name }}
                     </span>
-                    <button @click.prevent.stop="toggleCompare({{ $mob->id }}, '{{ $mob->name }}', '{{ asset('storage/' . $mob->image) }}')" 
+                    <button @click.prevent.stop="toggleCompare({{ $mob->id }}, '{{ $mob->name }}', '{{ asset('storage/' . $mob->image) }}')"
                         class="p-2 backdrop-blur-md border border-white/10 rounded-full transition-all group/btn"
                         :class="isComparing({{ $mob->id }}) ? 'bg-brand-600 border-brand-500' : 'bg-black/20 hover:bg-white/10'">
                         <svg class="w-4 h-4 transition-transform group-hover/btn:scale-125" :class="isComparing({{ $mob->id }}) ? 'text-white' : 'text-gray-400'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -37,9 +37,9 @@
                     </button>
                     <!-- Favorite Toggle -->
                     <div class="flex flex-col items-center">
-                        <button @click.prevent.stop="toggleFavorite({{ $mob->id }})" 
+                        <button @click.prevent.stop="toggleFavorite({{ $mob->id }})"
                             class="p-2 bg-black/20 backdrop-blur-md border border-white/10 rounded-full hover:bg-white/10 transition-all group/fav">
-                            <svg class="w-4 h-4 transition-all duration-300 group-hover/fav:scale-125 favorite-heart-{{ $mob->id }} {{ $mob->is_favorited ? 'text-red-500 fill-current' : 'text-gray-400' }}" 
+                            <svg class="w-4 h-4 transition-all duration-300 group-hover/fav:scale-125 favorite-heart-{{ $mob->id }} {{ $mob->is_favorited ? 'text-red-500 fill-current' : 'text-gray-400' }}"
                                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
                             </svg>
@@ -64,11 +64,11 @@
                             {{ $biome->name }}
                         </span>
                         @if($loop->iteration >= 2 && $mob->biomes->count() > 2)
-                            <span class="text-[10px] text-gray-600 font-bold">+{{ $mob->biomes->count() - 2 }}</span>
+                            <span class="text-[10px] text-gray-400 font-bold">+{{ $mob->biomes->count() - 2 }}</span>
                             @break
                         @endif
                     @empty
-                        <span class="text-[10px] text-gray-500 bg-white/5 px-2 py-0.5 rounded-full">Global Presence</span>
+                        <span class="text-[10px] text-gray-300 bg-white/5 px-2 py-0.5 rounded-full">Global Presence</span>
                     @endforelse
                 </div>
 
@@ -78,7 +78,7 @@
 
                 <!-- Direct Loot Preview -->
                 <div class="mb-6 pt-4 border-t border-white/5">
-                    <span class="text-[9px] font-black text-gray-500 uppercase tracking-widest block mb-2">Loot Intelligence Preview</span>
+                    <span class="text-[9px] font-black text-gray-300 uppercase tracking-widest block mb-2">Loot Intelligence Preview</span>
                     <div class="flex flex-wrap gap-1.5">
                         @forelse($mob->loot->take(4) as $drop)
                             <div class="flex items-center space-x-1 px-1.5 py-1 bg-white/5 rounded-md border border-white/5 hover:border-yellow-500/30 transition-all cursor-help" title="{{ $drop->item_name }}">
@@ -86,7 +86,7 @@
                                 <span class="text-[8px] text-gray-400 font-bold uppercase truncate max-w-[56px] sm:max-w-[40px]">{{ $drop->item_name }}</span>
                             </div>
                         @empty
-                            <span class="text-[8px] text-gray-600 italic">No loot metadata</span>
+                            <span class="text-[8px] text-gray-400 italic">No loot metadata</span>
                         @endforelse
                         @if($mob->loot->count() > 4)
                             <div class="flex items-center px-1.5 py-1 bg-white/5 rounded-md border border-white/5">
@@ -95,7 +95,7 @@
                         @endif
                     </div>
                 </div>
-                
+
                 <div class="flex justify-between items-center pt-4 border-t border-white/5 gap-3">
                     <div class="flex -space-x-2">
                         @auth
@@ -111,20 +111,30 @@
                             </form>
                         @endauth
                     </div>
-                    <div class="text-[10px] text-gray-600 font-mono tracking-tighter text-right">
+                    <div class="text-[10px] text-gray-400 font-mono tracking-tighter text-right">
                         {{ strtoupper($mob->category->name) }} // {{ $mob->id }}
                     </div>
                 </div>
             </div>
         </div>
     @empty
-        <div class="col-span-full glass-card p-20 text-center rounded-[3rem]">
+        <div class="col-span-full ui-panel p-12 sm:p-20 text-center">
             <div class="w-20 h-20 bg-gray-800 rounded-3xl flex items-center justify-center mx-auto mb-6">
                 <svg class="w-10 h-10 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
             </div>
             <h3 class="text-2xl font-bold text-white mb-2">No Mobs Discovered</h3>
-            <p class="text-gray-500">We couldn't find any mobs matching your current search parameters.</p>
-            <button @click="search = ''; category = ''; fetchResults()" class="mt-8 inline-block text-brand-500 font-bold hover:text-brand-400">Clear Search Criteria</button>
+            <p class="text-gray-300">We couldn't find any mobs matching your current search parameters.</p>
+            <div class="mt-8 flex flex-wrap items-center justify-center gap-3">
+                <button @click="resetFilters()" class="px-4 py-2 rounded-xl bg-brand-600/80 hover:bg-brand-600 text-white font-bold transition-colors">
+                    Reset All Filters
+                </button>
+                <button @click="showAdvanced = true" class="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-gray-200 font-bold transition-colors">
+                    Open Advanced Filters
+                </button>
+                <a href="{{ route('biomes.index') }}" class="px-4 py-2 rounded-xl border border-white/20 hover:border-brand-500/50 text-gray-200 font-bold transition-colors">
+                    Explore Biomes
+                </a>
+            </div>
         </div>
     @endforelse
 </div>

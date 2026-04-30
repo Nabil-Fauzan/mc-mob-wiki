@@ -32,6 +32,11 @@
         scroll-behavior: smooth;
     }
 
+    :focus-visible {
+        outline: 2px solid var(--mc-brand);
+        outline-offset: 2px;
+    }
+
     /* Custom Scrollbar */
     ::-webkit-scrollbar {
         width: 8px;
@@ -52,13 +57,33 @@
     .glass-card {
         @apply bg-white/5 backdrop-blur-xl border border-white/10 shadow-2xl;
     }
-    
+    .ui-panel {
+        @apply glass-card rounded-3xl border-white/10;
+    }
+    .ui-pill {
+        @apply rounded-2xl;
+    }
+
     .btn-primary-mc {
         @apply bg-[#0ea5e9] hover:bg-[#0284c7] text-white font-bold py-2 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 hover:shadow-[0_0_20px_rgba(14,165,233,0.4)] flex items-center justify-center whitespace-nowrap;
     }
 
     .minecraft-glow {
         text-shadow: 0 0 10px rgba(14, 165, 233, 0.5);
+    }
+}
+
+/* Accessibility & performance mode */
+.performance-mode * {
+    animation: none !important;
+    transition-duration: 120ms !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation: none !important;
+        transition: none !important;
+        scroll-behavior: auto !important;
     }
 }
 
@@ -156,4 +181,3 @@
 .swiper-pagination-bullet-active {
     @apply bg-[#0ea5e9] !important;
 }
-
