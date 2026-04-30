@@ -3,7 +3,7 @@
         <div class="flex flex-col md:flex-row justify-between items-center gap-4">
             <div>
                 <h1 class="text-3xl font-black text-white tracking-tight">Minecraft <span class="text-brand-500">Wiki</span></h1>
-                <p class="text-gray-400 text-sm">Explore the database of overworld and beyond.</p>
+                <p class="text-gray-300 text-sm">Explore the database of overworld and beyond.</p>
             </div>
             @auth
                 <a href="{{ route('mobs.create') }}" class="btn-primary-mc">
@@ -14,8 +14,8 @@
         </div>
     </x-slot>
 
-    <div x-data="{ 
-        search: '{{ request('search') }}', 
+    <div x-data="{
+        search: '{{ request('search') }}',
         category: '{{ request('category') }}',
         biome: '{{ request('biome') }}',
         loot_search: '{{ request('loot_search') }}',
@@ -25,7 +25,7 @@
         showAdvanced: false,
         isLoading: false,
         compareList: [],
-        
+
         init() {
             this.initPaginationLinks();
             const saved = localStorage.getItem('mob_compare_list');
@@ -58,7 +58,7 @@
             const ids = this.compareList.map(m => m.id).join(',');
             return `{{ route('mobs.comparison') }}?ids=${ids}`;
         },
-        
+
         async fetchResults() {
             this.isLoading = true;
             const params = new URLSearchParams({
@@ -70,16 +70,16 @@
                 is_ranged: this.is_ranged,
                 sort: this.sort
             });
-            
+
             const url = `{{ route('mobs.index') }}?${params.toString()}`;
-            
+
             try {
                 const startTime = Date.now();
                 const response = await fetch(url, {
                     headers: { 'X-Requested-With': 'XMLHttpRequest' }
                 });
                 const html = await response.text();
-                
+
                 // Ensure a minimum aesthetic duration of 300ms for the skeleton shimmer
                 const elapsed = Date.now() - startTime;
                 if(elapsed < 300) await new Promise(r => setTimeout(r, 300 - elapsed));
@@ -162,7 +162,7 @@
         }
     }" class="py-8 sm:py-12 relative overflow-hidden">
         <!-- Floating Comparison Bar (Remains same) -->
-        <div x-show="compareList.length > 0" 
+        <div x-show="compareList.length > 0"
              x-transition:enter="transition ease-out duration-500"
              x-transition:enter-start="translate-y-full opacity-0"
              x-transition:enter-end="translate-y-0 opacity-100"
@@ -196,29 +196,33 @@
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <!-- Search and Filter Module -->
-            <div class="glass-card rounded-[1.75rem] sm:rounded-[2.5rem] mb-10 sm:mb-12 overflow-hidden border-brand-500/10 shadow-2xl">
+            <div class="ui-panel mb-10 sm:mb-12 overflow-hidden border-brand-500/10 shadow-2xl">
                 <div class="p-4 sm:p-8 lg:p-10">
+                    <div class="mb-6 sm:mb-8">
+                        <h2 class="text-lg sm:text-xl font-black text-white">Entity Discovery</h2>
+                        <p class="text-sm text-gray-300">Use global search first, then refine with classification, biome, and combat traits.</p>
+                    </div>
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-5 sm:gap-8">
                         <!-- Primary Search -->
                         <div class="md:col-span-2">
-                            <x-input-label for="search" :value="__('Global Entity Search')" class="text-gray-500 mb-2 font-black uppercase tracking-widest text-[9px]" />
+                            <x-input-label for="search" :value="__('Global Entity Search')" class="text-gray-300 mb-2 font-black uppercase tracking-widest text-[9px]" />
                             <div class="relative group">
                                 <span class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none transition-colors group-focus-within:text-brand-500">
                                     <svg class="h-5 w-5 text-gray-600 group-focus-within:text-brand-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                                 </span>
-                                <input id="search" type="text" 
+                                <input id="search" type="text"
                                     x-model.debounce.300ms="search"
                                     @input="fetchResults()"
-                                    class="block w-full pl-12 pr-4 py-4 bg-white/5 border-white/5 rounded-[1.25rem] text-white placeholder-gray-600 focus:ring-2 focus:ring-brand-500/50 focus:bg-white/10 transition-all font-bold" 
+                                    class="block w-full pl-12 pr-4 py-4 bg-white/5 border-white/5 rounded-[1.25rem] text-white placeholder-gray-600 focus:ring-2 focus:ring-brand-500/50 focus:bg-white/10 transition-all font-bold"
                                     placeholder="Search by name or description..." />
                             </div>
                         </div>
 
                         <!-- Classification Filter -->
                         <div>
-                            <x-input-label for="category" :value="__('Classification')" class="text-gray-500 mb-2 font-black uppercase tracking-widest text-[9px]" />
+                            <x-input-label for="category" :value="__('Classification')" class="text-gray-300 mb-2 font-black uppercase tracking-widest text-[9px]" />
                             <div class="relative">
-                                <select id="category" 
+                                <select id="category"
                                     x-model="category"
                                     @change="fetchResults()"
                                     class="block w-full py-4 pl-4 pr-10 bg-white/5 border-white/5 rounded-[1.25rem] text-white focus:ring-2 focus:ring-brand-500/50 transition-all appearance-none cursor-pointer font-bold">
@@ -237,9 +241,9 @@
 
                         <!-- Sorting -->
                         <div>
-                            <x-input-label for="sort" :value="__('Intelligence Priority')" class="text-gray-500 mb-2 font-black uppercase tracking-widest text-[9px]" />
+                            <x-input-label for="sort" :value="__('Intelligence Priority')" class="text-gray-300 mb-2 font-black uppercase tracking-widest text-[9px]" />
                             <div class="relative">
-                                <select id="sort" 
+                                <select id="sort"
                                     x-model="sort"
                                     @change="fetchResults()"
                                     class="block w-full py-4 pl-4 pr-10 bg-white/5 border-white/5 rounded-[1.25rem] text-white focus:ring-2 focus:ring-brand-500/50 transition-all appearance-none cursor-pointer font-bold">
@@ -258,14 +262,14 @@
 
                     <!-- Advanced Filter Trigger -->
                     <div class="mt-6 sm:mt-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-t border-white/5 pt-6 sm:pt-8">
-                        <button @click="showAdvanced = !showAdvanced" 
+                        <button @click="showAdvanced = !showAdvanced"
                             class="flex items-center space-x-2 text-xs font-black uppercase tracking-widest text-brand-400 hover:text-brand-300 transition-colors">
                             <span x-text="showAdvanced ? 'Hide Advanced Filters' : 'Show Advanced Filters'"></span>
                             <svg class="w-4 h-4 transition-transform duration-300" :class="showAdvanced ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"></path></svg>
                         </button>
-                        
+
                         <div class="flex items-center flex-wrap gap-3 sm:gap-4">
-                            <button @click="resetFilters()" 
+                            <button @click="resetFilters()"
                                 x-show="search || category || biome || loot_search || is_melee || is_ranged || sort !== 'newest'"
                                 x-transition
                                 class="text-[10px] font-black uppercase tracking-widest text-gray-500 hover:text-red-500 transition-colors">
@@ -278,15 +282,15 @@
                     </div>
 
                     <!-- Advanced Filter Panel -->
-                    <div x-show="showAdvanced" 
+                    <div x-show="showAdvanced"
                         x-collapse
                         class="mt-6 sm:mt-8 grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-8 p-4 sm:p-8 bg-black/20 rounded-[1.25rem] sm:rounded-[1.5rem] border border-white/5">
-                        
+
                         <!-- Biome Filter (Grouped) -->
                         <div>
                             <x-input-label for="biome" :value="__('Habitat Intelligence (Biome)')" class="text-gray-500 mb-2 font-black uppercase tracking-widest text-[9px]" />
                             <div class="relative">
-                                <select id="biome" 
+                                <select id="biome"
                                     x-model="biome"
                                     @change="fetchResults()"
                                     class="block w-full py-3 pl-4 pr-10 bg-white/5 border-white/5 rounded-xl text-white focus:ring-2 focus:ring-brand-500/50 appearance-none cursor-pointer font-bold text-sm">
@@ -314,10 +318,10 @@
                                 <span class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                     <svg class="h-4 w-4 text-gray-600 group-focus-within:text-yellow-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
                                 </span>
-                                <input id="loot_search" type="text" 
+                                <input id="loot_search" type="text"
                                     x-model.debounce.400ms="loot_search"
                                     @input="fetchResults()"
-                                    class="block w-full pl-10 pr-4 py-3 bg-white/5 border-white/5 rounded-xl text-white placeholder-gray-600 focus:ring-2 focus:ring-yellow-500/50 transition-all font-bold text-sm" 
+                                    class="block w-full pl-10 pr-4 py-3 bg-white/5 border-white/5 rounded-xl text-white placeholder-gray-600 focus:ring-2 focus:ring-yellow-500/50 transition-all font-bold text-sm"
                                     placeholder="e.g. Iron, Pearl, Gunpowder..." />
                             </div>
                         </div>
