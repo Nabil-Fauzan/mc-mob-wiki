@@ -28,6 +28,7 @@ class ProfileUpdateRequest extends FormRequest
             ],
             'avatar' => ['nullable', 'image', 'max:2048'],
             'minecraft_username' => ['nullable', 'string', 'max:50'],
+            'remove_avatar' => ['nullable', 'boolean'],
             'public_slug' => [
                 'nullable',
                 'string',
