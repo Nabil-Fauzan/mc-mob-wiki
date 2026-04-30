@@ -179,7 +179,8 @@
                         this.terminalOutput.push('> ' + this.terminalInput);
 
                         if (cmd === 'help') {
-                            this.terminalOutput.push('Available: override, intel, oracle [query], registry, explorer, cls, exit');
+                            this.terminalOutput.push('Available: help, override/admin, intel, oracle [query], registry, explorer, cls, exit');
+                            this.terminalOutput.push('Admin Shortcuts: Alt+G (Dashboard), Alt+M (Oracle Console), Alt+U (Recent Users)');
                         } else if (cmd.startsWith('oracle')) {
                             const query = cmd.replace('oracle', '').trim();
                             if (!query) {
