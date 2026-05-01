@@ -60,6 +60,10 @@ class AdminController extends Controller
             'mob_ids.*' => ['integer', 'exists:mobs,id'],
         ]);
 
+        $mobs = Mob::whereIn('id', $validated['mob_ids'])
+            ->where('user_id', auth()->id())
+            ->get();
+
         $ids = collect($validated['mob_ids'])->unique()->values();
         $deleted = Mob::whereIn('id', $ids)->delete();
 
