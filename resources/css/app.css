@@ -168,6 +168,19 @@
     border-color: rgba(15, 23, 42, 0.12);
 }
 
+.theme-light .text-white {
+    color: #0f172a !important;
+}
+
+.theme-light .bg-gray-900,
+.theme-light .bg-gray-900\/40,
+.theme-light .bg-gray-900\/50,
+.theme-light .bg-black\/20,
+.theme-light .bg-black\/30,
+.theme-light .bg-black\/40 {
+    background-color: rgba(226, 232, 240, 0.72) !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
         animation: none !important;
