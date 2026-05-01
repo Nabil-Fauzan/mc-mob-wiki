@@ -26,7 +26,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         /** @var \App\Models\User $user */
         $user = \Illuminate\Support\Facades\Auth::user();
         $favorites = $user->favorite_mobs()->with(['category', 'biomes'])->latest()->get();
-        
+
         $commentsCount = $user->comments()->count();
         $favoritesCount = $favorites->count();
         $xp = ($favoritesCount * 125) + ($commentsCount * 350);
@@ -56,8 +56,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/mobs/{mob}/edit', [MobController::class, 'edit'])->name('mobs.edit');
     Route::patch('/mobs/{mob}', [MobController::class, 'update'])->name('mobs.update');
     Route::delete('/mobs/{mob}', [MobController::class, 'destroy'])->name('mobs.destroy');
-    
-    Route::get('/api/oracle', [OracleController::class, 'ask'])->name('api.oracle');
+
+    Route::post('/api/oracle', [OracleController::class, 'ask'])->middleware('throttle:oracle')->name('api.oracle');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
@@ -95,7 +95,9 @@ Route::get('/researchers/{user:public_slug}', [\App\Http\Controllers\ResearcherC
 // Admin Security Gateway
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [\App\Http\Controllers\AdminController::class, 'index'])->name('dashboard');
-    
+    Route::delete('/comments/{comment}', [\App\Http\Controllers\AdminController::class, 'moderateComment'])->name('comments.destroy');
+    Route::delete('/mobs/bulk-delete', [\App\Http\Controllers\AdminController::class, 'bulkDeleteMobs'])->name('mobs.bulk-delete');
+
     // Biome Deployment & Management
     Route::get('/biomes/create', [\App\Http\Controllers\BiomeController::class, 'create'])->name('biomes.create');
     Route::post('/biomes', [\App\Http\Controllers\BiomeController::class, 'store'])->name('biomes.store');
