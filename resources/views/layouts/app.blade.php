@@ -43,9 +43,17 @@
             }
         </style>
     </head>
-    <body class="font-sans antialiased bg-[#020617] text-gray-100 selection:bg-brand-500/30 overflow-x-hidden {{ 
-                $theme === 'Nether' ? 'theme-nether' : ($theme === 'The End' ? 'theme-end' : '') 
-          }}"
+    <body class="font-sans antialiased selection:bg-brand-500/30 overflow-x-hidden"
+          :class="{
+            'performance-mode': performanceMode,
+            'theme-light': themeMode === 'light',
+            'theme-nether': themePreset === 'nether',
+            'theme-end': themePreset === 'end',
+            'theme-overworld': themePreset === 'overworld',
+            'high-contrast': accessibility.highContrast,
+            'reduced-transparency': accessibility.reducedTransparency,
+            'font-dyslexia': accessibility.dyslexiaFont
+          }"
           x-data="aetherProtocol"
           @keydown.window.ctrl.k.prevent="paletteOpen = true"
           @keydown.window.cmd.k.prevent="paletteOpen = true"
@@ -57,6 +65,8 @@
               @keydown.window.alt.g.prevent="window.location.href = '{{ route('admin.dashboard') }}'"
               @keydown.window.alt.c.prevent="window.location.href = '{{ route('mobs.create') }}'"
               @keydown.window.alt.b.prevent="window.location.href = '{{ route('admin.biomes.create') }}'"
+              @keydown.window.alt.m.prevent="window.location.href = '{{ route('admin.dashboard') }}#global-comms'"
+              @keydown.window.alt.u.prevent="window.location.href = '{{ route('admin.dashboard') }}#recent-users'"
             @endif
           @endauth>
 
@@ -76,6 +86,11 @@
                     konami: [],
                     konamiCode: ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'],
                     selectedIndex: -1,
+                    themeMode: 'dark',
+                    themePreset: 'overworld',
+                    themePanelOpen: false,
+                    accessibility: { highContrast: false, reducedTransparency: false, dyslexiaFont: false },
+                    performanceMode: false,
                     isAdmin: {{ auth()->check() && auth()->user()->is_admin ? 'true' : 'false' }},
                     quickLinks: [
                         { name: 'Research Center (Wiki)', url: '{{ route('mobs.index') }}', desc: 'Browse all entitites', icon: 'Search' },
@@ -86,6 +101,15 @@
                     ],
                     init() {
                         this.recentResearch = JSON.parse(localStorage.getItem('recent_research') || '[]');
+                        this.performanceMode = localStorage.getItem('performance_mode') === '1';
+                        this.themeMode = localStorage.getItem('theme_mode') || 'dark';
+                        this.themePreset = localStorage.getItem('theme_preset') || 'overworld';
+                        this.accessibility = JSON.parse(localStorage.getItem('a11y_pack') || JSON.stringify(this.accessibility));
+                        const url = new URL(window.location.href);
+                        const t = url.searchParams.get('theme');
+                        if (t && ['overworld', 'nether', 'end'].includes(t)) this.themePreset = t;
+                        const m = url.searchParams.get('mode');
+                        if (m && ['dark', 'light'].includes(m)) this.themeMode = m;
                         window.notify = (content, type = 'info') => {
                             window.dispatchEvent(new CustomEvent('notify', { detail: { content, type } }));
                         };
@@ -104,7 +128,7 @@
                             localStorage.setItem('recent_research', JSON.stringify(history));
                             this.recentResearch = history;
                         };
-                        
+
                         this.$watch('paletteOpen', value => {
                             if (value) {
                                 this.recentResearch = JSON.parse(localStorage.getItem('recent_research') || '[]');
@@ -137,6 +161,25 @@
                             }
                         });
                     },
+                    togglePerformanceMode() {
+                        this.performanceMode = !this.performanceMode;
+                        localStorage.setItem('performance_mode', this.performanceMode ? '1' : '0');
+                        window.notify(this.performanceMode ? 'Performance Mode ON' : 'Performance Mode OFF', 'info');
+                    },
+                    applyTheme(preset = this.themePreset, mode = this.themeMode) {
+                        this.themePreset = preset;
+                        this.themeMode = mode;
+                        localStorage.setItem('theme_preset', this.themePreset);
+                        localStorage.setItem('theme_mode', this.themeMode);
+                        const url = new URL(window.location.href);
+                        url.searchParams.set('theme', this.themePreset);
+                        url.searchParams.set('mode', this.themeMode);
+                        window.history.replaceState({}, '', url.toString());
+                    },
+                    toggleA11y(key) {
+                        this.accessibility[key] = !this.accessibility[key];
+                        localStorage.setItem('a11y_pack', JSON.stringify(this.accessibility));
+                    },
                     get totalResults() {
                         if (this.paletteSearch.length >= 2) return this.liveResults.length + this.filteredLinks().length;
                         return this.recentResearch.length + this.filteredLinks().length;
@@ -167,9 +210,10 @@
                     executeTerminal() {
                         const cmd = this.terminalInput.toLowerCase().trim();
                         this.terminalOutput.push('> ' + this.terminalInput);
-                        
+
                         if (cmd === 'help') {
-                            this.terminalOutput.push('Available: override, intel, oracle [query], registry, explorer, cls, exit');
+                            this.terminalOutput.push('Available: help, override/admin, intel, oracle [query], registry, explorer, cls, exit');
+                            this.terminalOutput.push('Admin Shortcuts: Alt+G (Dashboard), Alt+M (Oracle Console), Alt+U (Recent Users)');
                         } else if (cmd.startsWith('oracle')) {
                             const query = cmd.replace('oracle', '').trim();
                             if (!query) {
@@ -178,8 +222,15 @@
                             }
                             this.terminalOutput.push('ORACLE: INITIALIZING DEEP ANALYSIS...');
                             this.terminalOutput.push('ORACLE: ACCESSING MULTIVERSAL DATA...');
-                            
-                            fetch('/api/oracle?query=' + encodeURIComponent(query))
+
+                            fetch('/api/oracle', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').getAttribute('content')
+                                },
+                                body: JSON.stringify({ query, lang: 'id', mode: 'lore' })
+                            })
                                 .then(res => res.json())
                                 .then(data => {
                                     this.terminalOutput.push(data.response);
@@ -216,7 +267,7 @@
                         } else {
                             this.terminalOutput.push('Unknown command: ' + cmd);
                         }
-                        
+
                         this.terminalInput = '';
                         this.$nextTick(() => {
                             const el = document.getElementById('terminal-scroll');
@@ -244,9 +295,9 @@
                 }));
             });
         </script>
-        
+
         <!-- Command Palette Modal -->
-        <div x-show="paletteOpen" 
+        <div x-show="paletteOpen"
              x-transition:enter="transition ease-out duration-300"
              x-transition:enter-start="opacity-0"
              x-transition:enter-end="opacity-100"
@@ -255,16 +306,16 @@
              x-transition:leave-end="opacity-0"
              class="fixed inset-0 z-[100] flex items-start justify-center pt-4 sm:pt-[15vh] px-3 sm:px-6 lg:px-8 bg-black/60 backdrop-blur-sm"
              x-cloak>
-            
-            <div @click.away="paletteOpen = false" 
+
+            <div @click.away="paletteOpen = false"
                  class="w-full max-w-2xl bg-[#0f172a] border border-white/10 rounded-[1.5rem] sm:rounded-[2rem] shadow-2xl overflow-hidden max-h-[calc(100svh-2rem)] sm:max-h-none">
-                
+
                 <!-- Search Input -->
                 <div class="relative p-4 sm:p-6 border-b border-white/5">
                     <span class="absolute inset-y-0 left-4 sm:left-6 flex items-center pr-3 pointer-events-none text-gray-500">
                         <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                     </span>
-                    <input type="text" 
+                    <input type="text"
                         x-model="paletteSearch"
                         x-ref="paletteInput"
                         @show.window="if(paletteOpen) $nextTick(() => $refs.paletteInput.focus())"
@@ -272,7 +323,7 @@
                         @keydown.up.prevent="navigatePalette('up')"
                         @keydown.enter.prevent="openSelected()"
                         @keydown.e.prevent="openSelected(true)"
-                        class="block w-full pl-11 sm:pl-12 pr-4 py-3 sm:py-4 bg-transparent border-none text-white text-base sm:text-xl placeholder-gray-600 focus:ring-0 font-bold" 
+                        class="block w-full pl-11 sm:pl-12 pr-4 py-3 sm:py-4 bg-transparent border-none text-white text-base sm:text-xl placeholder-gray-600 focus:ring-0 font-bold"
                         placeholder="Search Intelligence Terminal... (Ctrl+K)" />
                     <div x-show="isLoading" class="absolute right-4 sm:right-6 top-1/2 -translate-y-1/2">
                         <svg class="animate-spin h-5 w-5 text-brand-500" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
@@ -290,7 +341,7 @@
                             </div>
                             <div class="space-y-2">
                                 <template x-for="(mob, index) in liveResults" :key="mob.id">
-                                    <a :href="mob.url" 
+                                    <a :href="mob.url"
                                        @click="window.trackResearch(mob)"
                                        :data-index="index"
                                        :data-edit-url="'/mobs/' + mob.id + '/edit'"
@@ -312,7 +363,7 @@
                                         </div>
                                         <div class="flex items-center space-x-2">
                                             <template x-if="isAdmin">
-                                                <a :href="'/mobs/' + mob.id + '/edit'" 
+                                                <a :href="'/mobs/' + mob.id + '/edit'"
                                                    class="p-2 bg-white/5 hover:bg-yellow-500/20 text-gray-500 hover:text-yellow-500 rounded-lg transition-all"
                                                    @click.stop
                                                    title="Protocol Override: Quick Edit">
@@ -344,7 +395,7 @@
                             </div>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <template x-for="(item, index) in recentResearch" :key="item.id">
-                                    <a :href="item.url" 
+                                    <a :href="item.url"
                                        :data-index="index"
                                        :data-edit-url="'/mobs/' + item.id + '/edit'"
                                        :class="selectedIndex === index ? 'bg-brand-500/20 border-brand-500/40' : 'bg-white/5 border-white/5 hover:bg-brand-500/10 hover:border-brand-500/20'"
@@ -352,9 +403,9 @@
                                         <div class="absolute inset-0 bg-gradient-to-r from-brand-500/0 to-brand-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                                         <div class="w-10 h-10 rounded-lg bg-black overflow-hidden mr-3 border border-white/5 shadow-lg group-hover:scale-110 transition-transform duration-500 flex-shrink-0">
                                             <template x-if="item.image">
-                                                <img :src="item.image.includes('http') ? item.image : '/storage/' + item.image" 
+                                                <img :src="item.image.includes('http') ? item.image : '/storage/' + item.image"
                                                      :alt="item.name"
-                                                     class="w-full h-full object-cover" 
+                                                     class="w-full h-full object-cover"
                                                      onerror="this.src = 'https://ui-avatars.com/api/?name=' + this.alt + '&background=0f172a&color=0ea5e9'">
                                             </template>
                                             <div class="w-full h-full flex items-center justify-center text-gray-800" x-show="!item.image">
@@ -376,7 +427,7 @@
                         <h4 class="px-4 text-[9px] font-black text-gray-500 uppercase tracking-[0.2em] mb-3" x-text="paletteSearch.length >= 2 ? 'Related Systems' : 'System Navigation'"></h4>
                         <div class="space-y-1">
                             <template x-for="(link, index) in filteredLinks()" :key="link.url">
-                                <a :href="link.url" 
+                                <a :href="link.url"
                                    :data-index="(paletteSearch.length >= 2 ? liveResults.length : recentResearch.length) + index"
                                    :class="selectedIndex === (paletteSearch.length >= 2 ? liveResults.length : recentResearch.length) + index ? 'bg-white/10 border-white/20' : 'hover:bg-white/5 border-transparent'"
                                    class="flex items-center p-4 rounded-2xl border transition-all group">
@@ -412,10 +463,10 @@
         <div class="fixed inset-0 overflow-hidden pointer-events-none -z-10">
             <!-- Dynamic Mouse Glow (Aether Atmosphere) -->
             <div class="hidden lg:block absolute transition-opacity duration-700 pointer-events-none opacity-0"
-                 :style="{ 
-                    left: (mouseX - 400) + 'px', 
-                    top: (mouseY - 400) + 'px', 
-                    opacity: (mouseX === 0 ? 0 : 1) 
+                 :style="{
+                    left: (mouseX - 400) + 'px',
+                    top: (mouseY - 400) + 'px',
+                    opacity: (mouseX === 0 ? 0 : 1)
                  }">
                 <div class="w-[800px] h-[800px] bg-brand-500/10 blur-[150px] rounded-full"></div>
             </div>
@@ -425,8 +476,31 @@
             <div class="absolute -bottom-[10%] left-[20%] w-[30%] h-[30%] bg-brand-400/10 blur-[120px] rounded-full"></div>
         </div>
 
+        <!-- Theme Preview Panel -->
+        <div class="fixed floating-safe-bottom md:bottom-24 right-4 z-40" x-data>
+            <button @click="themePanelOpen = !themePanelOpen" class="touch-target px-3 py-2 rounded-xl bg-white/10 border border-white/20 text-xs font-bold">Theme & A11y</button>
+            <div x-show="themePanelOpen" x-transition class="md:mt-2 w-[calc(100vw-2rem)] md:w-56 p-3 glass-card rounded-2xl border border-white/10 space-y-2 fixed md:absolute right-4 md:right-0 bottom-[calc(5rem+env(safe-area-inset-bottom))] md:bottom-auto max-h-[65dvh] overflow-y-auto">
+                <p class="text-[10px] uppercase tracking-widest text-gray-400 font-bold">Preset (World Style)</p>
+                <div class="grid grid-cols-3 gap-2">
+                    <button @click="applyTheme('overworld', themeMode)" class="h-8 rounded-lg bg-emerald-500/70"></button>
+                    <button @click="applyTheme('nether', themeMode)" class="h-8 rounded-lg bg-red-500/70"></button>
+                    <button @click="applyTheme('end', themeMode)" class="h-8 rounded-lg bg-purple-500/70"></button>
+                </div>
+                <p class="text-[10px] uppercase tracking-widest text-gray-400 font-bold">Mode</p>
+                <div class="flex gap-2">
+                    <button @click="applyTheme(themePreset, 'dark')" class="flex-1 px-2 py-1 text-xs rounded-lg border border-white/20">Dark</button>
+                    <button @click="applyTheme(themePreset, 'light')" class="flex-1 px-2 py-1 text-xs rounded-lg border border-white/20">Light</button>
+                </div>
+                <p class="text-[10px] uppercase tracking-widest text-gray-400 font-bold">Accessibility Pack</p>
+                <label class="flex items-center justify-between text-xs"><span>High Contrast</span><input type="checkbox" @click="toggleA11y('highContrast')" :checked="accessibility.highContrast"></label>
+                <label class="flex items-center justify-between text-xs"><span>Reduced Transparency</span><input type="checkbox" @click="toggleA11y('reducedTransparency')" :checked="accessibility.reducedTransparency"></label>
+                <label class="flex items-center justify-between text-xs"><span>Dyslexia Font</span><input type="checkbox" @click="toggleA11y('dyslexiaFont')" :checked="accessibility.dyslexiaFont"></label>
+                <button @click="themePreset='overworld'; themeMode='dark'; accessibility={ highContrast:false, reducedTransparency:false, dyslexiaFont:false }; applyTheme(); localStorage.setItem('a11y_pack', JSON.stringify(accessibility));" class="w-full mt-1 px-2 py-1 text-[11px] rounded-lg border border-white/20 text-gray-200">Reset Default</button>
+            </div>
+        </div>
+
         <!-- Secret Admin Terminal -->
-        <div x-show="terminalOpen" 
+        <div x-show="terminalOpen"
              x-transition:enter="transition ease-out duration-300"
              x-transition:enter-start="opacity-0 scale-95"
              x-transition:enter-end="opacity-100 scale-100"
@@ -435,10 +509,10 @@
              x-transition:leave-end="opacity-0 scale-95"
              class="fixed inset-0 z-[110] flex items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-md"
              x-cloak>
-            
-            <div @click.away="terminalOpen = false" 
+
+            <div @click.away="terminalOpen = false"
                  class="w-full max-w-3xl terminal-glass border border-red-500/30 rounded-lg shadow-[0_0_50px_rgba(239,68,68,0.2)] overflow-hidden flex flex-col font-mono text-sm relative">
-                
+
                 <!-- Scanline Effect -->
                 <div class="scanline"></div>
 
@@ -456,7 +530,7 @@
                 <!-- Terminal Body -->
                 <div id="terminal-scroll" class="p-4 h-80 overflow-y-auto space-y-1 bg-black/40 terminal-grid relative z-10">
                     <template x-for="(line, index) in terminalOutput" :key="index">
-                        <div class="text-red-400/80 break-words" 
+                        <div class="text-red-400/80 break-words"
                              :class="line.startsWith('ORACLE:') ? 'text-red-300 font-black oracle-glow' : ''"
                              x-text="line"></div>
                     </template>
@@ -466,12 +540,12 @@
                 <div class="p-4 bg-red-950/10 border-t border-red-500/20">
                     <div class="flex items-center space-x-2">
                         <span class="text-red-500 font-black">#</span>
-                        <input type="text" 
-                               x-model="terminalInput" 
+                        <input type="text"
+                               x-model="terminalInput"
                                x-ref="terminalInput"
                                @show.window="if(terminalOpen) $nextTick(() => $refs.terminalInput.focus())"
                                @keydown.enter="executeTerminal()"
-                               class="flex-1 bg-transparent border-none focus:ring-0 text-red-500 font-bold p-0" 
+                               class="flex-1 bg-transparent border-none focus:ring-0 text-red-500 font-bold p-0"
                                placeholder="Type command (help)..." />
                     </div>
                 </div>
@@ -496,10 +570,10 @@
             </main>
 
             <!-- Floating Mobile Navigation -->
-            <div class="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 w-[calc(100%-1rem)] max-w-md md:hidden nav-appear" 
+        <div class="fixed bottom-[calc(0.75rem+env(safe-area-inset-bottom))] left-1/2 -translate-x-1/2 z-40 w-[calc(100%-1rem)] max-w-md md:hidden nav-appear"
                  x-data="{ active: '{{ Route::currentRouteName() }}' }">
                 <div class="glass-card rounded-[1.75rem] p-2 px-3 sm:px-4 flex items-center justify-between border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] text-xs font-bold uppercase tracking-wide">
-                    <a href="{{ route('mobs.index') }}" class="p-3 transition-all rounded-full" 
+                    <a href="{{ route('mobs.index') }}" class="p-3 transition-all rounded-full"
                        :class="active === 'mobs.index' ? 'bg-brand-500 text-white shadow-lg shadow-brand-500/40' : 'text-gray-500 hover:text-white'">
                         <span>Index</span>
                     </a>
@@ -519,7 +593,7 @@
             </div>
 
             <!-- Mobile Quick Trigger -->
-            <button @click="paletteOpen = true" 
+            <button @click="paletteOpen = true"
                     class="fixed bottom-24 right-4 z-40 w-11 h-11 bg-brand-600 text-white rounded-full shadow-2xl flex items-center justify-center border border-white/20 md:hidden nav-appear animate-float"
                     style="animation-delay: 200ms">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>

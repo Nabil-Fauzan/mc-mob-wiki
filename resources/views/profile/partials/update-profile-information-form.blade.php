@@ -13,7 +13,7 @@
         @csrf
     </form>
 
-    <form method="post" action="{{ route('profile.update') }}" class="mt-6 space-y-6" enctype="multipart/form-data" x-data="{ imageUrl: '{{ $user->avatar_url }}' }">
+    <form method="post" action="{{ route('profile.update') }}" class="mt-6 space-y-6" enctype="multipart/form-data" x-data="{ imageUrl: '{{ $user->avatar_url }}', publicSlug: '{{ old('public_slug', $user->public_slug) }}', profilePublic: {{ old('profile_is_public', $user->profile_is_public) ? 'true' : 'false' }} }">
         @csrf
         @method('patch')
 
@@ -44,7 +44,7 @@
                     </template>
                 </div>
 
-                <input id="avatar" name="avatar" type="file" 
+                <input id="avatar" name="avatar" type="file"
                     @change="
                         const file = $event.target.files[0];
                         if (file) {
@@ -54,6 +54,11 @@
                         }
                     "
                     class="mt-2 block w-full text-sm text-gray-400 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-black file:uppercase file:tracking-widest file:bg-brand-500/10 file:text-brand-400 hover:file:bg-brand-500/20 transition-all cursor-pointer" />
+                <p class="mt-2 text-[10px] text-gray-500 font-bold uppercase tracking-widest">Accepted formats: JPG, PNG, GIF, WEBP • Max size: 2MB.</p>
+                <label class="mt-3 inline-flex items-center gap-2 text-xs text-gray-300">
+                    <input type="checkbox" name="remove_avatar" value="1" class="rounded border-white/10 bg-gray-950 text-red-500 focus:ring-red-500">
+                    Remove local avatar and use dynamic/default identity
+                </label>
                 <x-input-error class="mt-2" :messages="$errors->get('avatar')" />
             </div>
 
@@ -106,8 +111,9 @@
 
             <div>
                 <x-input-label for="public_slug" :value="__('Public Profile Slug')" />
-                <x-text-input id="public_slug" name="public_slug" type="text" class="mt-2 block w-full bg-gray-950 border-gray-800 text-gray-300 focus:border-brand-500 focus:ring-brand-500 rounded-xl" :value="old('public_slug', $user->public_slug)" autocomplete="off" placeholder="e.g. mob-hunter-arya" />
+                <x-text-input id="public_slug" name="public_slug" type="text" x-model="publicSlug" class="mt-2 block w-full bg-gray-950 border-gray-800 text-gray-300 focus:border-brand-500 focus:ring-brand-500 rounded-xl" :value="old('public_slug', $user->public_slug)" autocomplete="off" placeholder="e.g. mob-hunter-arya" />
                 <p class="mt-2 text-[10px] text-gray-500 font-bold uppercase tracking-widest">Use lowercase letters, numbers, and hyphens only.</p>
+                <p class="mt-2 text-xs text-brand-300 break-all">Preview: {{ url('/researchers') }}/<span x-text="publicSlug || 'auto-generated-slug'"></span></p>
                 <x-input-error class="mt-2" :messages="$errors->get('public_slug')" />
             </div>
 
@@ -117,14 +123,15 @@
                     <span class="mt-1 block text-xs text-gray-500">Allow other researchers to open and share your profile page.</span>
                 </div>
                 <input type="hidden" name="profile_is_public" value="0">
-                <input id="profile_is_public" name="profile_is_public" type="checkbox" value="1" @checked(old('profile_is_public', $user->profile_is_public)) class="mt-1 rounded border-white/10 bg-gray-950 text-brand-500 focus:ring-brand-500" />
+                <input id="profile_is_public" name="profile_is_public" type="checkbox" value="1" x-model="profilePublic" @checked(old('profile_is_public', $user->profile_is_public)) class="mt-1 rounded border-white/10 bg-gray-950 text-brand-500 focus:ring-brand-500" />
             </label>
+            <p x-show="!profilePublic" class="text-[11px] text-yellow-400">Profile visibility is OFF. Your public researcher page will not be discoverable by other users.</p>
 
             @if($user->public_slug)
                 <div class="p-4 rounded-2xl border border-white/5 bg-black/20">
                     <p class="text-[10px] text-gray-500 font-bold uppercase tracking-[0.2em] mb-2">Public Link</p>
                     <div class="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
-                        <a href="{{ route('researchers.show', $user->public_slug) }}" target="_blank" class="text-sm text-brand-400 hover:text-brand-300 break-all">
+                        <a href="{{ route('researchers.show', $user->public_slug) }}" target="_blank" class="text-sm text-brand-400 hover:text-brand-300 break-all overflow-guard">
                             {{ route('researchers.show', $user->public_slug) }}
                         </a>
                         <button
@@ -139,7 +146,7 @@
             @endif
         </div>
 
-        <div class="flex items-center gap-4">
+        <div class="sticky bottom-[calc(0.75rem+env(safe-area-inset-bottom))] md:static z-20 flex items-center gap-4 p-3 md:p-0 bg-[#020617]/85 md:bg-transparent backdrop-blur-sm md:backdrop-blur-none rounded-xl md:rounded-none border border-white/10 md:border-0">
             <x-primary-button>{{ __('Save') }}</x-primary-button>
 
             @if (session('status') === 'profile-updated')
@@ -147,8 +154,8 @@
                     x-data="{ show: true }"
                     x-show="show"
                     x-transition
-                    x-init="setTimeout(() => show = false, 2000)"
                     class="text-sm text-gray-600 dark:text-gray-400"
+                    x-init="setTimeout(() => show = false, 2000); if (window.notify) window.notify('Profile updated successfully', 'success');"
                 >{{ __('Saved.') }}</p>
             @endif
         </div>
