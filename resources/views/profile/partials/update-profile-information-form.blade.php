@@ -131,7 +131,7 @@
                 <div class="p-4 rounded-2xl border border-white/5 bg-black/20">
                     <p class="text-[10px] text-gray-500 font-bold uppercase tracking-[0.2em] mb-2">Public Link</p>
                     <div class="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
-                        <a href="{{ route('researchers.show', $user->public_slug) }}" target="_blank" class="text-sm text-brand-400 hover:text-brand-300 break-all">
+                        <a href="{{ route('researchers.show', $user->public_slug) }}" target="_blank" class="text-sm text-brand-400 hover:text-brand-300 break-all overflow-guard">
                             {{ route('researchers.show', $user->public_slug) }}
                         </a>
                         <button
@@ -146,7 +146,7 @@
             @endif
         </div>
 
-        <div class="flex items-center gap-4">
+        <div class="sticky bottom-[calc(0.75rem+env(safe-area-inset-bottom))] md:static z-20 flex items-center gap-4 p-3 md:p-0 bg-[#020617]/85 md:bg-transparent backdrop-blur-sm md:backdrop-blur-none rounded-xl md:rounded-none border border-white/10 md:border-0">
             <x-primary-button>{{ __('Save') }}</x-primary-button>
 
             @if (session('status') === 'profile-updated')

@@ -43,6 +43,7 @@
             }
         </style>
     </head>
+    <body class="font-sans antialiased selection:bg-brand-500/30 overflow-x-hidden"
     <body class="font-sans antialiased bg-[#020617] text-gray-100 selection:bg-brand-500/30 overflow-x-hidden {{
                 $theme === 'Nether' ? 'theme-nether' : ($theme === 'The End' ? 'theme-end' : '')
           }}"
@@ -481,6 +482,10 @@
         </div>
 
         <!-- Theme Preview Panel -->
+        <div class="fixed floating-safe-bottom md:bottom-24 right-4 z-40" x-data>
+            <button @click="themePanelOpen = !themePanelOpen" class="touch-target px-3 py-2 rounded-xl bg-white/10 border border-white/20 text-xs font-bold">Theme & A11y</button>
+            <div x-show="themePanelOpen" x-transition class="md:mt-2 w-[calc(100vw-2rem)] md:w-56 p-3 glass-card rounded-2xl border border-white/10 space-y-2 fixed md:absolute right-4 md:right-0 bottom-[calc(5rem+env(safe-area-inset-bottom))] md:bottom-auto max-h-[65dvh] overflow-y-auto">
+                <p class="text-[10px] uppercase tracking-widest text-gray-400 font-bold">Preset (World Style)</p>
         <div class="fixed bottom-24 right-4 z-40" x-data>
             <button @click="themePanelOpen = !themePanelOpen" class="px-3 py-2 rounded-xl bg-white/10 border border-white/20 text-xs font-bold">Theme</button>
             <div x-show="themePanelOpen" x-transition class="mt-2 w-56 p-3 glass-card rounded-2xl border border-white/10 space-y-2">
@@ -490,6 +495,7 @@
                     <button @click="applyTheme('nether', themeMode)" class="h-8 rounded-lg bg-red-500/70"></button>
                     <button @click="applyTheme('end', themeMode)" class="h-8 rounded-lg bg-purple-500/70"></button>
                 </div>
+                <p class="text-[10px] uppercase tracking-widest text-gray-400 font-bold">Mode</p>
                 <div class="flex gap-2">
                     <button @click="applyTheme(themePreset, 'dark')" class="flex-1 px-2 py-1 text-xs rounded-lg border border-white/20">Dark</button>
                     <button @click="applyTheme(themePreset, 'light')" class="flex-1 px-2 py-1 text-xs rounded-lg border border-white/20">Light</button>
@@ -498,6 +504,7 @@
                 <label class="flex items-center justify-between text-xs"><span>High Contrast</span><input type="checkbox" @click="toggleA11y('highContrast')" :checked="accessibility.highContrast"></label>
                 <label class="flex items-center justify-between text-xs"><span>Reduced Transparency</span><input type="checkbox" @click="toggleA11y('reducedTransparency')" :checked="accessibility.reducedTransparency"></label>
                 <label class="flex items-center justify-between text-xs"><span>Dyslexia Font</span><input type="checkbox" @click="toggleA11y('dyslexiaFont')" :checked="accessibility.dyslexiaFont"></label>
+                <button @click="themePreset='overworld'; themeMode='dark'; accessibility={ highContrast:false, reducedTransparency:false, dyslexiaFont:false }; applyTheme(); localStorage.setItem('a11y_pack', JSON.stringify(accessibility));" class="w-full mt-1 px-2 py-1 text-[11px] rounded-lg border border-white/20 text-gray-200">Reset Default</button>
             </div>
         </div>
 
@@ -572,6 +579,7 @@
             </main>
 
             <!-- Floating Mobile Navigation -->
+        <div class="fixed bottom-[calc(0.75rem+env(safe-area-inset-bottom))] left-1/2 -translate-x-1/2 z-40 w-[calc(100%-1rem)] max-w-md md:hidden nav-appear"
             <div class="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 w-[calc(100%-1rem)] max-w-md md:hidden nav-appear"
                  x-data="{ active: '{{ Route::currentRouteName() }}' }">
                 <div class="glass-card rounded-[1.75rem] p-2 px-3 sm:px-4 flex items-center justify-between border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] text-xs font-bold uppercase tracking-wide">

@@ -14,6 +14,7 @@
             <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/micro-carbon.png')] opacity-20 mix-blend-overlay"></div>
         </div>
 
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 relative z-10 space-y-10">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 relative z-10 space-y-8">
 
             <!-- Admin Header -->
