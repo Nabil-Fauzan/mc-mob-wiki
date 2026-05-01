@@ -490,6 +490,7 @@
         </div>
 
         <!-- Theme Preview Panel -->
+        @unless(request()->routeIs('home'))
         <div class="fixed floating-safe-bottom md:bottom-24 right-4 z-40" x-data>
             <button @click="themePanelOpen = !themePanelOpen" class="touch-target px-3 py-2 rounded-xl bg-white/10 border border-white/20 text-xs font-bold">Theme & A11y</button>
             <div x-show="themePanelOpen" x-transition class="md:mt-2 w-[calc(100vw-2rem)] md:w-56 p-3 glass-card rounded-2xl border border-white/10 space-y-2 fixed md:absolute right-4 md:right-0 bottom-[calc(5rem+env(safe-area-inset-bottom))] md:bottom-auto max-h-[65dvh] overflow-y-auto">
@@ -513,6 +514,9 @@
                 <label class="flex items-center justify-between text-xs"><span>Reduced Transparency</span><input type="checkbox" @click="toggleA11y('reducedTransparency')" :checked="accessibility.reducedTransparency"></label>
                 <label class="flex items-center justify-between text-xs"><span>Dyslexia Font</span><input type="checkbox" @click="toggleA11y('dyslexiaFont')" :checked="accessibility.dyslexiaFont"></label>
                 <button @click="resetThemeDefaults()" class="w-full mt-1 px-2 py-1 text-[11px] rounded-lg border border-white/20 text-gray-200">Reset Default</button>
+            </div>
+        </div>
+        @endunless
                 <button @click="themePreset='overworld'; themeMode='dark'; accessibility={ highContrast:false, reducedTransparency:false, dyslexiaFont:false }; applyTheme(); localStorage.setItem('a11y_pack', JSON.stringify(accessibility));" class="w-full mt-1 px-2 py-1 text-[11px] rounded-lg border border-white/20 text-gray-200">Reset Default</button>
             </div>
         </div>
