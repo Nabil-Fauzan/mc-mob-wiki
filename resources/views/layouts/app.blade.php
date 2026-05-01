@@ -491,6 +491,15 @@
 
         <!-- Theme Preview Panel -->
         @unless(request()->routeIs('home'))
+        <div class="fixed floating-safe-bottom right-4 z-40" x-data>
+            <button @click="themePanelOpen = !themePanelOpen" class="touch-target px-3 py-2 rounded-xl bg-white/10 border border-white/20 text-xs font-bold">Theme & A11y</button>
+            <div x-show="themePanelOpen" x-cloak x-transition @click.away="themePanelOpen = false"
+                 class="w-[calc(100vw-2rem)] md:w-64 p-3 glass-card rounded-2xl border border-white/10 space-y-2 fixed md:absolute right-4 md:right-0 bottom-[calc(5rem+env(safe-area-inset-bottom))] md:bottom-full md:mb-2 max-h-[65dvh] overflow-y-auto">
+                <p class="text-[10px] uppercase tracking-widest text-gray-400 font-bold">Preset (World Style)</p>
+                <div class="grid grid-cols-3 gap-2">
+                    <button @click="applyTheme('overworld', themeMode)" class="h-8 rounded-lg bg-emerald-500/70 text-[10px] font-bold">OW</button>
+                    <button @click="applyTheme('nether', themeMode)" class="h-8 rounded-lg bg-red-500/70 text-[10px] font-bold">NT</button>
+                    <button @click="applyTheme('end', themeMode)" class="h-8 rounded-lg bg-purple-500/70 text-[10px] font-bold">END</button>
         <div class="fixed floating-safe-bottom md:bottom-24 right-4 z-40" x-data>
             <button @click="themePanelOpen = !themePanelOpen" class="touch-target px-3 py-2 rounded-xl bg-white/10 border border-white/20 text-xs font-bold">Theme & A11y</button>
             <div x-show="themePanelOpen" x-transition class="md:mt-2 w-[calc(100vw-2rem)] md:w-56 p-3 glass-card rounded-2xl border border-white/10 space-y-2 fixed md:absolute right-4 md:right-0 bottom-[calc(5rem+env(safe-area-inset-bottom))] md:bottom-auto max-h-[65dvh] overflow-y-auto">
