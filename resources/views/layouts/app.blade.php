@@ -16,6 +16,7 @@
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
         <style>
+            [x-cloak] { display: none !important; }
             .terminal-glass {
                 background: linear-gradient(135deg, rgba(2, 6, 23, 0.95), rgba(15, 23, 42, 0.98));
                 box-shadow: 0 0 50px rgba(220, 38, 38, 0.15), inset 0 0 20px rgba(220, 38, 38, 0.1);
@@ -182,6 +183,13 @@
                     },
                     toggleA11y(key) {
                         this.accessibility[key] = !this.accessibility[key];
+                        localStorage.setItem('a11y_pack', JSON.stringify(this.accessibility));
+                    },
+                    resetThemeDefaults() {
+                        this.themePreset = 'overworld';
+                        this.themeMode = 'dark';
+                        this.accessibility = { highContrast: false, reducedTransparency: false, dyslexiaFont: false };
+                        this.applyTheme();
                         localStorage.setItem('a11y_pack', JSON.stringify(this.accessibility));
                     },
                     get totalResults() {
@@ -504,6 +512,7 @@
                 <label class="flex items-center justify-between text-xs"><span>High Contrast</span><input type="checkbox" @click="toggleA11y('highContrast')" :checked="accessibility.highContrast"></label>
                 <label class="flex items-center justify-between text-xs"><span>Reduced Transparency</span><input type="checkbox" @click="toggleA11y('reducedTransparency')" :checked="accessibility.reducedTransparency"></label>
                 <label class="flex items-center justify-between text-xs"><span>Dyslexia Font</span><input type="checkbox" @click="toggleA11y('dyslexiaFont')" :checked="accessibility.dyslexiaFont"></label>
+                <button @click="resetThemeDefaults()" class="w-full mt-1 px-2 py-1 text-[11px] rounded-lg border border-white/20 text-gray-200">Reset Default</button>
                 <button @click="themePreset='overworld'; themeMode='dark'; accessibility={ highContrast:false, reducedTransparency:false, dyslexiaFont:false }; applyTheme(); localStorage.setItem('a11y_pack', JSON.stringify(accessibility));" class="w-full mt-1 px-2 py-1 text-[11px] rounded-lg border border-white/20 text-gray-200">Reset Default</button>
             </div>
         </div>
