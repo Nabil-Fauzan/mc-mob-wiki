@@ -15,6 +15,7 @@
         </div>
 
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 relative z-10 space-y-10">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 relative z-10 space-y-8">
 
             <!-- Admin Header -->
             <div class="glass-card rounded-[2.5rem] border border-red-500/20 overflow-hidden relative shadow-[0_0_50px_rgba(239,68,68,0.1)] flex flex-col md:flex-row items-center justify-between p-8 bg-gray-900/60 backdrop-blur-xl">
