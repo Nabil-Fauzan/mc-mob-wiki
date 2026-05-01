@@ -38,6 +38,10 @@ class AdminController extends Controller
 
     public function moderateComment(Comment $comment)
     {
+        if ($comment->user_id !== auth()->id() && !auth()->user()->is_admin) {
+            abort(403);
+        }
+
         $payload = [
             'comment_id' => $comment->id,
             'mob_id' => $comment->mob_id,
