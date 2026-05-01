@@ -46,6 +46,16 @@
     <body class="font-sans antialiased bg-[#020617] text-gray-100 selection:bg-brand-500/30 overflow-x-hidden {{
                 $theme === 'Nether' ? 'theme-nether' : ($theme === 'The End' ? 'theme-end' : '')
           }}"
+          :class="{
+            'performance-mode': performanceMode,
+            'theme-light': themeMode === 'light',
+            'theme-nether': themePreset === 'nether',
+            'theme-end': themePreset === 'end',
+            'theme-overworld': themePreset === 'overworld',
+            'high-contrast': accessibility.highContrast,
+            'reduced-transparency': accessibility.reducedTransparency,
+            'font-dyslexia': accessibility.dyslexiaFont
+          }"
           :class="{ 'performance-mode': performanceMode }"
           x-data="aetherProtocol"
           @keydown.window.ctrl.k.prevent="paletteOpen = true"
@@ -79,6 +89,10 @@
                     konami: [],
                     konamiCode: ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'],
                     selectedIndex: -1,
+                    themeMode: 'dark',
+                    themePreset: 'overworld',
+                    themePanelOpen: false,
+                    accessibility: { highContrast: false, reducedTransparency: false, dyslexiaFont: false },
                     performanceMode: false,
                     isAdmin: {{ auth()->check() && auth()->user()->is_admin ? 'true' : 'false' }},
                     quickLinks: [
@@ -91,6 +105,14 @@
                     init() {
                         this.recentResearch = JSON.parse(localStorage.getItem('recent_research') || '[]');
                         this.performanceMode = localStorage.getItem('performance_mode') === '1';
+                        this.themeMode = localStorage.getItem('theme_mode') || 'dark';
+                        this.themePreset = localStorage.getItem('theme_preset') || 'overworld';
+                        this.accessibility = JSON.parse(localStorage.getItem('a11y_pack') || JSON.stringify(this.accessibility));
+                        const url = new URL(window.location.href);
+                        const t = url.searchParams.get('theme');
+                        if (t && ['overworld', 'nether', 'end'].includes(t)) this.themePreset = t;
+                        const m = url.searchParams.get('mode');
+                        if (m && ['dark', 'light'].includes(m)) this.themeMode = m;
                         window.notify = (content, type = 'info') => {
                             window.dispatchEvent(new CustomEvent('notify', { detail: { content, type } }));
                         };
@@ -146,6 +168,20 @@
                         this.performanceMode = !this.performanceMode;
                         localStorage.setItem('performance_mode', this.performanceMode ? '1' : '0');
                         window.notify(this.performanceMode ? 'Performance Mode ON' : 'Performance Mode OFF', 'info');
+                    },
+                    applyTheme(preset = this.themePreset, mode = this.themeMode) {
+                        this.themePreset = preset;
+                        this.themeMode = mode;
+                        localStorage.setItem('theme_preset', this.themePreset);
+                        localStorage.setItem('theme_mode', this.themeMode);
+                        const url = new URL(window.location.href);
+                        url.searchParams.set('theme', this.themePreset);
+                        url.searchParams.set('mode', this.themeMode);
+                        window.history.replaceState({}, '', url.toString());
+                    },
+                    toggleA11y(key) {
+                        this.accessibility[key] = !this.accessibility[key];
+                        localStorage.setItem('a11y_pack', JSON.stringify(this.accessibility));
                     },
                     get totalResults() {
                         if (this.paletteSearch.length >= 2) return this.liveResults.length + this.filteredLinks().length;
@@ -442,6 +478,27 @@
             <div class="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] bg-brand-600/20 blur-[120px] rounded-full animate-pulse"></div>
             <div class="absolute top-[20%] -right-[10%] w-[35%] h-[35%] bg-accent-400/10 blur-[120px] rounded-full" style="animation: float 8s ease-in-out infinite;"></div>
             <div class="absolute -bottom-[10%] left-[20%] w-[30%] h-[30%] bg-brand-400/10 blur-[120px] rounded-full"></div>
+        </div>
+
+        <!-- Theme Preview Panel -->
+        <div class="fixed bottom-24 right-4 z-40" x-data>
+            <button @click="themePanelOpen = !themePanelOpen" class="px-3 py-2 rounded-xl bg-white/10 border border-white/20 text-xs font-bold">Theme</button>
+            <div x-show="themePanelOpen" x-transition class="mt-2 w-56 p-3 glass-card rounded-2xl border border-white/10 space-y-2">
+                <p class="text-[10px] uppercase tracking-widest text-gray-400 font-bold">Theme Preset</p>
+                <div class="grid grid-cols-3 gap-2">
+                    <button @click="applyTheme('overworld', themeMode)" class="h-8 rounded-lg bg-emerald-500/70"></button>
+                    <button @click="applyTheme('nether', themeMode)" class="h-8 rounded-lg bg-red-500/70"></button>
+                    <button @click="applyTheme('end', themeMode)" class="h-8 rounded-lg bg-purple-500/70"></button>
+                </div>
+                <div class="flex gap-2">
+                    <button @click="applyTheme(themePreset, 'dark')" class="flex-1 px-2 py-1 text-xs rounded-lg border border-white/20">Dark</button>
+                    <button @click="applyTheme(themePreset, 'light')" class="flex-1 px-2 py-1 text-xs rounded-lg border border-white/20">Light</button>
+                </div>
+                <p class="text-[10px] uppercase tracking-widest text-gray-400 font-bold">Accessibility Pack</p>
+                <label class="flex items-center justify-between text-xs"><span>High Contrast</span><input type="checkbox" @click="toggleA11y('highContrast')" :checked="accessibility.highContrast"></label>
+                <label class="flex items-center justify-between text-xs"><span>Reduced Transparency</span><input type="checkbox" @click="toggleA11y('reducedTransparency')" :checked="accessibility.reducedTransparency"></label>
+                <label class="flex items-center justify-between text-xs"><span>Dyslexia Font</span><input type="checkbox" @click="toggleA11y('dyslexiaFont')" :checked="accessibility.dyslexiaFont"></label>
+            </div>
         </div>
 
         <!-- Secret Admin Terminal -->

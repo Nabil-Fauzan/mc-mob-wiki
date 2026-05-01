@@ -4,6 +4,13 @@
 
 @layer base {
     :root {
+        --surface-1: rgba(2, 6, 23, 0.9);
+        --surface-2: rgba(15, 23, 42, 0.8);
+        --surface-glass: rgba(255, 255, 255, 0.05);
+        --text-primary: #f8fafc;
+        --text-muted: #94a3b8;
+        --ring-focus: #0ea5e9;
+        --shadow-elevated: 0 20px 50px rgba(0, 0, 0, 0.45);
         --mc-brand: #0ea5e9; /* Sky 500 */
         --mc-brand-dark: #0369a1; /* Sky 700 */
         --mc-accent: #22d3ee; /* Cyan 400 */
@@ -27,12 +34,31 @@
         --mc-glow: rgba(168, 85, 247, 0.4);
     }
 
+    .theme-overworld {
+        --mc-brand: #10b981;
+        --mc-brand-dark: #047857;
+        --mc-accent: #22d3ee;
+    }
+
+    .theme-light {
+        --surface-1: #f8fafc;
+        --surface-2: #e2e8f0;
+        --surface-glass: rgba(15, 23, 42, 0.04);
+        --text-primary: #0f172a;
+        --text-muted: #475569;
+        --ring-focus: #0284c7;
+        --shadow-elevated: 0 10px 25px rgba(15, 23, 42, 0.08);
+    }
+
     body {
-        @apply bg-brand-950 text-gray-100 transition-colors duration-1000;
+        @apply transition-colors duration-1000;
+        background: var(--surface-1);
+        color: var(--text-primary);
         scroll-behavior: smooth;
     }
 
     :focus-visible {
+        outline: 2px solid var(--ring-focus);
         outline: 2px solid var(--mc-brand);
         outline-offset: 2px;
     }
@@ -77,6 +103,21 @@
 .performance-mode * {
     animation: none !important;
     transition-duration: 120ms !important;
+}
+
+.high-contrast {
+    filter: contrast(1.2);
+}
+
+.reduced-transparency .glass-card,
+.reduced-transparency .ui-panel {
+    backdrop-filter: none !important;
+    background: rgba(15, 23, 42, 0.92) !important;
+}
+
+.font-dyslexia {
+    font-family: "Verdana", "Trebuchet MS", sans-serif !important;
+    letter-spacing: 0.02em;
 }
 
 @media (prefers-reduced-motion: reduce) {
