@@ -45,6 +45,9 @@
         </style>
     </head>
     <body class="font-sans antialiased selection:bg-brand-500/30 overflow-x-hidden"
+    <body class="font-sans antialiased bg-[#020617] text-gray-100 selection:bg-brand-500/30 overflow-x-hidden {{
+                $theme === 'Nether' ? 'theme-nether' : ($theme === 'The End' ? 'theme-end' : '')
+          }}"
           :class="{
             'performance-mode': performanceMode,
             'theme-light': themeMode === 'light',
@@ -55,6 +58,7 @@
             'reduced-transparency': accessibility.reducedTransparency,
             'font-dyslexia': accessibility.dyslexiaFont
           }"
+          :class="{ 'performance-mode': performanceMode }"
           x-data="aetherProtocol"
           @keydown.window.ctrl.k.prevent="paletteOpen = true"
           @keydown.window.cmd.k.prevent="paletteOpen = true"
@@ -239,6 +243,7 @@
                                 },
                                 body: JSON.stringify({ query, lang: 'id', mode: 'lore' })
                             })
+                            fetch('/api/oracle?query=' + encodeURIComponent(query))
                                 .then(res => res.json())
                                 .then(data => {
                                     this.terminalOutput.push(data.response);
@@ -495,6 +500,18 @@
                     <button @click="applyTheme('overworld', themeMode)" class="h-8 rounded-lg bg-emerald-500/70 text-[10px] font-bold">OW</button>
                     <button @click="applyTheme('nether', themeMode)" class="h-8 rounded-lg bg-red-500/70 text-[10px] font-bold">NT</button>
                     <button @click="applyTheme('end', themeMode)" class="h-8 rounded-lg bg-purple-500/70 text-[10px] font-bold">END</button>
+        <div class="fixed floating-safe-bottom md:bottom-24 right-4 z-40" x-data>
+            <button @click="themePanelOpen = !themePanelOpen" class="touch-target px-3 py-2 rounded-xl bg-white/10 border border-white/20 text-xs font-bold">Theme & A11y</button>
+            <div x-show="themePanelOpen" x-transition class="md:mt-2 w-[calc(100vw-2rem)] md:w-56 p-3 glass-card rounded-2xl border border-white/10 space-y-2 fixed md:absolute right-4 md:right-0 bottom-[calc(5rem+env(safe-area-inset-bottom))] md:bottom-auto max-h-[65dvh] overflow-y-auto">
+                <p class="text-[10px] uppercase tracking-widest text-gray-400 font-bold">Preset (World Style)</p>
+        <div class="fixed bottom-24 right-4 z-40" x-data>
+            <button @click="themePanelOpen = !themePanelOpen" class="px-3 py-2 rounded-xl bg-white/10 border border-white/20 text-xs font-bold">Theme</button>
+            <div x-show="themePanelOpen" x-transition class="mt-2 w-56 p-3 glass-card rounded-2xl border border-white/10 space-y-2">
+                <p class="text-[10px] uppercase tracking-widest text-gray-400 font-bold">Theme Preset</p>
+                <div class="grid grid-cols-3 gap-2">
+                    <button @click="applyTheme('overworld', themeMode)" class="h-8 rounded-lg bg-emerald-500/70"></button>
+                    <button @click="applyTheme('nether', themeMode)" class="h-8 rounded-lg bg-red-500/70"></button>
+                    <button @click="applyTheme('end', themeMode)" class="h-8 rounded-lg bg-purple-500/70"></button>
                 </div>
                 <p class="text-[10px] uppercase tracking-widest text-gray-400 font-bold">Mode</p>
                 <div class="flex gap-2">
@@ -509,6 +526,9 @@
             </div>
         </div>
         @endunless
+                <button @click="themePreset='overworld'; themeMode='dark'; accessibility={ highContrast:false, reducedTransparency:false, dyslexiaFont:false }; applyTheme(); localStorage.setItem('a11y_pack', JSON.stringify(accessibility));" class="w-full mt-1 px-2 py-1 text-[11px] rounded-lg border border-white/20 text-gray-200">Reset Default</button>
+            </div>
+        </div>
 
         <!-- Secret Admin Terminal -->
         <div x-show="terminalOpen"
@@ -582,6 +602,7 @@
 
             <!-- Floating Mobile Navigation -->
         <div class="fixed bottom-[calc(0.75rem+env(safe-area-inset-bottom))] left-1/2 -translate-x-1/2 z-40 w-[calc(100%-1rem)] max-w-md md:hidden nav-appear"
+            <div class="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 w-[calc(100%-1rem)] max-w-md md:hidden nav-appear"
                  x-data="{ active: '{{ Route::currentRouteName() }}' }">
                 <div class="glass-card rounded-[1.75rem] p-2 px-3 sm:px-4 flex items-center justify-between border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] text-xs font-bold uppercase tracking-wide">
                     <a href="{{ route('mobs.index') }}" class="p-3 transition-all rounded-full"

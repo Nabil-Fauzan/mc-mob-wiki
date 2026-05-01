@@ -58,6 +58,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/mobs/{mob}', [MobController::class, 'destroy'])->name('mobs.destroy');
 
     Route::post('/api/oracle', [OracleController::class, 'ask'])->middleware('throttle:oracle')->name('api.oracle');
+    Route::get('/api/oracle', [OracleController::class, 'ask'])->name('api.oracle');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
