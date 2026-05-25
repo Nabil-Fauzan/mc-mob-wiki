@@ -43,16 +43,16 @@
 
                                     {{-- Sub-biome badge --}}
                                     @if($biome->subBiomes->count() > 0)
-                                        <div class="absolute top-4 left-4 flex items-center space-x-1.5 bg-black/60 backdrop-blur-sm border border-white/10 px-3 py-1 rounded-full">
+                                        <div class="absolute top-4 left-4 flex items-center space-x-1.5 bg-black/60 backdrop-blur-sm border border-[#ffffff1a] px-3 py-1 rounded-full">
                                             <svg class="w-3 h-3 text-brand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg>
                                             <span class="text-[9px] font-black uppercase tracking-widest text-brand-300">{{ $biome->subBiomes->count() }} Sub-biomes</span>
                                         </div>
                                     @endif
 
                                     <div class="absolute bottom-6 left-6">
-                                        <h3 class="text-xl font-bold text-white mb-1">{{ $biome->name }}</h3>
+                                        <h3 class="text-xl font-bold text-[#ffffff] mb-1">{{ $biome->name }}</h3>
                                         <div class="flex items-center space-x-3">
-                                            <span class="text-[10px] text-gray-400 uppercase tracking-widest font-black flex items-center">
+                                            <span class="text-[10px] text-[#9ca3af] uppercase tracking-widest font-black flex items-center">
                                                 <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z"></path></svg>
                                                 {{ $biome->mobs->count() }} Creatures
                                             </span>

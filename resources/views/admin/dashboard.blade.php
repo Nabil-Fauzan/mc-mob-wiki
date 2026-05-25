@@ -64,6 +64,24 @@
                     </a>
                 </div>
 
+                <div class="glass-card p-2 rounded-[2rem] border border-emerald-500/10 bg-gray-900/40">
+                    <a href="{{ route('admin.contributions.index') }}" class="flex items-center space-x-4 p-4 rounded-[1.75rem] hover:bg-emerald-500/10 transition-all group">
+                        <div class="w-12 h-12 bg-emerald-500/20 rounded-xl flex items-center justify-center text-emerald-500 group-hover:scale-110 transition-transform relative">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            @php
+                                $pendingCount = \App\Models\MobContribution::where('status', 'pending')->count();
+                            @endphp
+                            @if($pendingCount > 0)
+                                <span class="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] text-white font-bold">{{ $pendingCount }}</span>
+                            @endif
+                        </div>
+                        <div>
+                            <span class="block text-xs font-black text-white uppercase tracking-widest">Contributions</span>
+                            <span class="text-[9px] text-gray-400 uppercase font-bold">Review Edit Queue</span>
+                        </div>
+                    </a>
+                </div>
+
                 <div class="glass-card p-2 rounded-[2rem] border border-white/10 bg-gray-900/40">
                     <a href="#bulk-ops" class="flex items-center space-x-4 p-4 rounded-[1.75rem] hover:bg-white/5 transition-all group">
                         <div class="w-12 h-12 bg-gray-500/20 rounded-xl flex items-center justify-center text-gray-500">

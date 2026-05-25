@@ -117,7 +117,7 @@
                                 $class = $mob->threat_score >= 100 ? 'S' : ($mob->threat_score >= 60 ? 'A' : 'B');
                                 $color = $class == 'S' ? 'text-red-500' : ($class == 'A' ? 'text-orange-500' : 'text-yellow-500');
                             @endphp
-                            <div class="flex items-center p-4 bg-gray-950/40 hover:bg-red-500/5 rounded-2xl border border-white/5 hover:border-red-500/30 transition-all group overflow-hidden relative">
+                            <div class="flex items-center p-4 bg-gray-900/40 hover:bg-red-500/5 rounded-2xl border border-white/5 hover:border-red-500/30 transition-all group overflow-hidden relative">
                                 <div class="absolute inset-0 bg-gradient-to-r from-red-500/0 via-red-500/0 to-red-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                                 <div class="w-10 text-xl font-black {{ $color }} font-mono italic">{{ $class }}</div>
                                 <div class="w-12 h-12 rounded-xl border border-white/10 overflow-hidden bg-black mr-4 shadow-xl group-hover:scale-110 transition-transform duration-500">
@@ -159,7 +159,7 @@
                             </div>
                             <div class="glass-card p-6 rounded-[2rem] border-white/5 text-center group-hover:border-brand-500/30 transition-all hover:-translate-y-2 duration-500">
                                 <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-500 to-accent-500 p-0.5 mx-auto mb-4">
-                                    <div class="w-full h-full bg-gray-950 rounded-[0.9rem] flex items-center justify-center text-xl font-black text-white">
+                                    <div class="w-full h-full bg-gray-900 rounded-[0.9rem] flex items-center justify-center text-xl font-black text-white">
                                         {{ substr($researcher->name, 0, 1) }}
                                     </div>
                                 </div>

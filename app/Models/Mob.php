@@ -50,4 +50,9 @@ class Mob extends Model
     {
         return $this->hasMany(Comment::class)->latest();
     }
+
+    public function contributions()
+    {
+        return $this->hasMany(MobContribution::class);
+    }
 }

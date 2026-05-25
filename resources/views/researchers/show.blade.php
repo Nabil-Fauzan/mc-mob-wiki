@@ -1,7 +1,21 @@
 <x-app-layout>
-    <div class="py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
-        <div class="max-w-7xl mx-auto space-y-8">
-            <div class="glass-card rounded-[2rem] sm:rounded-[2.75rem] border border-white/10 overflow-hidden relative p-5 sm:p-8 lg:p-10">
+    @php
+        $bannerUrl = filter_var($user->banner, FILTER_VALIDATE_URL) ? $user->banner : ($user->banner ? asset('storage/'.$user->banner) : null);
+    @endphp
+    
+    <div class="py-8 sm:py-12 px-4 sm:px-6 lg:px-8 relative min-h-screen">
+        <!-- Background Banner -->
+        <div class="absolute inset-0 h-[400px] w-full z-0">
+            @if($bannerUrl)
+                <img src="{{ $bannerUrl }}" alt="Profile Banner" class="w-full h-full object-cover">
+                <div class="absolute inset-0 bg-gradient-to-b from-transparent via-[#020617]/80 to-[#020617]"></div>
+            @else
+                <div class="w-full h-full bg-gradient-to-b from-brand-900/10 via-[#020617]/50 to-[#020617]"></div>
+            @endif
+        </div>
+
+        <div class="max-w-7xl mx-auto space-y-8 relative z-10 pt-16">
+            <div class="glass-card rounded-[2rem] sm:rounded-[2.75rem] border border-white/10 overflow-hidden relative p-5 sm:p-8 lg:p-10 backdrop-blur-xl bg-black/40 shadow-2xl">
                 <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(14,165,233,0.18),_transparent_35%)]"></div>
                 <div class="relative flex flex-col lg:flex-row gap-6 sm:gap-8 lg:items-center">
                     <div class="shrink-0">
@@ -31,6 +45,12 @@
                                 </div>
 
                                 <h1 class="text-3xl sm:text-5xl font-black text-white tracking-tight break-words">{{ $user->name }}</h1>
+                                @if($user->active_title)
+                                    <p class="mt-2 text-amber-400 font-black uppercase tracking-[0.25em] text-[12px] flex items-center gap-2">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path></svg>
+                                        {{ $user->active_title }}
+                                    </p>
+                                @endif
                                 <p class="mt-2 text-brand-300 font-bold uppercase tracking-[0.25em] text-[11px]">{{ $rank }}</p>
 
                                 <div class="mt-4 flex flex-wrap gap-2">
@@ -56,37 +76,58 @@
                                     <button
                                         type="button"
                                         onclick="navigator.clipboard.writeText('{{ route('researchers.show', $user->public_slug) }}'); window.notify('Researcher profile link copied', 'success');"
-                                        class="px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-black uppercase tracking-widest transition-all"
+                                        class="px-4 py-2.5 bg-white/5 hover:bg-white/10 text-white rounded-xl text-xs font-black uppercase tracking-widest transition-all text-center border border-white/10"
                                     >
                                         Copy Link
                                     </button>
+                                    
                                     @auth
-                                        @if(auth()->id() === $user->id)
-                                            <a href="{{ route('profile.edit') }}" class="px-4 py-2.5 bg-white/5 hover:bg-white/10 text-white rounded-xl text-xs font-black uppercase tracking-widest transition-all text-center border border-white/10">
+                                        @if(auth()->id() !== $user->id)
+                                            <form method="POST" action="{{ route('researchers.connect', $user->public_slug) }}" class="flex-1">
+                                                @csrf
+                                                <button type="submit" class="w-full px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all {{ auth()->user()->isFollowing($user) ? 'bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-500/20' : 'bg-brand-600 hover:bg-brand-700 text-white' }}">
+                                                    {{ auth()->user()->isFollowing($user) ? 'Sever Connection' : 'Establish Connection' }}
+                                                </button>
+                                            </form>
+                                        @else
+                                            <a href="{{ route('profile.edit') }}" class="flex-1 px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-black uppercase tracking-widest transition-all text-center">
                                                 Edit Profile
                                             </a>
                                         @endif
                                     @endauth
+
+                                    @if(\Illuminate\Support\Facades\Auth::check() && \Illuminate\Support\Facades\Auth::user()->is_admin && \Illuminate\Support\Facades\Auth::id() !== $user->id && !$user->is_admin)
+                                        <form method="POST" action="{{ route('admin.impersonate', $user) }}">
+                                            @csrf
+                                            <button type="submit" class="px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-black uppercase tracking-widest transition-all text-center">
+                                                IMP
+                                            </button>
+                                        </form>
+                                    @endif
                                 </div>
                             </div>
                         </div>
 
-                        <div class="mt-6 grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-                            <div class="rounded-[1.5rem] border border-white/10 bg-black/20 p-4">
+                        <div class="mt-6 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
+                            <div class="rounded-[1.5rem] border border-white/10 bg-black/20 p-4 col-span-2 md:col-span-1">
                                 <p class="text-[10px] text-gray-500 font-black uppercase tracking-[0.2em]">Reputation</p>
                                 <p class="mt-2 text-2xl sm:text-3xl font-black text-amber-300">{{ $stats['reputation'] }}</p>
                             </div>
                             <div class="rounded-[1.5rem] border border-white/10 bg-black/20 p-4">
-                                <p class="text-[10px] text-gray-500 font-black uppercase tracking-[0.2em]">Observations</p>
+                                <p class="text-[10px] text-gray-500 font-black uppercase tracking-[0.2em]">Notes</p>
                                 <p class="mt-2 text-2xl sm:text-3xl font-black text-white">{{ $stats['comments_count'] }}</p>
                             </div>
                             <div class="rounded-[1.5rem] border border-white/10 bg-black/20 p-4">
                                 <p class="text-[10px] text-gray-500 font-black uppercase tracking-[0.2em]">Tracked</p>
                                 <p class="mt-2 text-2xl sm:text-3xl font-black text-rose-300">{{ $stats['favorites_count'] }}</p>
                             </div>
-                            <div class="rounded-[1.5rem] border border-white/10 bg-black/20 p-4">
-                                <p class="text-[10px] text-gray-500 font-black uppercase tracking-[0.2em]">Avg Score</p>
-                                <p class="mt-2 text-2xl sm:text-3xl font-black text-cyan-300">{{ $stats['avg_comment_score'] }}</p>
+                            <div class="rounded-[1.5rem] border border-brand-500/10 bg-brand-900/10 p-4">
+                                <p class="text-[10px] text-brand-500/70 font-black uppercase tracking-[0.2em]">Followers</p>
+                                <p class="mt-2 text-2xl sm:text-3xl font-black text-brand-300">{{ $user->followers()->count() }}</p>
+                            </div>
+                            <div class="rounded-[1.5rem] border border-brand-500/10 bg-brand-900/10 p-4">
+                                <p class="text-[10px] text-brand-500/70 font-black uppercase tracking-[0.2em]">Following</p>
+                                <p class="mt-2 text-2xl sm:text-3xl font-black text-brand-300">{{ $user->following()->count() }}</p>
                             </div>
                         </div>
                     </div>
@@ -95,30 +136,65 @@
 
             <div class="grid grid-cols-1 xl:grid-cols-12 gap-8">
                 <div class="xl:col-span-8 space-y-8">
+                    @if($pinnedMobs && $pinnedMobs->count() > 0)
+                        <section>
+                            <div class="flex items-center mb-4">
+                                <svg class="w-6 h-6 mr-2 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path></svg>
+                                <h2 class="text-xl sm:text-2xl font-black text-white tracking-tight">Pinned Research</h2>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                                @foreach($pinnedMobs as $mob)
+                                    <a href="{{ route('mobs.show', $mob) }}" class="group block h-full">
+                                        <div class="glass-card h-full p-4 rounded-2xl border border-white/5 hover:border-brand-500/50 transition-all duration-300 relative overflow-hidden">
+                                            @if($mob->image)
+                                                <div class="absolute inset-0 opacity-10 group-hover:opacity-20 transition-opacity">
+                                                    <img src="{{ asset('storage/' . $mob->image) }}" class="w-full h-full object-cover blur-sm">
+                                                </div>
+                                            @endif
+                                            <div class="relative z-10 flex flex-col items-center text-center">
+                                                @if($mob->image)
+                                                    <img src="{{ asset('storage/' . $mob->image) }}" class="w-20 h-20 object-contain drop-shadow-2xl group-hover:scale-110 transition-transform duration-500 mb-3" style="image-rendering: pixelated;">
+                                                @endif
+                                                <h3 class="font-bold text-white group-hover:text-brand-400 transition-colors">{{ $mob->name }}</h3>
+                                                <span class="px-2 py-0.5 mt-2 bg-gray-900 rounded text-[10px] font-black uppercase text-gray-400 border border-white/10">{{ $mob->category->name }}</span>
+                                            </div>
+                                        </div>
+                                    </a>
+                                @endforeach
+                            </div>
+                        </section>
+                    @endif
+
                     <section>
                         <div class="flex items-center justify-between mb-4">
                             <h2 class="text-xl sm:text-2xl font-black text-white tracking-tight">Achievements</h2>
+                            @php
+                                $allAchievements = \App\Models\Achievement::all();
+                                $userAchievements = $user->achievements->pluck('id')->toArray();
+                            @endphp
                             <span class="text-[10px] text-gray-500 font-black uppercase tracking-[0.2em]">
-                                {{ $achievements->where('unlocked', true)->count() }}/{{ $achievements->count() }} unlocked
+                                {{ count($userAchievements) }}/{{ count($allAchievements) }} unlocked
                             </span>
                         </div>
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            @foreach($achievements as $achievement)
+                            @foreach($allAchievements as $achievement)
+                                @php
+                                    $unlocked = in_array($achievement->id, $userAchievements);
+                                @endphp
                                 <div @class([
-                                    'rounded-[1.5rem] border p-5 transition-all',
-                                    'glass-card border-brand-500/20 shadow-[0_0_20px_rgba(14,165,233,0.12)]' => $achievement['unlocked'],
-                                    'bg-white/5 border-white/5 opacity-60' => ! $achievement['unlocked'],
+                                    'rounded-[1.5rem] border p-5 transition-all flex items-center gap-4',
+                                    'glass-card border-brand-500/20 shadow-[0_0_20px_rgba(14,165,233,0.12)]' => $unlocked,
+                                    'bg-white/5 border-white/5 opacity-60' => ! $unlocked,
                                 ])>
-                                    <div class="flex items-center justify-between gap-3">
-                                        <div>
-                                            <p class="text-sm font-black text-white">{{ $achievement['title'] }}</p>
-                                            <p class="mt-2 text-xs text-gray-400 leading-relaxed">{{ $achievement['description'] }}</p>
-                                        </div>
-                                        <span class="text-[10px] font-black uppercase tracking-widest {{ $achievement['unlocked'] ? 'text-brand-300' : 'text-gray-500' }}">
-                                            {{ $achievement['unlocked'] ? 'Unlocked' : 'Locked' }}
-                                        </span>
+                                    <div class="text-3xl">{{ $achievement->icon }}</div>
+                                    <div class="flex-1">
+                                        <p class="text-sm font-black text-white">{{ $achievement->name }}</p>
+                                        <p class="mt-1 text-xs text-gray-400 leading-relaxed">{{ $achievement->description }}</p>
                                     </div>
+                                    <span class="text-[10px] font-black uppercase tracking-widest shrink-0 {{ $unlocked ? 'text-brand-300' : 'text-gray-500' }}">
+                                        {{ $unlocked ? 'Unlocked' : 'Locked' }}
+                                    </span>
                                 </div>
                             @endforeach
                         </div>

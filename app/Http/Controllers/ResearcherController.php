@@ -81,10 +81,13 @@ class ResearcherController extends Controller
             'joined_at' => $user->created_at,
         ];
 
+        $pinnedMobs = $user->pinned_mobs()->with('category')->get();
+
         return view('researchers.show', compact(
             'user',
             'favorites',
             'comments',
+            'pinnedMobs',
             'rank',
             'roles',
             'achievements',

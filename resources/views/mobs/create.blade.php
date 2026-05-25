@@ -12,6 +12,53 @@
         d_easy: '', d_normal: '', d_hard: '',
         xp: '',
         desc: '',
+        isAutoTagging: false,
+        autoTagFromOracle() {
+            if (!this.name) {
+                window.notify('Please enter a Mob Name first.', 'error');
+                return;
+            }
+            this.isAutoTagging = true;
+            fetch('{{ route('api.oracle.autotag') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({ name: this.name })
+            })
+            .then(res => res.json())
+            .then(data => {
+                this.isAutoTagging = false;
+                if (data.error) {
+                    window.notify('Auto-tag failed: ' + data.error, 'error');
+                    return;
+                }
+                
+                if (data.category_id) this.category_id = data.category_id;
+                if (data.health) {
+                    this.h_easy = data.health; this.h_normal = data.health; this.h_hard = data.health;
+                }
+                if (data.damage) {
+                    this.d_easy = data.damage; this.d_normal = data.damage; this.d_hard = data.damage;
+                }
+                if (data.description) this.desc = data.description;
+                
+                // Tick biome checkboxes
+                if (data.biome_ids && Array.isArray(data.biome_ids)) {
+                    document.querySelectorAll('input[name=\'biome_ids[]\']').forEach(cb => {
+                        if (data.biome_ids.includes(parseInt(cb.value))) {
+                            cb.checked = true;
+                        }
+                    });
+                }
+                window.notify('Form auto-filled by Oracle!', 'success');
+            })
+            .catch(err => {
+                this.isAutoTagging = false;
+                window.notify('Network error contacting Oracle.', 'error');
+            });
+        },
         applyTemplate(type) {
             if(type === 'boss') {
                 this.category_id = '1';
@@ -58,7 +105,14 @@
                         <!-- Name -->
                         <div>
                             <x-input-label for="name" :value="__('Mob Name')" />
-                            <x-text-input id="name" name="name" type="text" class="mt-1 block w-full" x-model="name" required autofocus />
+                            <div class="flex mt-1 items-center gap-3">
+                                <x-text-input id="name" name="name" type="text" class="block w-full" x-model="name" required autofocus />
+                                <button type="button" @click="autoTagFromOracle()" :disabled="isAutoTagging" class="px-4 py-2 bg-brand-500/10 hover:bg-brand-500/20 text-brand-400 border border-brand-500/30 rounded-lg text-xs font-black uppercase tracking-widest whitespace-nowrap transition-all flex items-center gap-2">
+                                    <span x-show="isAutoTagging" class="w-4 h-4 border-2 border-brand-400 border-t-transparent rounded-full animate-spin"></span>
+                                    <svg x-show="!isAutoTagging" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                                    <span x-text="isAutoTagging ? 'Thinking...' : 'Auto-Fill'"></span>
+                                </button>
+                            </div>
                             <x-input-error class="mt-2" :messages="$errors->get('name')" />
                         </div>
 

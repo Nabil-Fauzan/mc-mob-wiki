@@ -37,6 +37,12 @@ class ProfileUpdateRequest extends FormRequest
                 Rule::unique(User::class, 'public_slug')->ignore($this->user()->id),
             ],
             'profile_is_public' => ['nullable', 'boolean'],
+            'active_title' => ['nullable', 'string', 'max:50'],
+            'banner' => ['nullable', 'image', 'max:2048'],
+            'banner_url' => ['nullable', 'url', 'max:500'],
+            'remove_banner' => ['nullable', 'boolean'],
+            'pinned_mobs' => ['nullable', 'array', 'max:3'],
+            'pinned_mobs.*' => ['exists:mobs,id'],
         ];
     }
 }

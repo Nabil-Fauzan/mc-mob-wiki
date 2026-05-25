@@ -45,9 +45,6 @@
         </style>
     </head>
     <body class="font-sans antialiased selection:bg-brand-500/30 overflow-x-hidden"
-    <body class="font-sans antialiased bg-[#020617] text-gray-100 selection:bg-brand-500/30 overflow-x-hidden {{
-                $theme === 'Nether' ? 'theme-nether' : ($theme === 'The End' ? 'theme-end' : '')
-          }}"
           :class="{
             'performance-mode': performanceMode,
             'theme-light': themeMode === 'light',
@@ -58,7 +55,6 @@
             'reduced-transparency': accessibility.reducedTransparency,
             'font-dyslexia': accessibility.dyslexiaFont
           }"
-          :class="{ 'performance-mode': performanceMode }"
           x-data="aetherProtocol"
           @keydown.window.ctrl.k.prevent="paletteOpen = true"
           @keydown.window.cmd.k.prevent="paletteOpen = true"
@@ -141,10 +137,10 @@
                             }
                         });
 
-                        this.$watch('paletteSearch', value => {
+                        this.$watch('paletteSearch', Alpine.debounce(value => {
                             this.fetchLiveResults(value);
                             this.selectedIndex = -1;
-                        });
+                        }, 500));
 
                         window.addEventListener('mousemove', (e) => {
                             this.mouseX = e.clientX;
@@ -335,7 +331,7 @@
                         @keydown.down.prevent="navigatePalette('down')"
                         @keydown.up.prevent="navigatePalette('up')"
                         @keydown.enter.prevent="openSelected()"
-                        @keydown.e.prevent="openSelected(true)"
+                        @keydown.ctrl.e.prevent="openSelected(true)"
                         class="block w-full pl-11 sm:pl-12 pr-4 py-3 sm:py-4 bg-transparent border-none text-white text-base sm:text-xl placeholder-gray-600 focus:ring-0 font-bold"
                         placeholder="Search Intelligence Terminal... (Ctrl+K)" />
                     <div x-show="isLoading" class="absolute right-4 sm:right-6 top-1/2 -translate-y-1/2">
@@ -489,46 +485,7 @@
             <div class="absolute -bottom-[10%] left-[20%] w-[30%] h-[30%] bg-brand-400/10 blur-[120px] rounded-full"></div>
         </div>
 
-        <!-- Theme Preview Panel -->
-        @unless(request()->routeIs('home'))
-        <div class="fixed floating-safe-bottom right-4 z-40" x-data>
-            <button @click="themePanelOpen = !themePanelOpen" class="touch-target px-3 py-2 rounded-xl bg-white/10 border border-white/20 text-xs font-bold">Theme & A11y</button>
-            <div x-show="themePanelOpen" x-cloak x-transition @click.away="themePanelOpen = false"
-                 class="w-[calc(100vw-2rem)] md:w-64 p-3 glass-card rounded-2xl border border-white/10 space-y-2 fixed md:absolute right-4 md:right-0 bottom-[calc(5rem+env(safe-area-inset-bottom))] md:bottom-full md:mb-2 max-h-[65dvh] overflow-y-auto">
-                <p class="text-[10px] uppercase tracking-widest text-gray-400 font-bold">Preset (World Style)</p>
-                <div class="grid grid-cols-3 gap-2">
-                    <button @click="applyTheme('overworld', themeMode)" class="h-8 rounded-lg bg-emerald-500/70 text-[10px] font-bold">OW</button>
-                    <button @click="applyTheme('nether', themeMode)" class="h-8 rounded-lg bg-red-500/70 text-[10px] font-bold">NT</button>
-                    <button @click="applyTheme('end', themeMode)" class="h-8 rounded-lg bg-purple-500/70 text-[10px] font-bold">END</button>
-        <div class="fixed floating-safe-bottom md:bottom-24 right-4 z-40" x-data>
-            <button @click="themePanelOpen = !themePanelOpen" class="touch-target px-3 py-2 rounded-xl bg-white/10 border border-white/20 text-xs font-bold">Theme & A11y</button>
-            <div x-show="themePanelOpen" x-transition class="md:mt-2 w-[calc(100vw-2rem)] md:w-56 p-3 glass-card rounded-2xl border border-white/10 space-y-2 fixed md:absolute right-4 md:right-0 bottom-[calc(5rem+env(safe-area-inset-bottom))] md:bottom-auto max-h-[65dvh] overflow-y-auto">
-                <p class="text-[10px] uppercase tracking-widest text-gray-400 font-bold">Preset (World Style)</p>
-        <div class="fixed bottom-24 right-4 z-40" x-data>
-            <button @click="themePanelOpen = !themePanelOpen" class="px-3 py-2 rounded-xl bg-white/10 border border-white/20 text-xs font-bold">Theme</button>
-            <div x-show="themePanelOpen" x-transition class="mt-2 w-56 p-3 glass-card rounded-2xl border border-white/10 space-y-2">
-                <p class="text-[10px] uppercase tracking-widest text-gray-400 font-bold">Theme Preset</p>
-                <div class="grid grid-cols-3 gap-2">
-                    <button @click="applyTheme('overworld', themeMode)" class="h-8 rounded-lg bg-emerald-500/70"></button>
-                    <button @click="applyTheme('nether', themeMode)" class="h-8 rounded-lg bg-red-500/70"></button>
-                    <button @click="applyTheme('end', themeMode)" class="h-8 rounded-lg bg-purple-500/70"></button>
-                </div>
-                <p class="text-[10px] uppercase tracking-widest text-gray-400 font-bold">Mode</p>
-                <div class="flex gap-2">
-                    <button @click="applyTheme(themePreset, 'dark')" class="flex-1 px-2 py-1 text-xs rounded-lg border border-white/20">Dark</button>
-                    <button @click="applyTheme(themePreset, 'light')" class="flex-1 px-2 py-1 text-xs rounded-lg border border-white/20">Light</button>
-                </div>
-                <p class="text-[10px] uppercase tracking-widest text-gray-400 font-bold">Accessibility Pack</p>
-                <label class="flex items-center justify-between text-xs"><span>High Contrast</span><input type="checkbox" @click="toggleA11y('highContrast')" :checked="accessibility.highContrast"></label>
-                <label class="flex items-center justify-between text-xs"><span>Reduced Transparency</span><input type="checkbox" @click="toggleA11y('reducedTransparency')" :checked="accessibility.reducedTransparency"></label>
-                <label class="flex items-center justify-between text-xs"><span>Dyslexia Font</span><input type="checkbox" @click="toggleA11y('dyslexiaFont')" :checked="accessibility.dyslexiaFont"></label>
-                <button @click="resetThemeDefaults()" class="w-full mt-1 px-2 py-1 text-[11px] rounded-lg border border-white/20 text-gray-200">Reset Default</button>
-            </div>
-        </div>
-        @endunless
-                <button @click="themePreset='overworld'; themeMode='dark'; accessibility={ highContrast:false, reducedTransparency:false, dyslexiaFont:false }; applyTheme(); localStorage.setItem('a11y_pack', JSON.stringify(accessibility));" class="w-full mt-1 px-2 py-1 text-[11px] rounded-lg border border-white/20 text-gray-200">Reset Default</button>
-            </div>
-        </div>
+
 
         <!-- Secret Admin Terminal -->
         <div x-show="terminalOpen"
@@ -600,9 +557,8 @@
                 {{ $slot }}
             </main>
 
-            <!-- Floating Mobile Navigation -->
+        <!-- Floating Mobile Navigation -->
         <div class="fixed bottom-[calc(0.75rem+env(safe-area-inset-bottom))] left-1/2 -translate-x-1/2 z-40 w-[calc(100%-1rem)] max-w-md md:hidden nav-appear"
-            <div class="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 w-[calc(100%-1rem)] max-w-md md:hidden nav-appear"
                  x-data="{ active: '{{ Route::currentRouteName() }}' }">
                 <div class="glass-card rounded-[1.75rem] p-2 px-3 sm:px-4 flex items-center justify-between border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] text-xs font-bold uppercase tracking-wide">
                     <a href="{{ route('mobs.index') }}" class="p-3 transition-all rounded-full"
@@ -633,5 +589,6 @@
         </div>
 
         <x-toast />
+        <x-ai-chat-widget />
     </body>
 </html>

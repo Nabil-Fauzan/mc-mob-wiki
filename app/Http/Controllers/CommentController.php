@@ -19,10 +19,37 @@ class CommentController extends Controller
             'body' => 'required|string|max:1000',
         ]);
 
-        $mob->comments()->create([
+        $body = $request->body;
+        
+        // Toxicity Shield
+        $oracle = app(\App\Http\Controllers\OracleController::class);
+        if ($oracle->checkToxicity($body)) {
+            $body = '[REDACTED BY AETHER PROTOCOL]';
+        }
+
+        $comment = $mob->comments()->create([
             'user_id' => Auth::id(),
-            'body' => $request->body,
+            'body' => $body,
         ]);
+
+        // Mention Parsing
+        preg_match_all('/@([A-Za-z0-9_-]+)/', $body, $matches);
+        if (!empty($matches[1])) {
+            $mentionedUsernames = array_unique($matches[1]);
+            $usersToNotify = \App\Models\User::whereIn('minecraft_username', $mentionedUsernames)
+                                            ->orWhereIn('public_slug', $mentionedUsernames)
+                                            ->get()
+                                            ->filter(fn($u) => $u->id !== Auth::id());
+            
+            foreach ($usersToNotify as $uToNotify) {
+                $uToNotify->notify(new \App\Notifications\UserMentioned(
+                    Auth::user()->name, 
+                    $mob->name, 
+                    $mob->id, 
+                    $comment->id
+                ));
+            }
+        }
 
         return back()->with('success', 'Field note transmitted successfully.');
     }
@@ -38,8 +65,16 @@ class CommentController extends Controller
             'body' => 'required|string|max:1000',
         ]);
 
+        $body = $request->body;
+        
+        // Toxicity Shield
+        $oracle = app(\App\Http\Controllers\OracleController::class);
+        if ($oracle->checkToxicity($body)) {
+            $body = '[REDACTED BY AETHER PROTOCOL]';
+        }
+
         $comment->update([
-            'body' => $request->body,
+            'body' => $body,
         ]);
 
         return back()->with('success', 'Field note recalibrated.');

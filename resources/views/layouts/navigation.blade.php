@@ -1,3 +1,16 @@
+@if(session()->has('impersonate'))
+    <div class="bg-red-600 px-4 py-2 flex items-center justify-center space-x-4 relative z-[60] shadow-md">
+        <span class="text-white text-xs font-black uppercase tracking-widest">
+            ⚠️ You are impersonating {{ Auth::user()->name }}
+        </span>
+        <form method="POST" action="{{ route('impersonate.leave') }}">
+            @csrf
+            <button type="submit" class="px-3 py-1 bg-black/20 hover:bg-black/40 text-white rounded text-xs font-black uppercase tracking-widest transition-all">
+                Leave
+            </button>
+        </form>
+    </div>
+@endif
 <nav x-data="{ open: false }" class="sticky top-0 z-50 bg-black/20 backdrop-blur-lg border-b border-white/10 shadow-lg">
     <!-- Primary Navigation Menu -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -28,6 +41,9 @@
                     <x-nav-link :href="route('stats.index')" :active="request()->routeIs('stats.*')" class="text-gray-300 hover:text-white transition-colors duration-300">
                         {{ __('Global Intel') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('leaderboard')" :active="request()->routeIs('leaderboard')" class="text-gray-300 hover:text-white transition-colors duration-300">
+                        {{ __('Hall of Fame') }}
+                    </x-nav-link>
                     @auth
                         <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" class="text-gray-300 hover:text-white transition-colors duration-300">
                             {{ __('Dashboard') }}
@@ -51,12 +67,79 @@
                         :class="performanceMode ? 'bg-brand-500/20 border-brand-500/40 text-brand-300' : ''">
                     PERF
                 </button>
+
+                <!-- Theme Panel -->
+                <div class="relative">
+                    <button @click="themePanelOpen = !themePanelOpen" class="px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-xs font-bold text-gray-300 hover:text-white hover:border-brand-500/40 transition-all">
+                        THEME
+                    </button>
+                    <div x-show="themePanelOpen" x-transition @click.away="themePanelOpen = false" class="absolute right-0 mt-2 w-56 p-3 glass-card rounded-2xl border border-white/10 space-y-2 z-50">
+                        <p class="text-[10px] uppercase tracking-widest text-gray-400 font-bold">Theme Preset</p>
+                        <div class="grid grid-cols-3 gap-2">
+                            <button @click="applyTheme('overworld', themeMode)" class="h-8 rounded-lg bg-emerald-500/70 text-[10px] font-bold">OW</button>
+                            <button @click="applyTheme('nether', themeMode)" class="h-8 rounded-lg bg-red-500/70 text-[10px] font-bold">NT</button>
+                            <button @click="applyTheme('end', themeMode)" class="h-8 rounded-lg bg-purple-500/70 text-[10px] font-bold">END</button>
+                        </div>
+                        <p class="text-[10px] uppercase tracking-widest text-gray-400 font-bold">Mode</p>
+                        <div class="flex gap-2">
+                            <button @click="applyTheme(themePreset, 'dark')" class="flex-1 px-2 py-1 text-xs rounded-lg border border-white/20">Dark</button>
+                            <button @click="applyTheme(themePreset, 'light')" class="flex-1 px-2 py-1 text-xs rounded-lg border border-white/20">Light</button>
+                        </div>
+                        <p class="text-[10px] uppercase tracking-widest text-gray-400 font-bold">Accessibility Pack</p>
+                        <label class="flex items-center justify-between text-xs"><span>High Contrast</span><input type="checkbox" @click="toggleA11y('highContrast')" :checked="accessibility.highContrast"></label>
+                        <label class="flex items-center justify-between text-xs"><span>Reduced Transparency</span><input type="checkbox" @click="toggleA11y('reducedTransparency')" :checked="accessibility.reducedTransparency"></label>
+                        <label class="flex items-center justify-between text-xs"><span>Dyslexia Font</span><input type="checkbox" @click="toggleA11y('dyslexiaFont')" :checked="accessibility.dyslexiaFont"></label>
+                        <button @click="resetThemeDefaults()" class="w-full mt-1 px-2 py-1 text-[11px] rounded-lg border border-white/20 text-gray-200">Reset Default</button>
+                    </div>
+                </div>
             </div>
 
             <!-- Settings Dropdown -->
-            <div class="hidden sm:flex sm:items-center sm:ms-6">
-                @auth
-                    <div class="ms-3 relative">
+        <div class="hidden sm:flex sm:items-center sm:ms-6">
+            @auth
+                <!-- Notification Bell -->
+                <div class="ms-3 relative">
+                    <x-dropdown align="right" width="80">
+                        <x-slot name="trigger">
+                            <button class="relative inline-flex items-center p-2 bg-white/5 border border-white/10 text-gray-400 hover:text-white rounded-full hover:bg-white/10 focus:outline-none transition ease-in-out duration-150 backdrop-blur-sm">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+                                @if(Auth::user()->unreadNotifications->count() > 0)
+                                    <span class="absolute top-0 right-0 w-2.5 h-2.5 bg-red-500 rounded-full border border-[#020617]"></span>
+                                @endif
+                            </button>
+                        </x-slot>
+
+                        <x-slot name="content">
+                            <div class="px-4 py-3 border-b border-white/10 flex justify-between items-center">
+                                <span class="text-xs font-black text-white uppercase tracking-widest">Alerts</span>
+                                @if(Auth::user()->unreadNotifications->count() > 0)
+                                    <form method="POST" action="{{ route('notifications.mark-read') }}">
+                                        @csrf
+                                        <button type="submit" class="text-[10px] text-brand-400 hover:text-brand-300 font-bold uppercase">Mark all read</button>
+                                    </form>
+                                @endif
+                            </div>
+                            <div class="max-h-64 overflow-y-auto">
+                                @forelse(Auth::user()->unreadNotifications as $notification)
+                                    <a href="{{ $notification->data['url'] ?? '#' }}" class="block px-4 py-3 hover:bg-white/5 border-b border-white/5 transition-colors">
+                                        <p class="text-xs text-gray-300">
+                                            <span class="font-bold text-white">{{ $notification->data['sender'] ?? 'System' }}</span> 
+                                            {{ $notification->data['message'] ?? 'sent you an alert.' }}
+                                        </p>
+                                        <p class="text-[10px] text-gray-500 mt-1 uppercase tracking-widest font-bold">{{ $notification->created_at->diffForHumans() }}</p>
+                                    </a>
+                                @empty
+                                    <div class="px-4 py-6 text-center">
+                                        <svg class="w-8 h-8 mx-auto text-gray-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path></svg>
+                                        <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">No unread alerts</p>
+                                    </div>
+                                @endforelse
+                            </div>
+                        </x-slot>
+                    </x-dropdown>
+                </div>
+
+                <div class="ms-3 relative">
                         <x-dropdown align="right" width="48">
                             <x-slot name="trigger">
                                 <button class="inline-flex items-center px-4 py-2 bg-white/5 border border-white/10 text-sm leading-4 font-medium rounded-full text-white hover:bg-white/10 focus:outline-none transition ease-in-out duration-150 backdrop-blur-sm">
@@ -169,6 +252,39 @@
                     {{ __('Dashboard') }}
                 </x-responsive-nav-link>
             @endauth
+        </div>
+
+        <!-- Responsive Tools -->
+        <div class="px-4 pt-2 pb-4 border-t border-white/5 space-y-3">
+            <button @click="paletteOpen = true; open = false" class="w-full flex items-center justify-center px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-xs font-bold text-gray-300 hover:text-white hover:bg-white/10 transition-all">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                SEARCH / TERMINAL
+            </button>
+            <div class="flex gap-2">
+                <button @click="togglePerformanceMode()" class="flex-1 px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-xs font-bold text-gray-300 transition-all" :class="performanceMode ? 'bg-brand-500/20 border-brand-500/40 text-brand-300' : ''">PERFORMANCE</button>
+                <div class="relative flex-1" x-data="{ mobileThemeOpen: false }">
+                    <button @click="mobileThemeOpen = !mobileThemeOpen" class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-xs font-bold text-gray-300 transition-all">THEME</button>
+                    <!-- Mobile Theme Panel Dropdown -->
+                    <div x-show="mobileThemeOpen" x-transition @click.away="mobileThemeOpen = false" class="absolute top-full right-0 mt-2 w-56 p-3 glass-card rounded-2xl border border-white/10 space-y-2 z-50">
+                        <p class="text-[10px] uppercase tracking-widest text-gray-400 font-bold">Theme Preset</p>
+                        <div class="grid grid-cols-3 gap-2">
+                            <button @click="applyTheme('overworld', themeMode)" class="h-8 rounded-lg bg-emerald-500/70 text-[10px] font-bold">OW</button>
+                            <button @click="applyTheme('nether', themeMode)" class="h-8 rounded-lg bg-red-500/70 text-[10px] font-bold">NT</button>
+                            <button @click="applyTheme('end', themeMode)" class="h-8 rounded-lg bg-purple-500/70 text-[10px] font-bold">END</button>
+                        </div>
+                        <p class="text-[10px] uppercase tracking-widest text-gray-400 font-bold">Mode</p>
+                        <div class="flex gap-2">
+                            <button @click="applyTheme(themePreset, 'dark')" class="flex-1 px-2 py-1 text-xs rounded-lg border border-white/20">Dark</button>
+                            <button @click="applyTheme(themePreset, 'light')" class="flex-1 px-2 py-1 text-xs rounded-lg border border-white/20">Light</button>
+                        </div>
+                        <p class="text-[10px] uppercase tracking-widest text-gray-400 font-bold">Accessibility Pack</p>
+                        <label class="flex items-center justify-between text-xs text-white"><span>High Contrast</span><input type="checkbox" @click="toggleA11y('highContrast')" :checked="accessibility.highContrast"></label>
+                        <label class="flex items-center justify-between text-xs text-white"><span>Reduced Transparency</span><input type="checkbox" @click="toggleA11y('reducedTransparency')" :checked="accessibility.reducedTransparency"></label>
+                        <label class="flex items-center justify-between text-xs text-white"><span>Dyslexia Font</span><input type="checkbox" @click="toggleA11y('dyslexiaFont')" :checked="accessibility.dyslexiaFont"></label>
+                        <button @click="resetThemeDefaults()" class="w-full mt-1 px-2 py-1 text-[11px] rounded-lg border border-white/20 text-gray-200">Reset Default</button>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Responsive Settings Options -->

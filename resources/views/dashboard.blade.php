@@ -42,20 +42,15 @@
             <div class="mb-12 overflow-x-auto scrollbar-none">
                 <div class="flex space-x-6 min-w-max pb-4">
                     @php
-                        $badges = [
-                            ['name' => 'First Blood', 'unlocked' => $stats['comments_count'] > 0, 'desc' => 'Record first field note', 'icon' => '🩸'],
-                            ['name' => 'Archivist', 'unlocked' => $stats['favorites_count'] >= 5, 'desc' => '5 species favorited', 'icon' => '📚'],
-                            ['name' => 'Elite Agent', 'unlocked' => $stats['level'] >= 3, 'desc' => 'Reach level 3', 'icon' => '🛡️'],
-                            ['name' => 'Ghost Hunter', 'unlocked' => false, 'desc' => 'Analyze 5 Nether mobs', 'icon' => '👻'],
-                            ['name' => 'Dimension Hopper', 'unlocked' => true, 'desc' => 'Visit all dimension hubs', 'icon' => '🌀'],
-                        ];
+                        $allAchievements = \App\Models\Achievement::all();
+                        $userAchievements = auth()->user()->achievements->pluck('id')->toArray();
                     @endphp
-                    @foreach($badges as $badge)
-                        <div class="glass-card px-6 py-4 rounded-2xl border-white/5 flex items-center space-x-4 {{ $badge['unlocked'] ? 'opacity-100' : 'opacity-30 grayscale' }}">
-                            <div class="text-2xl">{{ $badge['icon'] }}</div>
+                    @foreach($allAchievements as $badge)
+                        <div class="glass-card px-6 py-4 rounded-2xl border-white/5 flex items-center space-x-4 {{ in_array($badge->id, $userAchievements) ? 'opacity-100 shadow-[0_0_15px_rgba(255,255,255,0.1)]' : 'opacity-30 grayscale' }}">
+                            <div class="text-2xl">{{ $badge->icon }}</div>
                             <div>
-                                <h4 class="text-[10px] font-black text-white uppercase tracking-widest mb-0.5">{{ $badge['name'] }}</h4>
-                                <p class="text-[8px] text-gray-500 font-bold uppercase tracking-tighter">{{ $badge['desc'] }}</p>
+                                <h4 class="text-[10px] font-black text-white uppercase tracking-widest mb-0.5">{{ $badge->name }}</h4>
+                                <p class="text-[8px] text-gray-500 font-bold uppercase tracking-tighter">{{ $badge->description }}</p>
                             </div>
                         </div>
                     @endforeach
@@ -65,6 +60,24 @@
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
                 <!-- Bookmarked Species (Grid-ish) -->
                 <div class="lg:col-span-2">
+                    <!-- Dynamic Threat Assessment -->
+                    <div class="mb-12 glass-card p-6 sm:p-8 rounded-[2.5rem] border-red-500/20 bg-gradient-to-br from-red-500/5 to-transparent relative overflow-hidden" x-data="{ loading: true, report: '', fetchAssessment() { fetch('{{ route('api.oracle.threat') }}').then(r => r.json()).then(d => { this.report = d.response; this.loading = false; }).catch(() => { this.report = 'Koneksi ke Oracle terputus. Tidak dapat menganalisis ancaman.'; this.loading = false; }); } }" x-init="fetchAssessment()">
+                        <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMiIgY3k9IjIiIHI9IjEiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC4wNSkiLz48L3N2Zz4=')] opacity-50 pointer-events-none"></div>
+                        <div class="relative z-10">
+                            <h3 class="text-xs font-black text-red-500 uppercase tracking-[0.3em] mb-4 flex items-center">
+                                <span class="w-2 h-2 bg-red-500 rounded-full mr-3 animate-ping"></span>
+                                Oracle Threat Assessment
+                            </h3>
+                            <div x-show="loading" class="flex items-center space-x-3 text-red-400/80">
+                                <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                <span class="text-sm font-bold uppercase tracking-widest animate-pulse">Analyzing dimensional anomalies...</span>
+                            </div>
+                            <div x-show="!loading" x-transition.opacity>
+                                <p class="text-sm sm:text-base text-red-100/90 leading-relaxed font-medium italic" x-text="report"></p>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="flex items-center justify-between mb-8">
                         <h3 class="text-xl font-black text-white flex items-center">
                             <span class="w-2 h-2 bg-brand-500 rounded-full mr-3"></span>
@@ -111,6 +124,51 @@
                         <a href="{{ route('mobs.create') }}" class="px-8 py-3 bg-white text-black text-[10px] font-black rounded-xl hover:bg-brand-500 hover:text-white transition-all uppercase tracking-widest shadow-xl shadow-white/10">
                             Register Discovery
                         </a>
+                    </div>
+                    </div>
+
+                    <!-- Network Feed -->
+                    <div class="mt-12">
+                        <div class="flex items-center justify-between mb-8">
+                            <h3 class="text-xl font-black text-white flex items-center">
+                                <span class="w-2 h-2 bg-brand-500 rounded-full mr-3"></span>
+                                Researcher Network Feed
+                            </h3>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            @forelse($networkFeed as $feedItem)
+                                <div class="glass-card p-5 sm:p-6 rounded-3xl border border-white/5 hover:border-brand-500/20 transition-all flex gap-4">
+                                    <div class="shrink-0">
+                                        <div class="w-10 h-10 rounded-full bg-brand-500/10 flex items-center justify-center text-brand-500">
+                                            @if($feedItem->type === 'comment')
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+                                            @else
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path></svg>
+                                            @endif
+                                        </div>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <a href="{{ route('researchers.show', $feedItem->user->public_slug) }}" class="font-bold text-white hover:text-brand-400 transition-colors">{{ $feedItem->user->name }}</a>
+                                            <span class="text-gray-500 text-xs">
+                                                {{ $feedItem->type === 'comment' ? 'left a field note on' : 'bookmarked' }}
+                                            </span>
+                                            <a href="{{ route('mobs.show', $feedItem->mob->id) }}" class="font-bold text-brand-400 hover:text-brand-300 transition-colors">{{ $feedItem->mob->name }}</a>
+                                        </div>
+                                        @if($feedItem->type === 'comment')
+                                            <p class="text-sm text-gray-400 italic">"{{ Str::limit($feedItem->content, 100) }}"</p>
+                                        @endif
+                                        <p class="text-[10px] text-gray-600 mt-2 font-mono uppercase">{{ $feedItem->created_at->diffForHumans() }}</p>
+                                    </div>
+                                </div>
+                            @empty
+                                <div class="py-12 text-center glass-card rounded-[3rem] border-dashed border-white/10">
+                                    <p class="text-gray-500 font-medium">Your network feed is empty.</p>
+                                    <p class="text-xs text-gray-600 mt-2">Connect with other researchers to see their activities here.</p>
+                                </div>
+                            @endforelse
+                        </div>
                     </div>
                 </div>
 

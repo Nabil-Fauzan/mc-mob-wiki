@@ -83,6 +83,28 @@ class MobController extends Controller
         }
 
         $mobs = $query->paginate(12)->withQueryString();
+
+        // Semantic Search Fallback for main index
+        if ($mobs->isEmpty() && $request->filled('search')) {
+            $semanticName = app(\App\Http\Controllers\OracleController::class)->extractSemanticName($request->search);
+            if ($semanticName) {
+                // Re-build query with semantic name
+                $query = Mob::with(['category', 'biomes.dimension'])->withCount('favoritedBy');
+                if (\Illuminate\Support\Facades\Auth::check()) {
+                    $query->withExists(['favoritedBy as is_favorited' => function($q) {
+                        $q->where('user_id', \Illuminate\Support\Facades\Auth::id());
+                    }]);
+                }
+                $query->where('name', 'like', '%' . $semanticName . '%');
+                $mobs = $query->paginate(12)->withQueryString();
+                
+                // Alert the user that this is a semantic match
+                if ($mobs->isNotEmpty()) {
+                    session()->now('info', "Semantic Match: Menampilkan hasil untuk '{$semanticName}'.");
+                }
+            }
+        }
+
         $categories = Category::all();
         $allBiomes = \App\Models\Biome::with('dimension')->orderBy('name')->get();
 
@@ -183,20 +205,25 @@ class MobController extends Controller
             });
         }
         
-        $biomeIds = $mob->biomes->pluck('id');
-        $relatedMobs = Mob::whereHas('biomes', function($q) use ($biomeIds) {
-            $q->whereIn('biomes.id', $biomeIds);
-        })->where('id', '!=', $mob->id)
-          ->with(['category', 'biomes'])
-          ->limit(4)
-          ->get();
+        $oracle = app(\App\Http\Controllers\OracleController::class);
+        $relatedMobs = $oracle->getRelatedEntities($mob);
           
         if($relatedMobs->isEmpty()) {
-            $relatedMobs = Mob::where('category_id', $mob->category_id)
-                ->where('id', '!=', $mob->id)
-                ->with(['category', 'biomes'])
-                ->limit(4)
-                ->get();
+            $biomeIds = $mob->biomes->pluck('id');
+            $relatedMobs = Mob::whereHas('biomes', function($q) use ($biomeIds) {
+                $q->whereIn('biomes.id', $biomeIds);
+            })->where('id', '!=', $mob->id)
+              ->with(['category', 'biomes'])
+              ->limit(4)
+              ->get();
+              
+            if($relatedMobs->isEmpty()) {
+                $relatedMobs = Mob::where('category_id', $mob->category_id)
+                    ->where('id', '!=', $mob->id)
+                    ->with(['category', 'biomes'])
+                    ->limit(4)
+                    ->get();
+            }
         }
 
         return view('mobs.show', compact('mob', 'relatedMobs'));
@@ -259,7 +286,21 @@ class MobController extends Controller
             $data['image'] = $path;
         }
 
-        $mob->update($data);
+        // Track revisions before saving
+        $mob->fill($data);
+        foreach ($mob->getDirty() as $field => $newValue) {
+            $oldValue = $mob->getOriginal($field);
+            if ($oldValue !== $newValue) {
+                \App\Models\MobRevision::create([
+                    'mob_id' => $mob->id,
+                    'user_id' => Auth::id(),
+                    'field' => $field,
+                    'old_value' => $oldValue,
+                    'new_value' => $newValue,
+                ]);
+            }
+        }
+        $mob->save();
         
         if ($request->has('biome_ids')) {
             $mob->biomes()->sync($request->biome_ids);
@@ -291,6 +332,47 @@ class MobController extends Controller
     }
 
     /**
+     * Display the revision history for a specific mob.
+     */
+    public function history(Mob $mob)
+    {
+        $revisions = \App\Models\MobRevision::where('mob_id', $mob->id)
+            ->with('user')
+            ->latest()
+            ->get();
+            
+        return view('mobs.history', compact('mob', 'revisions'));
+    }
+
+    /**
+     * Revert a specific revision.
+     */
+    public function revert(Request $request, Mob $mob, \App\Models\MobRevision $revision)
+    {
+        if ($revision->mob_id !== $mob->id) {
+            abort(404);
+        }
+
+        // Track this revert as a new revision!
+        $field = $revision->field;
+        $currentValue = $mob->$field;
+        $revertedValue = $revision->old_value;
+
+        \App\Models\MobRevision::create([
+            'mob_id' => $mob->id,
+            'user_id' => Auth::id(), // Admin doing the revert
+            'field' => $field,
+            'old_value' => $currentValue,
+            'new_value' => $revertedValue,
+        ]);
+
+        $mob->$field = $revertedValue;
+        $mob->save();
+
+        return back()->with('success', "Reverted {$field} to its previous state.");
+    }
+
+    /**
      * Compare specific mobs side by side.
      */
     public function comparison(Request $request)
@@ -317,8 +399,19 @@ class MobController extends Controller
             ->where('name', 'like', "%{$query}%")
             ->orWhere('description', 'like', "%{$query}%")
             ->limit(5)
-            ->get()
-            ->map(function($mob) {
+            ->get();
+
+        if ($mobs->isEmpty()) {
+            $semanticName = app(\App\Http\Controllers\OracleController::class)->extractSemanticName($query);
+            if ($semanticName) {
+                $mobs = Mob::with(['category', 'biomes'])
+                    ->where('name', 'like', "%{$semanticName}%")
+                    ->limit(5)
+                    ->get();
+            }
+        }
+
+        $mobs = $mobs->map(function($mob) {
                 return [
                     'id' => $mob->id,
                     'name' => $mob->name,

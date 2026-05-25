@@ -50,11 +50,55 @@
                     <span class="text-xs font-black text-white" x-text="count"></span>
                 </button>
                 @auth
-                    <a href="{{ route('mobs.edit', $mob) }}" class="btn-primary-mc flex items-center justify-center w-full sm:w-auto">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-                        Edit Registry
+                    <a href="{{ route('mobs.history', $mob) }}" class="px-4 py-2.5 bg-gray-500/10 text-gray-400 font-bold rounded-lg border border-gray-500/30 hover:bg-gray-500 hover:text-white transition-all text-center w-full sm:w-auto text-sm flex items-center justify-center">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        History
                     </a>
+                    @if(auth()->user()->is_admin)
+                        <a href="{{ route('mobs.edit', $mob) }}" class="btn-primary-mc flex items-center justify-center w-full sm:w-auto">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                            Edit Registry
+                        </a>
+                    @else
+                        <button x-data @click="$dispatch('open-modal', 'suggest-edit-{{ $mob->id }}')" class="px-4 py-2.5 bg-brand-500/10 text-brand-400 font-bold rounded-lg border border-brand-500/30 hover:bg-brand-500 hover:text-white transition-all text-center w-full sm:w-auto text-sm flex items-center justify-center">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                            Suggest Edit
+                        </button>
+                    @endif
                 @endauth
+                        <x-modal name="suggest-edit-{{ $mob->id }}" :show="false" maxWidth="2xl">
+                            <form method="POST" action="{{ route('mobs.contribute', $mob) }}" class="p-6 sm:p-8 bg-gray-900 border border-white/10 rounded-2xl">
+                                @csrf
+                                <h2 class="text-2xl font-black text-white mb-6 uppercase tracking-widest flex items-center">
+                                    <span class="w-3 h-3 bg-brand-500 rounded-full mr-3 animate-pulse"></span>
+                                    Suggest Revision
+                                </h2>
+                                
+                                <p class="text-sm text-gray-400 mb-6">
+                                    Propose a change to this entity's documentation. Your submission will be reviewed by an Administrator. If approved, you will earn XP and unlock the <strong>Contributor</strong> badge.
+                                </p>
+
+                                <div class="mb-6">
+                                    <x-input-label for="field" value="Select Field to Edit" class="text-brand-400 font-bold uppercase tracking-widest text-xs mb-2" />
+                                    <select id="field" name="field" class="w-full bg-white/5 border border-white/10 rounded-xl text-white py-3 px-4 focus:ring-brand-500 focus:border-brand-500">
+                                        <option value="description" class="bg-gray-900">Description / Lore</option>
+                                        <option value="health" class="bg-gray-900">Health Points</option>
+                                        <option value="damage" class="bg-gray-900">Damage Output</option>
+                                        <option value="behavior" class="bg-gray-900">Behavior Patterns</option>
+                                    </select>
+                                </div>
+
+                                <div class="mb-8">
+                                    <x-input-label for="proposed_value" value="Proposed Value" class="text-brand-400 font-bold uppercase tracking-widest text-xs mb-2" />
+                                    <textarea id="proposed_value" name="proposed_value" rows="5" class="w-full bg-white/5 border border-white/10 rounded-xl text-white py-3 px-4 focus:ring-brand-500 focus:border-brand-500" required placeholder="Enter your revised text or value here..."></textarea>
+                                </div>
+
+                                <div class="flex justify-end gap-4">
+                                    <button type="button" @click="$dispatch('close')" class="px-6 py-2.5 text-sm font-bold text-gray-400 hover:text-white transition-colors">Cancel</button>
+                                    <button type="submit" class="px-6 py-2.5 bg-brand-600 hover:bg-brand-500 text-white text-sm font-bold rounded-xl transition-all shadow-[0_0_15px_rgba(14,165,233,0.5)]">Submit for Review</button>
+                                </div>
+                            </form>
+                        </x-modal>
                 <a href="{{ route('mobs.index') }}" class="px-6 py-2.5 bg-white/5 hover:bg-white/10 text-white font-bold rounded-lg border border-white/10 transition-all text-center w-full sm:w-auto">
                     Back to Wiki
                 </a>
@@ -113,6 +157,12 @@
                                         </div>
                                         
                                         <div class="space-y-4">
+                                            @if($mob->health)
+                                            <div class="flex justify-between items-center group bg-brand-500/5 p-2 rounded-lg">
+                                                <span class="text-[10px] font-black text-brand-400 uppercase">Base / Universal</span>
+                                                <span class="text-lg font-black text-white tracking-tight">{{ $mob->health }}</span>
+                                            </div>
+                                            @endif
                                             <div class="flex justify-between items-center group">
                                                 <span class="text-[10px] font-black text-green-500/70 uppercase">Easy</span>
                                                 <span class="text-lg font-black text-white tracking-tight">{{ $mob->health_easy ?: '?' }}</span>
@@ -138,6 +188,12 @@
                                         </div>
                                         
                                         <div class="space-y-4">
+                                            @if($mob->damage)
+                                            <div class="flex justify-between items-center group bg-brand-500/5 p-2 rounded-lg">
+                                                <span class="text-[10px] font-black text-brand-400 uppercase">Base / Universal</span>
+                                                <span class="text-lg font-black text-white tracking-tight">{{ $mob->damage }}</span>
+                                            </div>
+                                            @endif
                                             <div class="flex justify-between items-center group">
                                                 <span class="text-[10px] font-black text-green-500/70 uppercase">Easy</span>
                                                 <span class="text-lg font-black text-white tracking-tight">{{ $mob->damage_easy ?: '?' }}</span>
@@ -253,13 +309,40 @@
                             <div class="mb-8">
                                 <h1 class="text-3xl sm:text-5xl lg:text-6xl font-black text-white mb-6 sm:mb-8 tracking-tighter break-words">{{ $mob->name }}</h1>
                                 
-                                <div class="space-y-6">
-                                    <h4 class="text-xs font-black text-brand-500 uppercase tracking-[0.2em] flex items-center">
-                                        Description
-                                        <span class="flex-1 h-px bg-white/10 ml-4"></span>
-                                    </h4>
-                                    <div class="text-base sm:text-lg lg:text-xl text-gray-400 leading-relaxed font-medium">
-                                        {!! nl2br(e($mob->description)) !!}
+                                <div class="space-y-6" x-data="{ 
+                                    text: '',
+                                    translating: false,
+                                    currentLang: 'id',
+                                    init() {
+                                        this.text = JSON.parse(document.getElementById('mob-description-data').textContent);
+                                    },
+                                    translate(target) {
+                                        if(this.currentLang === target) return;
+                                        this.translating = true;
+                                        fetch('{{ route('api.oracle.translate', $mob) }}?target_lang=' + target)
+                                            .then(res => res.json())
+                                            .then(data => {
+                                                if(data.translation) {
+                                                    this.text = data.translation;
+                                                    this.currentLang = target;
+                                                }
+                                            })
+                                            .finally(() => this.translating = false);
+                                    }
+                                }">
+                                    <script type="application/json" id="mob-description-data">{!! json_encode($mob->description) !!}</script>
+                                    <div class="flex items-center justify-between">
+                                        <h4 class="text-xs font-black text-brand-500 uppercase tracking-[0.2em] flex items-center">
+                                            Description
+                                        </h4>
+                                        <div class="flex items-center gap-2 bg-black/40 rounded-lg p-1 border border-white/5">
+                                            <button @click="translate('id')" :class="currentLang === 'id' ? 'bg-brand-500 text-white' : 'text-gray-500 hover:text-white'" class="px-2 py-1 rounded text-[10px] font-bold uppercase transition-colors" :disabled="translating">ID</button>
+                                            <button @click="translate('en')" :class="currentLang === 'en' ? 'bg-brand-500 text-white' : 'text-gray-500 hover:text-white'" class="px-2 py-1 rounded text-[10px] font-bold uppercase transition-colors" :disabled="translating">EN</button>
+                                            <svg x-show="translating" class="animate-spin w-3 h-3 text-brand-500 absolute -right-4" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                        </div>
+                                    </div>
+                                    <div class="text-base sm:text-lg lg:text-xl text-gray-400 leading-relaxed font-medium transition-all relative" :class="translating ? 'opacity-50' : 'opacity-100'">
+                                        <span x-html="text.replace(/\n/g, '<br>')"></span>
                                     </div>
                                 </div>
                             </div>
@@ -376,6 +459,28 @@
                                     <p class="text-xs text-brand-300/70 leading-relaxed">Intelligence reports suggest that {{ strtolower($mob->name) }} species exhibit {{ strtolower($mob->category->name) }} behavior traits. Exercise standard field protocols when engaging.</p>
                                 </div>
                             </div>
+
+                            <!-- Survival Guide RAG -->
+                            <div class="mt-6 sm:mt-8 glass-card p-4 sm:p-6 rounded-[1.5rem] sm:rounded-3xl border-brand-500/20 relative overflow-hidden" x-data="{ query: '', loading: false, response: '', askOracle() { if(!this.query) return; this.loading = true; this.response = ''; fetch('{{ route('api.oracle.contextual') }}', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' }, body: JSON.stringify({ query: this.query, mob_id: {{ $mob->id }} }) }).then(res => res.json()).then(data => { this.response = data.response; this.loading = false; }).catch(() => { this.response = '[ERROR] Communication link failed.'; this.loading = false; }); } }">
+                                <div class="absolute inset-0 bg-gradient-to-r from-brand-900/10 to-transparent pointer-events-none"></div>
+                                <h4 class="text-xs font-black text-brand-400 uppercase tracking-widest mb-4 flex items-center">
+                                    <svg class="w-4 h-4 mr-2 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                                    Ask Oracle about {{ $mob->name }}
+                                </h4>
+                                <div class="flex flex-col sm:flex-row gap-3 relative z-10">
+                                    <input type="text" x-model="query" @keydown.enter="askOracle()" class="flex-1 bg-white/5 border border-white/10 rounded-xl text-white text-sm px-4 py-3 focus:ring-brand-500 focus:border-brand-500 transition-colors" placeholder="e.g. What is the best strategy to defeat it?">
+                                    <button @click="askOracle()" :disabled="loading" class="px-6 py-3 bg-brand-600 hover:bg-brand-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-black rounded-xl transition-all shadow-lg shadow-brand-600/30 uppercase tracking-widest flex items-center justify-center">
+                                        <span x-show="!loading">Consult</span>
+                                        <span x-show="loading" class="flex items-center">
+                                            <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                            Uplinking...
+                                        </span>
+                                    </button>
+                                </div>
+                                <div x-show="response" x-transition.opacity class="mt-4 p-5 bg-black/40 border border-brand-500/20 rounded-xl relative z-10">
+                                    <p class="text-sm text-brand-100/90 leading-relaxed font-medium italic" x-text="response"></p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -418,9 +523,16 @@
                                 </a>
                                 <div class="flex-1 min-w-0">
                                     <div class="flex items-start justify-between gap-3 mb-1">
-                                        <a href="{{ route('researchers.show', $comment->user) }}" class="text-sm font-black text-white hover:text-brand-400 transition-colors">
-                                            {{ $comment->user->name }}
-                                        </a>
+                                        <div class="flex items-center gap-2">
+                                            <a href="{{ route('researchers.show', $comment->user) }}" class="text-sm font-black text-white hover:text-brand-400 transition-colors">
+                                                {{ $comment->user->name }}
+                                            </a>
+                                            @if($comment->user->active_title)
+                                                <span class="px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/20 text-[9px] font-black uppercase tracking-widest text-amber-400">
+                                                    {{ $comment->user->active_title }}
+                                                </span>
+                                            @endif
+                                        </div>
                                         <span class="text-[9px] text-gray-600 font-mono uppercase">{{ $comment->created_at->diffForHumans() }}</span>
                                     </div>
                                     

@@ -13,9 +13,67 @@
         @csrf
     </form>
 
-    <form method="post" action="{{ route('profile.update') }}" class="mt-6 space-y-6" enctype="multipart/form-data" x-data="{ imageUrl: '{{ $user->avatar_url }}', publicSlug: '{{ old('public_slug', $user->public_slug) }}', profilePublic: {{ old('profile_is_public', $user->profile_is_public) ? 'true' : 'false' }} }">
+    <form method="post" action="{{ route('profile.update') }}" class="mt-6 space-y-6" enctype="multipart/form-data" x-data="{ 
+        imageUrl: '{{ $user->avatar_url }}', 
+        bannerUrl: '{{ filter_var($user->banner, FILTER_VALIDATE_URL) ? $user->banner : ($user->banner ? asset('storage/'.$user->banner) : '') }}',
+        bannerInputMode: '{{ filter_var($user->banner, FILTER_VALIDATE_URL) ? 'url' : 'file' }}',
+        publicSlug: '{{ old('public_slug', $user->public_slug) }}', 
+        profilePublic: {{ old('profile_is_public', $user->profile_is_public) ? 'true' : 'false' }} 
+    }">
         @csrf
         @method('patch')
+
+        <div class="p-6 bg-gray-900/50 border border-brand-500/20 rounded-2xl space-y-6 mb-6">
+            <h3 class="text-md font-bold text-brand-400 flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                Profile Banner
+            </h3>
+            
+            <div x-show="bannerUrl" class="w-full h-40 md:h-64 rounded-2xl overflow-hidden border-2 border-brand-500/50 relative group mb-6">
+                <img :src="bannerUrl" alt="Banner Preview" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+                <p class="absolute bottom-4 left-4 text-xs font-black uppercase text-brand-300 tracking-widest">Banner Preview</p>
+            </div>
+
+            <div class="flex items-center gap-4 mb-4">
+                <label class="flex items-center gap-2 text-sm text-gray-300 cursor-pointer">
+                    <input type="radio" x-model="bannerInputMode" value="file" class="text-brand-500 focus:ring-brand-500 bg-gray-950 border-gray-700">
+                    Upload Local File
+                </label>
+                <label class="flex items-center gap-2 text-sm text-gray-300 cursor-pointer">
+                    <input type="radio" x-model="bannerInputMode" value="url" class="text-brand-500 focus:ring-brand-500 bg-gray-950 border-gray-700">
+                    Use External URL
+                </label>
+            </div>
+
+            <div x-show="bannerInputMode === 'file'" x-transition>
+                <x-input-label for="banner" :value="__('Upload Banner (File)')" />
+                <input id="banner" name="banner" type="file" accept="image/*"
+                    @change="
+                        const file = $event.target.files[0];
+                        if (file) {
+                            const reader = new FileReader();
+                            reader.onload = (e) => { bannerUrl = e.target.result; };
+                            reader.readAsDataURL(file);
+                        }
+                    "
+                    class="mt-2 block w-full text-sm text-gray-400 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-black file:uppercase file:tracking-widest file:bg-brand-500/10 file:text-brand-400 hover:file:bg-brand-500/20 transition-all cursor-pointer" />
+                <p class="mt-2 text-[10px] text-gray-500 font-bold uppercase tracking-widest">Ratio 16:9 or similar (e.g. YouTube banner). Max size: 2MB.</p>
+                <x-input-error class="mt-2" :messages="$errors->get('banner')" />
+            </div>
+
+            <div x-show="bannerInputMode === 'url'" x-transition>
+                <x-input-label for="banner_url" :value="__('Banner URL (YouTube/Google Image Link)')" />
+                <x-text-input id="banner_url" name="banner_url" type="url" x-on:input="bannerUrl = $event.target.value" class="mt-2 block w-full bg-gray-950 border-gray-800 text-gray-300 focus:border-brand-500 focus:ring-brand-500 rounded-xl" :value="old('banner_url', filter_var($user->banner, FILTER_VALIDATE_URL) ? $user->banner : '')" placeholder="https://example.com/image.jpg" />
+                <p class="mt-2 text-[10px] text-gray-500 font-bold uppercase tracking-widest">Paste direct image link here.</p>
+                <x-input-error class="mt-2" :messages="$errors->get('banner_url')" />
+            </div>
+
+            <label class="mt-4 inline-flex items-center gap-2 text-xs text-gray-300">
+                <input type="checkbox" name="remove_banner" value="1" class="rounded border-white/10 bg-gray-950 text-red-500 focus:ring-red-500" @change="if($event.target.checked) bannerUrl = ''">
+                Remove current banner
+            </label>
+        </div>
 
         <div class="p-6 bg-gray-900/50 border border-brand-500/20 rounded-2xl space-y-6 mb-6">
             <h3 class="text-md font-bold text-brand-400 flex items-center">
@@ -144,6 +202,56 @@
                     </div>
                 </div>
             @endif
+        </div>
+
+        <div class="p-6 bg-gray-900/50 border border-brand-500/10 rounded-2xl space-y-5 mb-6">
+            <div>
+                <h3 class="text-md font-bold text-amber-400 flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path></svg>
+                    Cosmetic Title Selection
+                </h3>
+                <p class="mt-2 text-[11px] text-gray-500 uppercase tracking-widest">Equip a title earned from your achievements to display on your public profile and comments.</p>
+            </div>
+
+            <div>
+                <x-input-label for="active_title" :value="__('Active Title')" />
+                <select id="active_title" name="active_title" class="mt-2 block w-full bg-gray-950 border-gray-800 text-gray-300 focus:border-amber-500 focus:ring-amber-500 rounded-xl">
+                    <option value="">-- No Title Equipped --</option>
+                    @foreach($titles ?? [] as $titleOption)
+                        <option value="{{ $titleOption }}" @selected(old('active_title', $user->active_title) === $titleOption)>
+                            {{ $titleOption }}
+                        </option>
+                    @endforeach
+                </select>
+                <x-input-error class="mt-2" :messages="$errors->get('active_title')" />
+            </div>
+        </div>
+
+        <div class="p-6 bg-gray-900/50 border border-brand-500/10 rounded-2xl space-y-5 mb-6">
+            <div>
+                <h3 class="text-md font-bold text-brand-400 flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path></svg>
+                    Pinned Entities (Showcase)
+                </h3>
+                <p class="mt-2 text-[11px] text-gray-500 uppercase tracking-widest">Select up to 3 of your Favorite Mobs to pin on your public profile.</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                @for($i = 0; $i < 3; $i++)
+                    <div>
+                        <x-input-label :for="'pinned_mob_'.$i" :value="__('Slot ' . ($i + 1))" />
+                        <select id="pinned_mob_{{ $i }}" name="pinned_mobs[{{ $i }}]" class="mt-2 block w-full bg-gray-950 border-gray-800 text-gray-300 focus:border-brand-500 focus:ring-brand-500 rounded-xl">
+                            <option value="">-- Empty Slot --</option>
+                            @foreach($favoriteMobs ?? [] as $favMob)
+                                <option value="{{ $favMob->id }}" @selected(isset($pinnedMobs[$i]) && $pinnedMobs[$i] == $favMob->id)>
+                                    {{ $favMob->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                @endfor
+            </div>
+            <x-input-error class="mt-2" :messages="$errors->get('pinned_mobs')" />
         </div>
 
         <div class="sticky bottom-[calc(0.75rem+env(safe-area-inset-bottom))] md:static z-20 flex items-center gap-4 p-3 md:p-0 bg-[#020617]/85 md:bg-transparent backdrop-blur-sm md:backdrop-blur-none rounded-xl md:rounded-none border border-white/10 md:border-0">

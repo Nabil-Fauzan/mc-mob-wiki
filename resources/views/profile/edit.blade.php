@@ -44,6 +44,13 @@
                     </div>
                 </div>
 
+                {{-- Security Terminal --}}
+                <div class="glass-card p-10 rounded-[3rem] border border-indigo-500/10 relative overflow-hidden">
+                    <div class="max-w-2xl">
+                        @include('profile.partials.security-form')
+                    </div>
+                </div>
+
                 {{-- Danger Zone (Delete Account) --}}
                 <div class="glass-card p-10 rounded-[3rem] border border-red-500/10 bg-red-950/5 relative overflow-hidden">
                     <div class="max-w-2xl">
