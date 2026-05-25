@@ -551,47 +551,113 @@ Reply ONLY with a valid JSON array of the integer IDs of the related mobs. Examp
     {
         /** @var \App\Models\User $user */
         $user = \Illuminate\Support\Facades\Auth::user();
-        if (!$user) return response()->json(['response' => 'Unauthorized'], 401);
+        if (!$user) {
+            return response()->stream(function() {
+                echo "data: " . json_encode(['chunk' => '[ERROR] Unauthorized access.']) . "\n\n";
+                echo "data: [DONE]\n\n";
+                ob_flush(); flush();
+            }, 401, ['Content-Type' => 'text/event-stream']);
+        }
 
         $cacheKey = 'oracle:threat:' . $user->id;
-        if ($cached = Cache::get($cacheKey)) {
-            return response()->json(['response' => $cached, 'cached' => true]);
+        $cached = Cache::get($cacheKey);
+
+        if ($cached) {
+            return response()->stream(function () use ($cached) {
+                $words = explode(' ', $cached);
+                foreach ($words as $i => $word) {
+                    echo "data: " . json_encode(['chunk' => $word . ($i < count($words) - 1 ? ' ' : '')]) . "\n\n";
+                    ob_flush(); flush();
+                    usleep(30000); // 30ms delay
+                }
+                echo "data: [DONE]\n\n";
+                ob_flush(); flush();
+            }, 200, ['Content-Type' => 'text/event-stream', 'Cache-Control' => 'no-cache']);
         }
 
         $favorites = $user->favorite_mobs()->with('category')->latest()->take(5)->get();
         if ($favorites->isEmpty()) {
-            return response()->json(['response' => "Pola penjelajahan masih kosong. Kunjungi beberapa entitas untuk mendapatkan Analisis Ancaman dari Oracle.", 'cached' => false]);
+            $msg = "Pola penjelajahan masih kosong. Kunjungi beberapa entitas untuk mendapatkan Analisis Ancaman dari Oracle.";
+            return response()->stream(function () use ($msg) {
+                $words = explode(' ', $msg);
+                foreach ($words as $i => $word) {
+                    echo "data: " . json_encode(['chunk' => $word . ($i < count($words) - 1 ? ' ' : '')]) . "\n\n";
+                    ob_flush(); flush();
+                    usleep(30000);
+                }
+                echo "data: [DONE]\n\n";
+                ob_flush(); flush();
+            }, 200, ['Content-Type' => 'text/event-stream', 'Cache-Control' => 'no-cache']);
         }
 
         $entities = $favorites->map(fn($f) => $f->name . ' (' . $f->category->name . ')')->implode(', ');
-
         $systemPrompt = "You are ORACLE, giving a daily Threat Assessment for a Minecraft researcher. Based on their recently researched entities: [{$entities}]. Write a 2-sentence cinematic threat assessment in Indonesian, warning them of specific environmental hazards or tactical preparations needed based on those specific mobs. Do not greet them, just output the assessment.";
 
         $apiKey = $this->getApiKey();
-        if (!$apiKey) return response()->json(['response' => 'AI System Offline.'], 200);
-
-        try {
-            $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $apiKey,
-            ])->post('https://api.groq.com/openai/v1/chat/completions', [
-                'model' => 'llama-3.3-70b-versatile',
-                'messages' => [
-                    ['role' => 'system', 'content' => $systemPrompt],
-                    ['role' => 'user', 'content' => 'Generate threat assessment.'],
-                ],
-                'temperature' => 0.6,
-                'max_tokens' => 150,
-            ]);
-
-            if ($response->successful()) {
-                $aiResponse = $response->json()['choices'][0]['message']['content'] ?? '';
-                Cache::put($cacheKey, $aiResponse, now()->addMinutes(60)); // Cache for 1 hour
-                return response()->json(['response' => $aiResponse, 'cached' => false]);
-            }
-            return response()->json(['response' => '[UNSTABLE] Gagal membuat analisis ancaman.'], 200);
-        } catch (\Exception $e) {
-            return response()->json(['response' => '[ERROR] Sensor offline.'], 200);
+        if (!$apiKey) {
+            return response()->stream(function() {
+                echo "data: " . json_encode(['chunk' => 'AI System Offline.']) . "\n\n";
+                echo "data: [DONE]\n\n";
+                ob_flush(); flush();
+            }, 200, ['Content-Type' => 'text/event-stream']);
         }
+
+        return response()->stream(function () use ($apiKey, $systemPrompt, $cacheKey) {
+            $client = new \GuzzleHttp\Client();
+            try {
+                $response = $client->request('POST', 'https://api.groq.com/openai/v1/chat/completions', [
+                    'headers' => [
+                        'Authorization' => 'Bearer ' . $apiKey,
+                        'Content-Type' => 'application/json',
+                        'Accept' => 'application/json',
+                    ],
+                    'json' => [
+                        'model' => 'llama-3.3-70b-versatile',
+                        'messages' => [
+                            ['role' => 'system', 'content' => $systemPrompt],
+                            ['role' => 'user', 'content' => 'Generate threat assessment.'],
+                        ],
+                        'temperature' => 0.6,
+                        'max_tokens' => 150,
+                        'stream' => true,
+                    ],
+                    'stream' => true,
+                ]);
+
+                $body = $response->getBody();
+                $fullResponse = '';
+
+                while (!$body->eof()) {
+                    $line = \GuzzleHttp\Psr7\Utils::readLine($body);
+                    if (str_starts_with($line, 'data: ')) {
+                        $dataStr = trim(substr($line, 6));
+                        if ($dataStr === '[DONE]') {
+                            break;
+                        }
+                        $data = json_decode($dataStr, true);
+                        if (isset($data['choices'][0]['delta']['content'])) {
+                            $content = $data['choices'][0]['delta']['content'];
+                            $fullResponse .= $content;
+                            echo "data: " . json_encode(['chunk' => $content]) . "\n\n";
+                            ob_flush(); flush();
+                        }
+                    }
+                }
+                
+                Cache::put($cacheKey, $fullResponse, now()->addMinutes(60));
+                
+                echo "data: [DONE]\n\n";
+                ob_flush(); flush();
+            } catch (\Exception $e) {
+                echo "data: " . json_encode(['chunk' => '[ERROR] Sensor offline.']) . "\n\n";
+                echo "data: [DONE]\n\n";
+                ob_flush(); flush();
+            }
+        }, 200, [
+            'Cache-Control' => 'no-cache',
+            'Content-Type' => 'text/event-stream',
+            'X-Accel-Buffering' => 'no',
+        ]);
     }
 
 

@@ -10,8 +10,13 @@
                 <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-8 relative">
                     <div class="flex items-center space-x-6">
                         <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-[2rem] bg-gradient-to-br from-brand-500 to-accent-500 p-1 shadow-[0_0_30px_rgba(14,165,233,0.3)]">
-                            <div class="w-full h-full bg-gray-900 rounded-[1.8rem] flex items-center justify-center text-3xl font-black text-white">
-                                {{ substr(auth()->user()->name, 0, 1) }}
+                            <div class="w-full h-full bg-gray-900 rounded-[1.8rem] flex items-center justify-center text-3xl font-black text-white overflow-hidden relative">
+                                @if(auth()->user()->minecraft_username)
+                                    <img src="https://mc-heads.net/avatar/{{ auth()->user()->minecraft_username }}/100" class="w-full h-full object-cover scale-110" alt="Minecraft 3D Head">
+                                    <div class="absolute inset-0 ring-inset ring-2 ring-white/10 rounded-[1.8rem]"></div>
+                                @else
+                                    {{ substr(auth()->user()->name, 0, 1) }}
+                                @endif
                             </div>
                         </div>
                         <div>
@@ -61,7 +66,45 @@
                 <!-- Bookmarked Species (Grid-ish) -->
                 <div class="lg:col-span-2">
                     <!-- Dynamic Threat Assessment -->
-                    <div class="mb-12 glass-card p-6 sm:p-8 rounded-[2.5rem] border-red-500/20 bg-gradient-to-br from-red-500/5 to-transparent relative overflow-hidden" x-data="{ loading: true, report: '', fetchAssessment() { fetch('{{ route('api.oracle.threat') }}').then(r => r.json()).then(d => { this.report = d.response; this.loading = false; }).catch(() => { this.report = 'Koneksi ke Oracle terputus. Tidak dapat menganalisis ancaman.'; this.loading = false; }); } }" x-init="fetchAssessment()">
+                    <div class="mb-12 glass-card p-6 sm:p-8 rounded-[2.5rem] border-red-500/20 bg-gradient-to-br from-red-500/5 to-transparent relative overflow-hidden" 
+                         x-data="{ 
+                            loading: true, 
+                            report: '', 
+                            async fetchAssessment() { 
+                                try {
+                                    const response = await fetch('{{ route('api.oracle.threat') }}');
+                                    if (!response.ok) throw new Error('Network error');
+                                    this.loading = false;
+                                    
+                                    const reader = response.body.getReader();
+                                    const decoder = new TextDecoder('utf-8');
+                                    let done = false;
+                                    
+                                    while (!done) {
+                                        const { value, done: readerDone } = await reader.read();
+                                        done = readerDone;
+                                        if (value) {
+                                            const chunkString = decoder.decode(value, { stream: true });
+                                            const lines = chunkString.split('\n');
+                                            for (let line of lines) {
+                                                if (line.startsWith('data: ')) {
+                                                    const dataStr = line.substring(6).trim();
+                                                    if (dataStr === '[DONE]') { done = true; break; }
+                                                    try {
+                                                        const parsed = JSON.parse(dataStr);
+                                                        if (parsed.chunk) { this.report += parsed.chunk; }
+                                                    } catch (e) {}
+                                                }
+                                            }
+                                        }
+                                    }
+                                } catch (error) {
+                                    this.report = '[SIGNAL INTERRUPTED] Koneksi ke Oracle terputus.';
+                                    this.loading = false;
+                                }
+                            } 
+                         }" 
+                         x-init="fetchAssessment()">
                         <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMiIgY3k9IjIiIHI9IjEiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC4wNSkiLz48L3N2Zz4=')] opacity-50 pointer-events-none"></div>
                         <div class="relative z-10">
                             <h3 class="text-xs font-black text-red-500 uppercase tracking-[0.3em] mb-4 flex items-center">
@@ -108,9 +151,17 @@
                                 </div>
                             </div>
                         @empty
-                            <div class="col-span-full py-20 text-center glass-card rounded-[3rem] border-dashed border-white/10">
-                                <p class="text-gray-500 font-medium">Your personal archive is currently empty.</p>
-                                <a href="{{ route('mobs.index') }}" class="mt-4 inline-block text-brand-500 font-bold hover:underline">Explore Wiki</a>
+                            <div class="col-span-full py-16 px-8 text-center glass-card rounded-[2.5rem] border border-white/5 bg-gray-900/60 relative overflow-hidden group">
+                                <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMiIgY3k9IjIiIHI9IjEiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC4wMykiLz48L3N2Zz4=')] opacity-30"></div>
+                                <div class="relative z-10 flex flex-col items-center justify-center">
+                                    <div class="w-16 h-16 rounded-2xl bg-brand-500/10 border border-brand-500/20 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-brand-500/20 transition-all duration-500">
+                                        <svg class="w-8 h-8 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                                    </div>
+                                    <p class="text-[10px] font-black text-brand-500 uppercase tracking-[0.4em] mb-2 animate-pulse">[DATA KOSONG]</p>
+                                    <h4 class="text-lg font-black text-white mb-2">Belum Ada Entitas Teramati</h4>
+                                    <p class="text-xs text-gray-500 max-w-md mx-auto leading-relaxed mb-6">Archive intel Anda kosong. Silakan kunjungi Registry dan tandai (bookmark) beberapa entitas Minecraft untuk dipantau secara intensif oleh Oracle.</p>
+                                    <a href="{{ route('mobs.index') }}" class="px-6 py-2 bg-white/5 border border-white/10 text-white text-[10px] font-black rounded-xl hover:bg-brand-500 hover:border-brand-500 transition-all uppercase tracking-widest">Akses Registry</a>
+                                </div>
                             </div>
                         @endforelse
                     </div>
