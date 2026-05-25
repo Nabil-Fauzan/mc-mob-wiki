@@ -10,6 +10,10 @@ class CommentVoteController extends Controller
 {
     public function toggle(Request $request, Comment $comment)
     {
+        if ($comment->user_id === Auth::id()) {
+            return back()->with('error', 'You cannot vote on your own observation.');
+        }
+
         $vote = $comment->votes()->where('user_id', Auth::id())->first();
 
         if ($vote) {

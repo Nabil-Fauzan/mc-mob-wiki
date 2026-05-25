@@ -595,4 +595,42 @@ Reply ONLY with a valid JSON array of the integer IDs of the related mobs. Examp
     {
         return 'oracle:resp:' . sha1(strtolower($query) . '|' . $lang . '|' . $mode);
     }
+
+    /**
+     * Generate Changelog from raw git commits
+     */
+    public function generateChangelog(string $rawCommits, ?string $lastVersion = null): array
+    {
+        $apiKey = $this->getApiKey();
+        if (!$apiKey) {
+            throw new \Exception("GROQ_API_KEY missing.");
+        }
+
+        $systemPrompt = "You are an AI generating Release Notes for 'Aether Protocol', a sci-fi wiki web application for a Minecraft project. 
+Given the following raw developer git commits, summarize them into a beautiful, user-friendly Release Notes document formatted in Markdown.
+Group them by '🚀 New Features', '🐛 Bug Fixes', and '✨ UI/UX Improvements'. 
+Also, based on the magnitude of the changes, propose a semantic version number. The last version was: " . ($lastVersion ?? "None") . ".
+Respond ONLY in valid JSON format with three keys: 'version' (string), 'title' (string, a catchy name for this update), and 'markdown_content' (string).";
+
+        $response = Http::withHeaders([
+            'Authorization' => 'Bearer ' . $apiKey,
+            'Content-Type' => 'application/json',
+        ])->post('https://api.groq.com/openai/v1/chat/completions', [
+            'model' => 'llama-3.3-70b-versatile',
+            'response_format' => ['type' => 'json_object'],
+            'messages' => [
+                ['role' => 'system', 'content' => $systemPrompt],
+                ['role' => 'user', 'content' => "Raw commits:\n" . $rawCommits],
+            ],
+            'temperature' => 0.5,
+        ]);
+
+        if ($response->successful()) {
+            $data = $response->json();
+            $content = $data['choices'][0]['message']['content'] ?? '{}';
+            return json_decode($content, true);
+        }
+
+        throw new \Exception("Oracle API Error: " . $response->body());
+    }
 }

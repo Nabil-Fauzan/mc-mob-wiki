@@ -323,6 +323,8 @@ class MobController extends Controller
      */
     public function destroy(Mob $mob)
     {
+        abort_unless(\Illuminate\Support\Facades\Auth::user()->is_admin, 403, 'Only administrators can delete mobs.');
+
         if ($mob->image) {
             Storage::disk('public')->delete($mob->image);
         }
@@ -349,6 +351,8 @@ class MobController extends Controller
      */
     public function revert(Request $request, Mob $mob, \App\Models\MobRevision $revision)
     {
+        abort_unless(\Illuminate\Support\Facades\Auth::user()->is_admin, 403, 'Only administrators can revert mob revisions.');
+
         if ($revision->mob_id !== $mob->id) {
             abort(404);
         }

@@ -116,7 +116,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('/comments/{comment}', [CommentController::class, 'update'])->name('comments.update');
     Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy');
     Route::post('/comments/{comment}/vote', [CommentVoteController::class, 'toggle'])->name('comments.vote');
+    
+    // AI Changelog Generator
+    Route::post('/changelogs/generate', [\App\Http\Controllers\ChangelogController::class, 'generate'])->name('changelogs.generate');
 });
+
+// Changelog UI
+Route::get('/changelogs', [\App\Http\Controllers\ChangelogController::class, 'index'])->name('changelogs.index');
 
 // Comparison Tool
 Route::get('/comparison', [MobController::class, 'comparison'])->name('mobs.comparison');

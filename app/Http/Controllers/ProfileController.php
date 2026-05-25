@@ -68,7 +68,26 @@ class ProfileController extends Controller
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
         $user = $request->user();
-        $user->fill($request->validated());
+        $validatedData = $request->validated();
+
+        // Security Check: Active Title Forgery
+        if (isset($validatedData['active_title'])) {
+            $requestedTitle = $validatedData['active_title'];
+            $unlockedTitles = $user->achievements()
+                ->whereNotNull('reward_title')
+                ->pluck('reward_title')
+                ->toArray();
+            
+            if ($user->is_admin) {
+                $unlockedTitles[] = 'ADMIN';
+            }
+
+            if (!empty($requestedTitle) && !in_array($requestedTitle, $unlockedTitles)) {
+                return back()->with('error', 'ILLEGAL OPERATION DETECTED: You have not unlocked the title "' . $requestedTitle . '". This incident has been logged by the Aether Protocol.');
+            }
+        }
+
+        $user->fill($validatedData);
         $user->profile_is_public = $request->boolean('profile_is_public');
 
         if (blank($user->public_slug)) {
