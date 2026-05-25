@@ -239,7 +239,6 @@
                                 },
                                 body: JSON.stringify({ query, lang: 'id', mode: 'lore' })
                             })
-                            fetch('/api/oracle?query=' + encodeURIComponent(query))
                                 .then(res => res.json())
                                 .then(data => {
                                     this.terminalOutput.push(data.response);

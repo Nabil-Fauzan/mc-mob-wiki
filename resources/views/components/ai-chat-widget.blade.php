@@ -159,18 +159,56 @@
                 this.isTyping = true;
                 this.scrollToBottom();
 
+                // Placeholder for Oracle response
+                const oracleMessageIndex = this.messages.length;
+                this.messages.push({ role: 'oracle', content: '' });
+
                 try {
-                    // Call the existing Oracle endpoint
-                    const response = await fetch('/api/oracle?query=' + encodeURIComponent(userText));
+                    const response = await fetch('/api/oracle', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        body: JSON.stringify({ query: userText, stream: true })
+                    });
                     
                     if (!response.ok) throw new Error('Network error');
                     
-                    const data = await response.json();
-                    
-                    this.messages.push({ role: 'oracle', content: data.response || data.message || 'I processed your request, but the data feed is unstable.' });
+                    const reader = response.body.getReader();
+                    const decoder = new TextDecoder("utf-8");
+                    let done = false;
+
+                    while (!done) {
+                        const { value, done: readerDone } = await reader.read();
+                        done = readerDone;
+                        if (value) {
+                            const chunkString = decoder.decode(value, { stream: true });
+                            const lines = chunkString.split("\n");
+                            
+                            for (let line of lines) {
+                                if (line.startsWith('data: ')) {
+                                    const dataStr = line.substring(6).trim();
+                                    if (dataStr === '[DONE]') {
+                                        done = true;
+                                        break;
+                                    }
+                                    try {
+                                        const parsed = JSON.parse(dataStr);
+                                        if (parsed.chunk) {
+                                            this.messages[oracleMessageIndex].content += parsed.chunk;
+                                            this.scrollToBottom();
+                                        }
+                                    } catch (e) {
+                                        // Ignore incomplete JSON chunks, handled natively by streaming
+                                    }
+                                }
+                            }
+                        }
+                    }
                 } catch (error) {
                     console.error('Oracle Error:', error);
-                    this.messages.push({ role: 'oracle', content: '[SIGNAL INTERRUPTED] Unable to connect to the Aether Network.' });
+                    this.messages[oracleMessageIndex].content = '[SIGNAL INTERRUPTED] Unable to connect to the Aether Network.';
                 } finally {
                     this.isTyping = false;
                     this.saveHistory();

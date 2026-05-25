@@ -55,8 +55,19 @@
                                 </div>
                             </div>
                             
-                            <div class="prose prose-invert prose-brand max-w-none prose-h2:text-xl prose-h2:mb-4 prose-h3:text-lg prose-p:text-gray-400 prose-p:leading-relaxed prose-li:text-gray-400">
-                                {!! Str::markdown($log->ai_summary) !!}
+                            @php
+                                $lines = explode("\n", trim($log->ai_summary));
+                                $formattedLines = array_map(function($line) {
+                                    $trimmed = trim($line);
+                                    if (empty($trimmed) || str_starts_with($trimmed, '#') || preg_match('/^[-*+]\s/', $trimmed) || preg_match('/^[\x{1F300}-\x{1FAD6}\x{2700}-\x{27BF}\x{1F600}-\x{1F64F}\x{1F680}-\x{1F6FF}]/u', $trimmed)) {
+                                        return $line . "\n"; 
+                                    }
+                                    return "- " . $trimmed . "\n";
+                                }, $lines);
+                                $formatted_summary = implode("\n", $formattedLines);
+                            @endphp
+                            <div class="prose prose-invert max-w-none prose-headings:text-white prose-h2:text-2xl prose-h2:mt-10 prose-h2:mb-6 prose-h3:text-brand-400 prose-h3:text-xl prose-h3:mt-8 prose-h3:mb-4 prose-p:text-gray-400 prose-li:text-gray-300 prose-li:my-2">
+                                {!! Str::markdown($formatted_summary) !!}
                             </div>
 
                             @if(auth()->check() && auth()->user()->is_admin)

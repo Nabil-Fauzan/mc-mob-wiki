@@ -23,23 +23,49 @@ class OracleController extends Controller
             'query' => ['required', 'string', 'max:500'],
             'lang' => ['nullable', 'in:id,en'],
             'mode' => ['nullable', 'in:lore,data'],
+            'stream' => ['nullable', 'boolean'],
         ]);
 
         $query = trim($validated['query']);
         $lang = $validated['lang'] ?? 'id';
         $mode = $validated['mode'] ?? 'lore';
+        $isStream = $validated['stream'] ?? false;
 
         if (!$this->allowRateLimitedRequest($request->ip())) {
-            return response()->json([
-                'response' => $lang === 'id'
-                    ? 'ORACLE: [RATE LIMITED] Terlalu banyak permintaan. Coba lagi dalam satu menit.'
-                    : 'ORACLE: [RATE LIMITED] Too many requests. Try again in a minute.',
-            ], 429);
+            $msg = $lang === 'id'
+                ? 'ORACLE: [RATE LIMITED] Terlalu banyak permintaan. Coba lagi dalam satu menit.'
+                : 'ORACLE: [RATE LIMITED] Too many requests. Try again in a minute.';
+            if ($isStream) {
+                return response()->stream(function () use ($msg) {
+                    echo "data: " . json_encode(['chunk' => $msg]) . "\n\n";
+                    echo "data: [DONE]\n\n";
+                    ob_flush(); flush();
+                }, 429, ['Content-Type' => 'text/event-stream', 'Cache-Control' => 'no-cache']);
+            }
+            return response()->json(['response' => $msg], 429);
         }
 
         $cacheKey = $this->cacheKey($query, $lang, $mode);
         $cached = Cache::get($cacheKey);
+        
+        // Cache Illusion for Streaming
         if ($cached) {
+            if ($isStream) {
+                return response()->stream(function () use ($cached) {
+                    $words = explode(' ', $cached);
+                    foreach ($words as $i => $word) {
+                        echo "data: " . json_encode(['chunk' => $word . ($i < count($words) - 1 ? ' ' : '')]) . "\n\n";
+                        ob_flush(); flush();
+                        usleep(30000); // 30ms delay per word to simulate typing
+                    }
+                    echo "data: [DONE]\n\n";
+                    ob_flush(); flush();
+                }, 200, [
+                    'Cache-Control' => 'no-cache',
+                    'Content-Type' => 'text/event-stream',
+                    'X-Accel-Buffering' => 'no',
+                ]);
+            }
             return response()->json([
                 'response' => $cached,
                 'meta' => ['cached' => true, 'lang' => $lang, 'mode' => $mode],
@@ -47,14 +73,76 @@ class OracleController extends Controller
         }
 
         $knowledge = $this->retrieveKnowledge($query);
-
-
-
         $systemPrompt = $this->buildSystemPrompt($knowledge['context'], $lang, $mode);
         $apiKey = $this->getApiKey();
 
         if (!$apiKey) {
-            return response()->json(['response' => 'ORACLE: [ERROR] GROQ API Key Missing.'], 200);
+            $msg = 'ORACLE: [ERROR] GROQ API Key Missing.';
+            if ($isStream) {
+                return response()->stream(function () use ($msg) {
+                    echo "data: " . json_encode(['chunk' => $msg]) . "\n\n";
+                    echo "data: [DONE]\n\n";
+                    ob_flush(); flush();
+                }, 200, ['Content-Type' => 'text/event-stream']);
+            }
+            return response()->json(['response' => $msg], 200);
+        }
+
+        if ($isStream) {
+            return response()->stream(function () use ($apiKey, $systemPrompt, $query, $cacheKey) {
+                $client = new \GuzzleHttp\Client();
+                $response = $client->request('POST', 'https://api.groq.com/openai/v1/chat/completions', [
+                    'headers' => [
+                        'Authorization' => 'Bearer ' . $apiKey,
+                        'Content-Type' => 'application/json',
+                        'Accept' => 'application/json',
+                    ],
+                    'json' => [
+                        'model' => 'llama-3.3-70b-versatile',
+                        'messages' => [
+                            ['role' => 'system', 'content' => $systemPrompt],
+                            ['role' => 'user', 'content' => $query],
+                        ],
+                        'temperature' => 0.5,
+                        'max_tokens' => 250,
+                        'stream' => true,
+                    ],
+                    'stream' => true,
+                ]);
+
+                $body = $response->getBody();
+                $fullResponse = 'ORACLE: ';
+                
+                echo "data: " . json_encode(['chunk' => 'ORACLE: ']) . "\n\n";
+                ob_flush(); flush();
+
+                while (!$body->eof()) {
+                    $line = \GuzzleHttp\Psr7\Utils::readLine($body);
+                    if (str_starts_with($line, 'data: ')) {
+                        $dataStr = trim(substr($line, 6));
+                        if ($dataStr === '[DONE]') {
+                            break;
+                        }
+                        $data = json_decode($dataStr, true);
+                        if (isset($data['choices'][0]['delta']['content'])) {
+                            $content = $data['choices'][0]['delta']['content'];
+                            $fullResponse .= $content;
+                            echo "data: " . json_encode(['chunk' => $content]) . "\n\n";
+                            ob_flush(); flush();
+                        }
+                    }
+                }
+                
+                // Cache the newly generated full response
+                Cache::put($cacheKey, $fullResponse, now()->addMinutes(10));
+                
+                echo "data: [DONE]\n\n";
+                ob_flush(); flush();
+            }, 200, [
+                'Cache-Control' => 'no-cache',
+                'Content-Type' => 'text/event-stream',
+                'X-Accel-Buffering' => 'no',
+            ]);
         }
 
         try {
@@ -609,6 +697,7 @@ Reply ONLY with a valid JSON array of the integer IDs of the related mobs. Examp
         $systemPrompt = "You are an AI generating Release Notes for 'Aether Protocol', a sci-fi wiki web application for a Minecraft project. 
 Given the following raw developer git commits, summarize them into a beautiful, user-friendly Release Notes document formatted in Markdown.
 Group them by '🚀 New Features', '🐛 Bug Fixes', and '✨ UI/UX Improvements'. 
+CRITICAL: You MUST use Markdown bullet points (`- `) for EVERY single change listed under the headings. Do not output plain text paragraphs for the changes. Ensure there is an empty line before and after each heading.
 Also, based on the magnitude of the changes, propose a semantic version number. The last version was: " . ($lastVersion ?? "None") . ".
 Respond ONLY in valid JSON format with three keys: 'version' (string), 'title' (string, a catchy name for this update), and 'markdown_content' (string).";
 
