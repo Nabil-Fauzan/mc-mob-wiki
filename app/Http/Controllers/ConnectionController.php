@@ -14,6 +14,7 @@ class ConnectionController extends Controller
             return back()->with('error', 'You cannot connect to yourself.');
         }
 
+        /** @var \App\Models\User $activeUser */
         $activeUser = Auth::user();
 
         if ($activeUser->isFollowing($user)) {
