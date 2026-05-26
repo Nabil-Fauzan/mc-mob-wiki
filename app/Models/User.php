@@ -16,7 +16,7 @@ use Illuminate\Support\Str;
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, \App\Models\Traits\HasExperience, \App\Models\Traits\Sluggable;
 
     /**
      * Get the attributes that should be cast.
@@ -33,15 +33,18 @@ class User extends Authenticatable
         ];
     }
 
-    protected static function booted(): void
+    // Scopes
+    public function scopeAdmins($query)
     {
-        static::creating(function (User $user) {
-            if (blank($user->public_slug)) {
-                $user->public_slug = static::generateUniqueSlug($user->name);
-            }
-        });
+        return $query->where('is_admin', true);
     }
 
+    public function scopePublicProfiles($query)
+    {
+        return $query->where('profile_is_public', true);
+    }
+
+    // Relationships
     public function favorite_mobs()
     {
         return $this->belongsToMany(Mob::class, 'favorites')->withTimestamps();
@@ -80,26 +83,6 @@ class User extends Authenticatable
         return $this->hasMany(CommentVote::class);
     }
 
-    public static function generateUniqueSlug(string $name, ?int $ignoreUserId = null): string
-    {
-        $base = Str::slug($name);
-        $base = $base !== '' ? $base : 'researcher';
-        $slug = $base;
-        $counter = 2;
-
-        while (
-            static::query()
-                ->when($ignoreUserId, fn ($query) => $query->whereKeyNot($ignoreUserId))
-                ->where('public_slug', $slug)
-                ->exists()
-        ) {
-            $slug = $base . '-' . $counter;
-            $counter++;
-        }
-
-        return $slug;
-    }
-
     public function getAvatarUrlAttribute()
     {
         if ($this->avatar) {
@@ -125,71 +108,13 @@ class User extends Authenticatable
         return $this->hasMany(MobContribution::class);
     }
 
-    public function addXp($amount)
+    public function mobRevisions()
     {
-        $this->xp += $amount;
-        
-        $xpRemaining = $this->xp;
-        $level = 1;
-        
-        // Level 1 to 15 (requires 2000 each)
-        while ($xpRemaining >= 2000 && $level < 15) {
-            $xpRemaining -= 2000;
-            $level++;
-        }
-        
-        // Level 16 to 30 (requires 1850 each)
-        if ($level >= 15) {
-            while ($xpRemaining >= 1850 && $level < 30) {
-                $xpRemaining -= 1850;
-                $level++;
-            }
-        }
-        
-        // Level 30+ (requires 2000 each)
-        if ($level >= 30) {
-            while ($xpRemaining >= 2000) {
-                $xpRemaining -= 2000;
-                $level++;
-            }
-        }
-        
-        $this->level = $level;
-        $this->save();
-        
-        return $this->level;
+        return $this->hasMany(MobRevision::class);
     }
 
-    public function xpForNextLevel()
+    public function adminContributions()
     {
-        if ($this->level < 15) return 2000;
-        if ($this->level < 30) return 1850;
-        return 2000;
-    }
-    
-    public function currentLevelProgress()
-    {
-        $xpRemaining = $this->xp;
-        $level = 1;
-        
-        while ($xpRemaining >= 2000 && $level < 15) {
-            $xpRemaining -= 2000;
-            $level++;
-        }
-        if ($level >= 15) {
-            while ($xpRemaining >= 1850 && $level < 30) {
-                $xpRemaining -= 1850;
-                $level++;
-            }
-        }
-        if ($level >= 30) {
-            while ($xpRemaining >= 2000) {
-                $xpRemaining -= 2000;
-                $level++;
-            }
-        }
-        
-        $required = $this->xpForNextLevel();
-        return min(100, round(($xpRemaining / $required) * 100));
+        return $this->hasMany(MobContribution::class, 'admin_id');
     }
 }

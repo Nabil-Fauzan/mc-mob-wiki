@@ -18,7 +18,7 @@ class BiomeController extends Controller
         // Only load top-level biomes (no parent) with their sub-biomes and mob counts
         $dimensions = Dimension::with([
             'biomes' => function ($q) {
-                $q->whereNull('parent_id')->with(['subBiomes', 'mobs']);
+                $q->root()->with(['subBiomes', 'mobs']);
             }
         ])->get();
 
@@ -38,19 +38,25 @@ class BiomeController extends Controller
     // Admin: Biome CRUD
     // -------------------------
 
+    private function getAvailableImages()
+    {
+        return [
+            'preset' => collect(File::glob(public_path('images/biomes/*.*')))
+                ->map(fn($path) => 'images/biomes/' . basename($path)),
+            'uploaded' => collect(Storage::disk('public')->files('biomes'))
+                ->map(fn($path) => 'biomes/' . basename($path))
+        ];
+    }
+
     public function create(Request $request)
     {
         $dimensions = Dimension::all();
-        // Only top-level biomes can be parents
-        $parentBiomes = Biome::whereNull('parent_id')->orderBy('name')->get();
+        $parentBiomes = Biome::root()->orderBy('name')->get();
         $selectedParent = $request->parent_id ? Biome::find($request->parent_id) : null;
 
-        // Fetch available images
-        $presetImages = collect(File::glob(public_path('images/biomes/*.*')))
-            ->map(fn($path) => 'images/biomes/' . basename($path));
-        
-        $uploadedImages = collect(Storage::disk('public')->files('biomes'))
-            ->map(fn($path) => 'biomes/' . basename($path));
+        $images = $this->getAvailableImages();
+        $presetImages = $images['preset'];
+        $uploadedImages = $images['uploaded'];
 
         return view('biomes.create', compact('dimensions', 'parentBiomes', 'selectedParent', 'presetImages', 'uploadedImages'));
     }
@@ -58,20 +64,11 @@ class BiomeController extends Controller
     /**
      * Store a newly created biome or sub-biome.
      */
-    public function store(Request $request)
+    public function store(\App\Http\Requests\SaveBiomeRequest $request)
     {
-        $isSubBiome = !empty($request->parent_id);
+        $validated = $request->validated();
+        $isSubBiome = !empty($validated['parent_id']);
 
-        $validated = $request->validate([
-            'name'        => 'required|string|max:255',
-            'parent_id'   => 'nullable|exists:biomes,id',
-            'dimension_id'=> $isSubBiome ? 'nullable' : 'required|exists:dimensions,id',
-            'description' => 'required|string',
-            'image'       => 'nullable|image|max:2048',
-            'existing_image' => 'nullable|string',
-        ]);
-
-        // Sub-biomes inherit their parent's dimension
         if ($isSubBiome) {
             $parent = Biome::findOrFail($validated['parent_id']);
             $validated['dimension_id'] = $parent->dimension_id;
@@ -95,15 +92,11 @@ class BiomeController extends Controller
     public function edit(Biome $biome)
     {
         $dimensions  = Dimension::all();
-        // Exclude self from potential parents
-        $parentBiomes = Biome::whereNull('parent_id')->where('id', '!=', $biome->id)->orderBy('name')->get();
+        $parentBiomes = Biome::root()->where('id', '!=', $biome->id)->orderBy('name')->get();
 
-        // Fetch available images
-        $presetImages = collect(File::glob(public_path('images/biomes/*.*')))
-            ->map(fn($path) => 'images/biomes/' . basename($path));
-        
-        $uploadedImages = collect(Storage::disk('public')->files('biomes'))
-            ->map(fn($path) => 'biomes/' . basename($path));
+        $images = $this->getAvailableImages();
+        $presetImages = $images['preset'];
+        $uploadedImages = $images['uploaded'];
 
         return view('biomes.edit', compact('biome', 'dimensions', 'parentBiomes', 'presetImages', 'uploadedImages'));
     }
@@ -111,18 +104,10 @@ class BiomeController extends Controller
     /**
      * Update the specified biome in storage.
      */
-    public function update(Request $request, Biome $biome)
+    public function update(\App\Http\Requests\SaveBiomeRequest $request, Biome $biome)
     {
-        $isSubBiome = !empty($request->parent_id);
-
-        $validated = $request->validate([
-            'name'        => 'required|string|max:255',
-            'parent_id'   => 'nullable|exists:biomes,id',
-            'dimension_id'=> $isSubBiome ? 'nullable' : 'required|exists:dimensions,id',
-            'description' => 'required|string',
-            'image'       => 'nullable|image|max:2048',
-            'existing_image' => 'nullable|string',
-        ]);
+        $validated = $request->validated();
+        $isSubBiome = !empty($validated['parent_id']);
 
         if ($isSubBiome) {
             $parent = Biome::findOrFail($validated['parent_id']);

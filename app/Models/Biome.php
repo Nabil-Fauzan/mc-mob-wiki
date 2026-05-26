@@ -27,4 +27,10 @@ class Biome extends Model
     {
         return $this->hasMany(Biome::class, 'parent_id');
     }
+
+    // Scopes
+    public function scopeRoot($query)
+    {
+        return $query->whereNull('parent_id');
+    }
 }

@@ -128,61 +128,9 @@ class MobController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(\App\Http\Requests\SaveMobRequest $request, \App\Services\MobService $mobService)
     {
-        $request->validate([
-            'name'        => 'required',
-            'category_id' => 'required|exists:categories,id',
-            'biome_ids'   => 'nullable|array',
-            'biome_ids.*' => 'exists:biomes,id',
-            'health'      => 'nullable',
-            'damage'      => 'nullable',
-            'drops'       => 'nullable|string',
-            'xp_reward'   => 'nullable|string',
-            'description' => 'required',
-            'spawning_conditions' => 'nullable|string',
-            'health_easy'   => 'nullable|string',
-            'health_normal' => 'nullable|string',
-            'health_hard'   => 'nullable|string',
-            'damage_easy'   => 'nullable|string',
-            'damage_normal' => 'nullable|string',
-            'damage_hard'   => 'nullable|string',
-            'melee_attack'  => 'nullable|string',
-            'ranged_attack' => 'nullable|string',
-            'image'         => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'loot'          => 'nullable|array',
-            'loot.*.item_name' => 'required|string',
-            'loot.*.quantity'  => 'nullable|string',
-            'loot.*.chance'    => 'nullable|string',
-            'loot.*.rarity'    => 'nullable|string',
-            'loot.*.icon'      => 'nullable|string',
-        ]);
-
-        $data = $request->except(['biome_ids', 'loot']);
-        
-        // Sync base fields for sorting/compatibility
-        $data['health'] = $request->health_normal ?: ($request->health_easy ?: ($request->health_hard ?: '0'));
-        $data['damage'] = $request->damage_normal ?: ($request->damage_easy ?: ($request->damage_hard ?: '0'));
-
-        if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('mobs', 'public');
-            $data['image'] = $path;
-        }
-
-        $mob = Mob::create($data);
-        
-        if ($request->has('biome_ids')) {
-            $mob->biomes()->sync($request->biome_ids);
-        }
-
-        if ($request->has('loot')) {
-            foreach ($request->loot as $dropData) {
-                if (!empty($dropData['item_name'])) {
-                    $mob->loot()->create($dropData);
-                }
-            }
-        }
-
+        $mobService->saveMob(new Mob(), $request);
         return redirect()->route('mobs.index')->with('success', 'Mob created successfully.');
     }
 
@@ -193,18 +141,19 @@ class MobController extends Controller
             'biomes.dimension',
             'loot',
             'comments' => function ($query) {
-                $query->with(['user', 'votes'])
-                    ->withCount('votes')
-                    ->latest();
+                $query->with('user')
+                    ->withCount('votes');
+                
+                if (Auth::check()) {
+                    $query->withExists(['votes as is_voted' => function($q) {
+                        $q->where('user_id', Auth::id());
+                    }]);
+                }
+                
+                $query->latest();
             },
         ]);
 
-        if (Auth::check()) {
-            $mob->comments->each(function ($comment) {
-                $comment->is_voted = $comment->votes->contains('user_id', Auth::id());
-            });
-        }
-        
         $oracle = app(\App\Http\Controllers\OracleController::class);
         $relatedMobs = $oracle->getRelatedEntities($mob);
           
@@ -242,79 +191,9 @@ class MobController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Mob $mob)
+    public function update(\App\Http\Requests\SaveMobRequest $request, Mob $mob, \App\Services\MobService $mobService)
     {
-        $request->validate([
-            'name'        => 'required',
-            'category_id' => 'required|exists:categories,id',
-            'biome_ids'   => 'nullable|array',
-            'biome_ids.*' => 'exists:biomes,id',
-            'health'      => 'nullable',
-            'damage'      => 'nullable',
-            'drops'       => 'nullable|string',
-            'xp_reward'   => 'nullable|string',
-            'description' => 'required',
-            'spawning_conditions' => 'nullable|string',
-            'health_easy'   => 'nullable|string',
-            'health_normal' => 'nullable|string',
-            'health_hard'   => 'nullable|string',
-            'damage_easy'   => 'nullable|string',
-            'damage_normal' => 'nullable|string',
-            'damage_hard'   => 'nullable|string',
-            'melee_attack'  => 'nullable|string',
-            'ranged_attack' => 'nullable|string',
-            'image'         => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'loot'          => 'nullable|array',
-            'loot.*.item_name' => 'required|string',
-            'loot.*.quantity'  => 'nullable|string',
-            'loot.*.chance'    => 'nullable|string',
-            'loot.*.rarity'    => 'nullable|string',
-            'loot.*.icon'      => 'nullable|string',
-        ]);
-
-        $data = $request->except(['biome_ids', 'loot']);
-        
-        // Sync base fields for sorting/compatibility
-        $data['health'] = $request->health_normal ?: ($request->health_easy ?: ($request->health_hard ?: '0'));
-        $data['damage'] = $request->damage_normal ?: ($request->damage_easy ?: ($request->damage_hard ?: '0'));
-
-        if ($request->hasFile('image')) {
-            if ($mob->image) {
-                \Illuminate\Support\Facades\Storage::disk('public')->delete($mob->image);
-            }
-            $path = $request->file('image')->store('mobs', 'public');
-            $data['image'] = $path;
-        }
-
-        // Track revisions before saving
-        $mob->fill($data);
-        foreach ($mob->getDirty() as $field => $newValue) {
-            $oldValue = $mob->getOriginal($field);
-            if ($oldValue !== $newValue) {
-                \App\Models\MobRevision::create([
-                    'mob_id' => $mob->id,
-                    'user_id' => Auth::id(),
-                    'field' => $field,
-                    'old_value' => $oldValue,
-                    'new_value' => $newValue,
-                ]);
-            }
-        }
-        $mob->save();
-        
-        if ($request->has('biome_ids')) {
-            $mob->biomes()->sync($request->biome_ids);
-        }
-
-        if ($request->has('loot')) {
-            $mob->loot()->delete();
-            foreach ($request->loot as $dropData) {
-                if (!empty($dropData['item_name'])) {
-                    $mob->loot()->create($dropData);
-                }
-            }
-        }
-
+        $mobService->saveMob($mob, $request);
         return redirect()->route('mobs.index')->with('success', 'Mob updated successfully.');
     }
 

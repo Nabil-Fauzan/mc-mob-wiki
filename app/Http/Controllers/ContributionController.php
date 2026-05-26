@@ -11,7 +11,7 @@ class ContributionController extends Controller
 {
     public function index()
     {
-        $contributions = MobContribution::with(['mob', 'user'])->where('status', 'pending')->latest()->get();
+        $contributions = MobContribution::with(['mob', 'user'])->pending()->latest()->get();
         return view('admin.contributions.index', compact('contributions'));
     }
 
@@ -41,49 +41,9 @@ class ContributionController extends Controller
         return back()->with('success', 'Your contribution has been submitted for review! Thank you.');
     }
 
-    public function approve(Request $request, MobContribution $contribution)
+    public function approve(Request $request, MobContribution $contribution, \App\Services\ContributionService $service)
     {
-        // Update the mob and track revision
-        $mob = $contribution->mob;
-        $field = $contribution->field;
-        $oldValue = $mob->$field;
-
-        \App\Models\MobRevision::create([
-            'mob_id' => $mob->id,
-            'user_id' => $contribution->user_id, // The contributor gets credit for the change
-            'field' => $field,
-            'old_value' => $oldValue,
-            'new_value' => $contribution->proposed_value,
-        ]);
-
-        $mob->$field = $contribution->proposed_value;
-        $mob->save();
-
-        // Update the contribution
-        $contribution->update([
-            'status' => 'approved',
-            'admin_id' => Auth::id()
-        ]);
-
-        // Award XP to the user
-        $user = $contribution->user;
-        
-        // Custom leveling XP award logic
-        $xpToAward = 50; // Default
-        if ($user->level <= 15) {
-            $xpToAward = 250;
-        } elseif ($user->level <= 30) {
-            $xpToAward = 100;
-        }
-        
-        $user->addXp($xpToAward);
-        
-        // Award Contributor achievement if not already earned
-        $achievement = \App\Models\Achievement::where('name', 'Contributor')->first();
-        if ($achievement && !$user->achievements()->where('achievement_id', $achievement->id)->exists()) {
-            $user->achievements()->attach($achievement->id, ['unlocked_at' => now()]);
-        }
-
+        $service->approve($contribution);
         return back()->with('success', 'Contribution approved and applied.');
     }
 
@@ -97,7 +57,7 @@ class ContributionController extends Controller
         return back()->with('success', 'Contribution rejected.');
     }
 
-    public function bulkApprove(Request $request)
+    public function bulkApprove(Request $request, \App\Services\ContributionService $service)
     {
         $request->validate([
             'contribution_ids' => 'required|array',
@@ -105,49 +65,15 @@ class ContributionController extends Controller
         ]);
 
         $contributions = MobContribution::whereIn('id', $request->contribution_ids)
-            ->where('status', 'pending')
+            ->pending()
             ->get();
+
+        // Fetch achievement once outside the loop to prevent N+1 queries
+        $achievement = \App\Models\Achievement::where('name', 'Contributor')->first();
 
         $count = 0;
         foreach ($contributions as $contribution) {
-            // Update the mob and track revision
-            $mob = $contribution->mob;
-            $field = $contribution->field;
-            $oldValue = $mob->$field;
-
-            \App\Models\MobRevision::create([
-                'mob_id' => $mob->id,
-                'user_id' => $contribution->user_id,
-                'field' => $field,
-                'old_value' => $oldValue,
-                'new_value' => $contribution->proposed_value,
-            ]);
-
-            $mob->$field = $contribution->proposed_value;
-            $mob->save();
-
-            // Update the contribution
-            $contribution->update([
-                'status' => 'approved',
-                'admin_id' => Auth::id()
-            ]);
-
-            // Award XP to the user
-            $user = $contribution->user;
-            
-            $xpToAward = 50;
-            if ($user->level <= 15) {
-                $xpToAward = 250;
-            } elseif ($user->level <= 30) {
-                $xpToAward = 100;
-            }
-            
-            $user->addXp($xpToAward);
-            
-            $achievement = \App\Models\Achievement::where('name', 'Contributor')->first();
-            if ($achievement && !$user->achievements()->where('achievement_id', $achievement->id)->exists()) {
-                $user->achievements()->attach($achievement->id, ['unlocked_at' => now()]);
-            }
+            $service->approve($contribution, $achievement);
             $count++;
         }
 
