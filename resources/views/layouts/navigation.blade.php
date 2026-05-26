@@ -44,6 +44,9 @@
                     <x-nav-link :href="route('leaderboard')" :active="request()->routeIs('leaderboard')" class="text-gray-300 hover:text-white transition-colors duration-300">
                         {{ __('Hall of Fame') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('changelogs.index')" :active="request()->routeIs('changelogs.*')" class="text-gray-300 hover:text-white transition-colors duration-300">
+                        {{ __('System Logs') }}
+                    </x-nav-link>
                     @auth
                         <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" class="text-gray-300 hover:text-white transition-colors duration-300">
                             {{ __('Dashboard') }}
@@ -246,6 +249,9 @@
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('biomes.index')" :active="request()->routeIs('biomes.*')" class="text-gray-300">
                 {{ __('Explorer') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('changelogs.index')" :active="request()->routeIs('changelogs.*')" class="text-gray-300">
+                {{ __('System Logs') }}
             </x-responsive-nav-link>
             @auth
                 <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" class="text-gray-300">
