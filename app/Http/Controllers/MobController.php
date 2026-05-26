@@ -294,17 +294,59 @@ class MobController extends Controller
             }
         }
 
-        $mobs = $mobs->map(function($mob) {
-                return [
-                    'id' => $mob->id,
-                    'name' => $mob->name,
-                    'category' => $mob->category->name,
-                    'habitat' => $mob->biomes->first()->name ?? 'Global',
-                    'image' => $mob->image ? asset('storage/' . $mob->image) : null,
-                    'url' => route('mobs.show', $mob)
-                ];
-            });
+        $results = collect();
 
-        return response()->json($mobs);
+        foreach ($mobs as $mob) {
+            $results->push([
+                'id' => 'mob_' . $mob->id,
+                'name' => $mob->name,
+                'category' => $mob->category->name ?? 'Unknown',
+                'habitat' => $mob->biomes->first()->name ?? 'Global',
+                'image' => $mob->image ? asset('storage/' . $mob->image) : null,
+                'url' => route('mobs.show', $mob),
+                'type' => 'Mob',
+                'edit_url' => route('mobs.edit', $mob)
+            ]);
+        }
+
+        $biomes = \App\Models\Biome::where('name', 'like', "%{$query}%")
+            ->limit(3)
+            ->get();
+            
+        foreach ($biomes as $biome) {
+            $results->push([
+                'id' => 'biome_' . $biome->id,
+                'name' => $biome->name,
+                'category' => 'Biome Environment',
+                'habitat' => 'Global',
+                'image' => null,
+                'url' => route('biomes.show', $biome),
+                'type' => 'Biome',
+                'edit_url' => route('admin.biomes.edit', $biome)
+            ]);
+        }
+
+        $users = \App\Models\User::publicProfiles()
+            ->where(function($q) use ($query) {
+                $q->where('name', 'like', "%{$query}%")
+                  ->orWhere('public_slug', 'like', "%{$query}%");
+            })
+            ->limit(3)
+            ->get();
+            
+        foreach ($users as $user) {
+            $results->push([
+                'id' => 'user_' . $user->id,
+                'name' => $user->name,
+                'category' => 'Lv. ' . $user->level . ' Researcher',
+                'habitat' => 'Network',
+                'image' => $user->avatar_url ?? 'https://ui-avatars.com/api/?name=' . urlencode($user->name) . '&color=0EA5E9&background=E0F2FE',
+                'url' => route('researchers.show', $user),
+                'type' => 'Researcher',
+                'edit_url' => null
+            ]);
+        }
+
+        return response()->json($results);
     }
 }

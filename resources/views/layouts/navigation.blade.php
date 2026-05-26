@@ -31,7 +31,7 @@
                 </div>
 
                 <!-- Navigation Links -->
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                <div class="hidden space-x-4 sm:-my-px sm:ms-10 sm:flex">
                     <x-nav-link :href="route('mobs.index')" :active="request()->routeIs('mobs.index')" class="text-gray-300 hover:text-white transition-colors duration-300">
                         {{ __('Registry') }}
                     </x-nav-link>
@@ -145,7 +145,7 @@
                 <div class="ms-3 relative">
                         <x-dropdown align="right" width="48">
                             <x-slot name="trigger">
-                                <button class="inline-flex items-center px-4 py-2 bg-white/5 border border-white/10 text-sm leading-4 font-medium rounded-full text-white hover:bg-white/10 focus:outline-none transition ease-in-out duration-150 backdrop-blur-sm">
+                                <button class="inline-flex items-center pl-2 pr-8 py-2 bg-white/5 border border-white/10 text-sm leading-4 font-medium rounded-full text-white hover:bg-white/10 focus:outline-none transition ease-in-out duration-150 backdrop-blur-sm">
                                     <img class="h-6 w-6 rounded-full mr-2 border border-brand-500/30" src="{{ Auth::user()->avatar_url ?? 'https://ui-avatars.com/api/?name=' . urlencode(Auth::user()->name) . '&color=0EA5E9&background=E0F2FE' }}" alt="{{ Auth::user()->name }}" />
                                     <div>{{ Auth::user()->name }}</div>
 
@@ -171,12 +171,8 @@
                                         </div>
                                     </div>
                                     @php
-                                        $fCount = Auth::user()->favorite_mobs()->count();
-                                        $cCount = Auth::user()->comments()->count();
-                                        $uXp = ($fCount * 125) + ($cCount * 350);
-                                        $uLvl = floor(sqrt($uXp / 100)) + 1;
-                                        $uNextLvlXp = pow($uLvl, 2) * 100;
-                                        $uProgress = min(100, round(($uXp / $uNextLvlXp) * 100));
+                                        $uLvl = Auth::user()->level;
+                                        $uProgress = Auth::user()->currentLevelProgress();
                                     @endphp
                                     <div class="space-y-1.5">
                                         <div class="flex justify-between text-[8px] font-black uppercase tracking-widest text-gray-500">
@@ -298,9 +294,20 @@
             @auth
                 <div class="px-4 flex items-center">
                     <img class="h-10 w-10 rounded-full mr-3 border-2 border-brand-500/50" src="{{ Auth::user()->avatar_url ?? 'https://ui-avatars.com/api/?name=' . urlencode(Auth::user()->name) . '&color=0EA5E9&background=E0F2FE' }}" alt="{{ Auth::user()->name }}" />
-                    <div>
+                    <div class="w-full">
                         <div class="font-medium text-base text-white">{{ Auth::user()->name }}</div>
-                        <div class="font-medium text-sm text-gray-400">{{ Auth::user()->email }}</div>
+                        <div class="font-medium text-xs text-gray-400 mb-2">{{ Auth::user()->email }}</div>
+                        
+                        <!-- Mobile XP Bar -->
+                        <div class="space-y-1.5 w-48">
+                            <div class="flex justify-between text-[8px] font-black uppercase tracking-widest text-gray-500">
+                                <span>Lvl {{ Auth::user()->level }}</span>
+                                <span>{{ Auth::user()->currentLevelProgress() }}%</span>
+                            </div>
+                            <div class="h-1 bg-white/10 rounded-full overflow-hidden">
+                                <div class="h-full bg-brand-500" style="width: {{ Auth::user()->currentLevelProgress() }}%"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 

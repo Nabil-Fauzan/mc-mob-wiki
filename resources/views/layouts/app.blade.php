@@ -138,9 +138,21 @@
                         });
 
                         this.$watch('paletteSearch', Alpine.debounce(value => {
+                            if (value.trim().startsWith('>')) {
+                                if (this.isAdmin) {
+                                    this.terminalInput = value.trim().substring(1).trimLeft();
+                                    this.paletteSearch = '';
+                                    this.paletteOpen = false;
+                                    this.terminalOpen = true;
+                                } else {
+                                    window.notify('ACCESS DENIED: Protocol Restricted to Rank Admin', 'error');
+                                    this.paletteSearch = '';
+                                }
+                                return;
+                            }
                             this.fetchLiveResults(value);
                             this.selectedIndex = -1;
-                        }, 500));
+                        }, 300));
 
                         window.addEventListener('mousemove', (e) => {
                             this.mouseX = e.clientX;
@@ -362,7 +374,15 @@
                                             </div>
                                         </div>
                                         <div class="flex-1 min-w-0">
-                                            <span class="block text-white font-black uppercase tracking-tight text-sm truncate group-hover:text-brand-400 transition-colors" x-text="mob.name"></span>
+                                            <div class="flex items-center space-x-2">
+                                                <span class="block text-white font-black uppercase tracking-tight text-sm truncate group-hover:text-brand-400 transition-colors" x-text="mob.name"></span>
+                                                <span class="px-1.5 py-0.5 rounded text-[8px] font-black tracking-widest uppercase"
+                                                      :class="{
+                                                          'bg-brand-500/20 text-brand-400': mob.type === 'Mob',
+                                                          'bg-green-500/20 text-green-400': mob.type === 'Biome',
+                                                          'bg-purple-500/20 text-purple-400': mob.type === 'Researcher'
+                                                      }" x-text="mob.type"></span>
+                                            </div>
                                             <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1">
                                                 <span class="text-[9px] font-bold text-gray-500 uppercase tracking-widest" x-text="mob.category"></span>
                                                 <span class="w-1 h-1 bg-gray-800 rounded-full"></span>
@@ -370,8 +390,8 @@
                                             </div>
                                         </div>
                                         <div class="flex items-center space-x-2">
-                                            <template x-if="isAdmin">
-                                                <a :href="'/mobs/' + mob.id + '/edit'"
+                                            <template x-if="isAdmin && mob.edit_url">
+                                                <a :href="mob.edit_url"
                                                    class="p-2 bg-white/5 hover:bg-yellow-500/20 text-gray-500 hover:text-yellow-500 rounded-lg transition-all"
                                                    @click.stop
                                                    title="Protocol Override: Quick Edit">
