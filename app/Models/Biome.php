@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Biome extends Model
 {
-    protected $fillable = ['name', 'dimension_id', 'parent_id', 'description', 'image'];
+    protected $fillable = ['name', 'dimension_id', 'parent_id', 'description', 'description_id', 'image'];
 
     public function dimension()
     {

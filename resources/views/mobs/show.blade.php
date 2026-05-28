@@ -310,39 +310,28 @@
                                 <h1 class="text-3xl sm:text-5xl lg:text-6xl font-black text-white mb-6 sm:mb-8 tracking-tighter break-words">{{ $mob->name }}</h1>
                                 
                                 <div class="space-y-6" x-data="{ 
-                                    text: '',
-                                    translating: false,
                                     currentLang: 'id',
+                                    textEn: '',
+                                    textId: '',
                                     init() {
-                                        this.text = JSON.parse(document.getElementById('mob-description-data').textContent);
-                                    },
-                                    translate(target) {
-                                        if(this.currentLang === target) return;
-                                        this.translating = true;
-                                        fetch('{{ route('api.oracle.translate', $mob) }}?target_lang=' + target)
-                                            .then(res => res.json())
-                                            .then(data => {
-                                                if(data.translation) {
-                                                    this.text = data.translation;
-                                                    this.currentLang = target;
-                                                }
-                                            })
-                                            .finally(() => this.translating = false);
+                                        this.textEn = JSON.parse(document.getElementById('mob-desc-en').textContent || 'null');
+                                        this.textId = JSON.parse(document.getElementById('mob-desc-id').textContent || 'null') || this.textEn;
                                     }
                                 }">
-                                    <script type="application/json" id="mob-description-data">{!! json_encode($mob->description) !!}</script>
+                                    <script type="application/json" id="mob-desc-en">{!! json_encode($mob->description) !!}</script>
+                                    <script type="application/json" id="mob-desc-id">{!! json_encode($mob->description_id) !!}</script>
+                                    
                                     <div class="flex items-center justify-between">
                                         <h4 class="text-xs font-black text-brand-500 uppercase tracking-[0.2em] flex items-center">
                                             Description
                                         </h4>
                                         <div class="flex items-center gap-2 bg-black/40 rounded-lg p-1 border border-white/5">
-                                            <button @click="translate('id')" :class="currentLang === 'id' ? 'bg-brand-500 text-white' : 'text-gray-500 hover:text-white'" class="px-2 py-1 rounded text-[10px] font-bold uppercase transition-colors" :disabled="translating">ID</button>
-                                            <button @click="translate('en')" :class="currentLang === 'en' ? 'bg-brand-500 text-white' : 'text-gray-500 hover:text-white'" class="px-2 py-1 rounded text-[10px] font-bold uppercase transition-colors" :disabled="translating">EN</button>
-                                            <svg x-show="translating" class="animate-spin w-3 h-3 text-brand-500 absolute -right-4" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                            <button @click="currentLang = 'id'" :class="currentLang === 'id' ? 'bg-brand-500 text-white' : 'text-gray-500 hover:text-white'" class="px-2 py-1 rounded text-[10px] font-bold uppercase transition-colors">ID</button>
+                                            <button @click="currentLang = 'en'" :class="currentLang === 'en' ? 'bg-brand-500 text-white' : 'text-gray-500 hover:text-white'" class="px-2 py-1 rounded text-[10px] font-bold uppercase transition-colors">EN</button>
                                         </div>
                                     </div>
-                                    <div class="text-base sm:text-lg lg:text-xl text-gray-400 leading-relaxed font-medium transition-all relative" :class="translating ? 'opacity-50' : 'opacity-100'">
-                                        <span x-html="text.replace(/\n/g, '<br>')"></span>
+                                    <div class="text-base sm:text-lg lg:text-xl text-gray-400 leading-relaxed font-medium transition-all relative">
+                                        <span x-html="(currentLang === 'id' ? textId : textEn)?.replace(/\n/g, '<br>') || 'No description available.'"></span>
                                     </div>
                                 </div>
                             </div>

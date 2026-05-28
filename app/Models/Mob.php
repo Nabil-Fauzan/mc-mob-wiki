@@ -14,6 +14,7 @@ class Mob extends Model
         'damage',
         'drops',
         'description',
+        'description_id',
         'spawning_conditions',
         'health_easy',
         'health_normal',
